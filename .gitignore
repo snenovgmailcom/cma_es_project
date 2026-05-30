@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.ipynb_checkpoints/
+
+# Environments
+.venv/
+venv/
+
+# OS / editor cruft
+.DS_Store
+*.swp
+
+# Data artifacts
+
+# Logs
+*.log
+
+# Compiled extensions
+*.so
+
+# Backups
+*.bak*
+
+# Claude Code local settings
+.claude/settings.local.json
+*.pkl

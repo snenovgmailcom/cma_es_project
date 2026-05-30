@@ -1,0 +1,2 @@
+func,n_runs,maxevals,mean,median,std,best,worst,elapsed_sec
+f3,51,750000,0.2724986504310646,0.0,0.4723495196995336,0.0,2.2459023316077946,5.5
