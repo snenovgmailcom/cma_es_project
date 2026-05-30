@@ -1,28 +1,38 @@
 # CEC2014 / D=30 — by-category summary
 
-Sums of per-function metrics, grouped by function class. Categories: **Basic** = unimodal + simple multimodal (F1–F16), **Hybrid** = F17–F22, **Composition** = F23–F30. Budget: 300,000 evaluations. **Bold** = best in row. 
+Sums of per-function metrics, grouped by function class. Categories: **Basic** = unimodal + simple multimodal (F1–F16), **Hybrid** = F17–F22, **Composition** = F23–F30. Total: 30 functions. Budget: 300,000 evaluations. **Bold** = best in row.
 
 ⚠ NLSHADE-RSP and j2020 contain non-convergent runs that inflate their sums on Basic; values shown verbatim.
 
-| Category | Metric | MSC-CMA | ARRDE | BIPOP-CMA | LSRTDE | NLSHADE | j2020 | jSO |
-|:--|:--|--:|--:|--:|--:|--:|--:|--:|
-| **Basic** (n=16) | mean | 5.07e+02 | 1.89e+03 | 1.39e+03 | **4.57e+02** | 3.71e+05 | 3.97e+05 | 1.41e+03 |
-| | median | 3.74e+02 | 1.74e+03 | 1.28e+03 | **3.52e+02** | 2.28e+05 | 3.03e+05 | 1.41e+03 |
-| | best | 7.36e+01 | 9.36e+02 | 3.43e+02 | **3.42e+01** | 5.97e+04 | 1.12e+05 | 8.57e+02 |
-| | worst | **1.41e+03** | 3.77e+03 | 3.60e+03 | 1.77e+03 | 4.45e+06 | 1.95e+06 | 1.88e+03 |
-| | std | 3.39e+02 | 6.24e+02 | 6.86e+02 | 3.78e+02 | 6.04e+05 | 3.51e+05 | **2.03e+02** |
-| | FBTC | 4.78 | 7.95 | 6.96 | 7.85 | 5.76 | 5.61 | **8.46** |
-| **Hybrid** (n=6) | mean | 1.87e+03 | 1.66e+02 | 1.84e+03 | **8.92e+01** | 2.11e+04 | 3.60e+03 | 1.45e+02 |
-| | median | 1.81e+03 | 1.14e+02 | 1.81e+03 | **4.39e+01** | 1.39e+04 | 3.37e+03 | 1.11e+02 |
-| | best | 1.17e+03 | 4.37e+01 | 3.21e+02 | **2.60e+01** | 1.25e+03 | 1.64e+03 | 6.29e+01 |
-| | worst | 3.19e+03 | 6.08e+02 | 3.66e+03 | **1.94e+02** | 1.48e+05 | 8.67e+03 | 2.89e+02 |
-| | std | 4.91e+02 | 1.43e+02 | 7.92e+02 | **6.92e+01** | 2.57e+04 | 1.23e+03 | 7.40e+01 |
-| | FBTC | 0.263 | 0.749 | 0.234 | **0.967** | 0.288 | 0.223 | 0.705 |
-| **Composition** (n=8) | mean | 4.35e+03 | 3.60e+03 | 4.88e+03 | **2.36e+03** | 4.62e+03 | 5.72e+03 | 2.51e+03 |
-| | median | 4.33e+03 | 3.56e+03 | 5.01e+03 | **2.33e+03** | 4.62e+03 | 5.51e+03 | 2.50e+03 |
-| | best | 3.35e+03 | 2.97e+03 | 3.33e+03 | **2.17e+03** | 3.14e+03 | 4.21e+03 | 2.36e+03 |
-| | worst | 5.29e+03 | 4.97e+03 | 7.02e+03 | **2.59e+03** | 6.13e+03 | 8.25e+03 | 2.80e+03 |
-| | std | 4.27e+02 | 4.07e+02 | 9.10e+02 | 1.10e+02 | 6.01e+02 | 1.11e+03 | **9.87e+01** |
-| | FBTC | 0.000 | 0.000 | 0.000 | 0.000 | **0.007** | 0.000 | 0.000 |
+| Category | Metric | MSC-CMA | BIPOP-CMA |   | ARRDE | LSRTDE | NLSHADE | j2020 | jSO |
+|:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
+| **Basic** (n=16) | mean | 507 | 1390 |   | 1890 | **457** | 3.71e5 | 3.97e5 | 1410 |
+|  | median | 374 | 1280 |   | 1740 | **352** | 2.28e5 | 3.03e5 | 1410 |
+|  | best | 73.6 | 343 |   | 936 | **34.2** | 5.97e4 | 1.12e5 | 857 |
+|  | worst | **1410** | 3600 |   | 3770 | 1770 | 4.45e6 | 1.95e6 | 1880 |
+|  | std | 339 | 686 |   | 624 | 378 | 6.04e5 | 3.51e5 | **203** |
+|  | FBTC | 4.780 | 6.960 |   | 7.950 | 7.850 | 5.760 | 5.610 | **8.460** |
+| **Hybrid** (n=6) | mean | 1870 | 1840 |   | 166 | **89.2** | 2.11e4 | 3600 | 145 |
+|  | median | 1810 | 1810 |   | 114 | **43.9** | 1.39e4 | 3370 | 111 |
+|  | best | 1170 | 321 |   | 43.7 | **26.0** | 1250 | 1640 | 62.9 |
+|  | worst | 3190 | 3660 |   | 608 | **194** | 1.48e5 | 8670 | 289 |
+|  | std | 491 | 792 |   | 143 | **69.2** | 2.57e4 | 1230 | 74.0 |
+|  | FBTC | 0.263 | 0.234 |   | 0.749 | **0.967** | 0.288 | 0.223 | 0.705 |
+| **Composition** (n=8) | mean | 4350 | 4880 |   | 3600 | **2360** | 4620 | 5720 | 2510 |
+|  | median | 4330 | 5010 |   | 3560 | **2330** | 4620 | 5510 | 2500 |
+|  | best | 3350 | 3330 |   | 2970 | **2170** | 3140 | 4210 | 2360 |
+|  | worst | 5290 | 7020 |   | 4970 | **2590** | 6130 | 8250 | 2800 |
+|  | std | 427 | 910 |   | 407 | 110 | 601 | 1110 | **98.7** |
+|  | FBTC | 0.000 | 0.000 |   | 0.000 | 0.000 | **0.007** | 0.000 | 0.000 |
+| **SUM** (n=30) | mean | 6728 | 8113 |   | 5660 | **2905** | 3.97e5 | 4.06e5 | 4060 |
+|  | median | 6514 | 8109 |   | 5413 | **2730** | 2.46e5 | 3.12e5 | 4019 |
+|  | best | 4593 | 3989 |   | 3949 | **2228** | 6.41e4 | 1.17e5 | 3275 |
+|  | worst | 9890 | 1.43e4 |   | 9347 | **4556** | 4.6e6 | 1.97e6 | 4969 |
+|  | std | 1269 | 2411 |   | 1186 | 562 | 6.36e5 | 3.57e5 | **379** |
+|  | FBTC | 5.046 | 7.195 |   | 8.701 | 8.815 | 6.058 | 5.832 | **9.168** |
 
-*FBTC = Fixed-Budget Target Coverage (sum across 51 log-uniform targets in [10²…10⁻⁸] per function); fixed-budget analogue of the COCO/BBOB ECDF.*
+*FBTC = Fixed-Budget Target Coverage (sum across 51 log-uniform targets in [10²…10⁻⁸] per function); fixed-budget analogue of the COCO/BBOB ECDF. Higher is better.*
+
+## Environment
+Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
+Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
