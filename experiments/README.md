@@ -74,6 +74,34 @@ Sum over all **basic** functions at each dimension (across suites, standard budg
 
 Sum over all **composition** functions at each dimension (across suites, standard budget). CMA family first. **Bold** = best (min for best/mean/median, max for FBTC).
 
+# Cross-suite summary of hybrid functions — by dimension
+
+Sum over all **hybrid** functions at each dimension (across suites, standard budget). CMA family first. **Bold** = best (min for best/mean/median, max for FBTC).
+
+| D · nF | Metric | MSC-CMA | ARRDE | LSRTDE | NLSHADE-RSP | j2020 | jSO | BIPOP |
+|---|---|---|---|---|---|---|---|---|
+| **5 · 3** | best | 5.5e-07 | **0** | **0** | **0** | **0** | **0** | **0** |
+|  | mean | 1.0 | 0.0122 | 5.6 | **0** | 0.0131 | 0.0489 | 0.754 |
+|  | median | 0.542 | **0** | **0** | **0** | **0** | **0** | 0.624 |
+|  | FBTC | 1.4 | 3.0 | 2.3 | **3.0** | 3.0 | 2.9 | 2.1 |
+| **10 · 22** | best | 7.6 | **0.0933** | 0.131 | 4.8 | 0.603 | 0.136 | 2.9 |
+|  | mean | 225 | 37.7 | 23.3 | 203 | 104 | **5.7** | 278 |
+|  | median | 238 | 11.0 | 7.5 | 159 | 64.9 | **4.8** | 252 |
+|  | FBTC | 5.0 | 9.4 | 8.0 | 8.5 | 7.9 | **10.5** | 4.9 |
+| **15 · 3** | best | 0.915 | **0.127** | 0.878 | 0.531 | 0.927 | 0.436 | 0.743 |
+|  | mean | 3.6 | **1.3** | 5.4 | 23.4 | 17.0 | 4.4 | 4.3 |
+|  | median | 3.3 | **1.2** | 2.0 | 15.7 | 10.5 | 4.2 | 1.8 |
+|  | FBTC | 0.642 | **0.798** | 0.668 | 0.632 | 0.562 | 0.646 | 0.737 |
+| **20 · 6** | best | 3.6 | **1.1** | 1.8 | 3.9 | 26.2 | 2.6 | 2.9 |
+|  | mean | 39.2 | 24.7 | **23.8** | 298 | 133 | 29.7 | 75.0 |
+|  | median | 52.9 | **23.8** | 23.8 | 202 | 106 | 30.5 | 61.3 |
+|  | FBTC | 0.965 | 1.3 | **1.4** | 0.741 | 0.853 | 1.2 | 0.868 |
+| **30 · 16** | best | 2263 | 128 | **30.7** | 7621 | 14149 | 144 | 1039 |
+|  | mean | 4642 | 861 | **165** | 54096 | 52340 | 590 | 3699 |
+|  | median | 4572 | 771 | **108** | 36972 | 37130 | 532 | 3484 |
+|  | FBTC | 0.563 | 1.8 | **3.5** | 0.671 | 0.435 | 1.7 | 0.579 |
+
+
 # Cross-suite summary of composition functions — by dimension
 
 | D · nF | Metric | MSC-CMA | ARRDE | LSRTDE | NLSHADE-RSP | j2020 | jSO | BIPOP |
