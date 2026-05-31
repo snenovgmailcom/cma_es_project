@@ -41,6 +41,38 @@ CEC2017 excludes F2 uniformly (numerical instability), so its counts are 15 / 29
 
 *FBTC = Fixed-Budget Target Coverage (mean per-target success rate over 51 log-uniform targets in [10²…10⁻⁸]); range [0, nF]. Higher is better.*
 
+# Cross-suite summary of basic functions — by dimension
+
+Sum over all **basic** functions at each dimension (across suites, standard budget). 
+
+| D · nF | Metric | MSC-CMA | ARRDE | LSRTDE | NLSHADE-RSP | j2020 | jSO | BIPOP |
+|---|---|---|---|---|---|---|---|---|
+| **2 · 9** | best | **0** | **0** | **0** | **0** | 3.58e-05 | **0** | **0** |
+|  | mean | 0.687 | 0.162 | 5.2 | **0.111** | 0.449 | 1.4 | 1.7 |
+|  | median | 8.51e-06 | **0** | 2.3 | **0** | 0.111 | 2.0 | 2.3 |
+|  | FBTC | 8.2 | 8.9 | 7.6 | **8.9** | 7.0 | 8.2 | 7.9 |
+| **5 · 4** | best | 0.125 | 0.613 | **0** | **0** | **0** | 0.613 | 1.1 |
+|  | mean | 25.1 | 14.3 | 14.9 | **3.0** | 9.2 | 5.6 | 18.7 |
+|  | median | 4.1 | 5.8 | 5.9 | **1.8** | 5.8 | 5.5 | 8.7 |
+|  | FBTC | 1.7 | 1.8 | 1.9 | **2.7** | 1.9 | 1.9 | 1.7 |
+| **10 · 34** | best | 31.0 | 17.6 | 21.5 | 28.2 | 18.6 | 26.9 | **7.7** |
+|  | mean | 168 | 255 | **85.4** | 274 | 238 | 202 | 235 |
+|  | median | 108 | 202 | **98.5** | 305 | 186 | 230 | 180 |
+|  | FBTC | 17.5 | 20.5 | **20.6** | 20.2 | 17.7 | 20.3 | 19.6 |
+| **15 · 4** | best | 1.2 | 15.9 | 16.3 | 15.6 | **0** | 15.8 | 0.125 |
+|  | mean | 11.2 | 18.8 | 50.8 | 19.2 | **8.8** | 62.0 | 24.8 |
+|  | median | **11.7** | 18.3 | 19.7 | 15.7 | 15.8 | 26.8 | 23.1 |
+|  | FBTC | 1.5 | 1.6 | 1.4 | 2.3 | 2.2 | 1.4 | **2.4** |
+| **20 · 9** | best | **3.4** | 21.7 | 66.2 | 50.2 | 7.3 | 67.6 | 6.2 |
+|  | mean | **16.2** | 24.4 | 69.9 | 110 | 44.9 | 76.0 | 34.9 |
+|  | median | **14.2** | 23.9 | 70.0 | 115 | 43.5 | 75.5 | 19.8 |
+|  | FBTC | 4.7 | 5.7 | 5.0 | 5.4 | 5.2 | 4.7 | **6.2** |
+| **30 · 25** | best | **103** | 2015 | 130 | 61308 | 1.14e+05 | 2019 | 489 |
+|  | mean | 942 | 4038 | **878** | 3.73e+05 | 4.01e+05 | 3119 | 2431 |
+|  | median | 748 | 3912 | **704** | 2.3e+05 | 3.07e+05 | 3153 | 2280 |
+|  | FBTC | 7.9 | 12.3 | 12.3 | 7.9 | 8.7 | **12.8** | 11.6 |
+
+
 ## Environment
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
