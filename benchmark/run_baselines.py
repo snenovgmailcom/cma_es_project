@@ -26,9 +26,9 @@ MINION_ALGOS = [
     ('benchmark.nlshade_rsp', ALGO_NLSHADE_RSP),
     ('benchmark.lsrtde',      ALGO_LSRTDE),
     # Dropped per agreed set (redundant/dominated for D<=30); uncomment if needed:
-    # ('benchmark.lshade',         'LSHADE-minionpy'),
-    # ('benchmark.lshade_cnepsin', 'LSHADE-cnEpSin-minionpy'),
-    ('benchmark.bipop',       'BIPOP-CMA-pycma'),
+    # ('benchmark.lshade',         'LSHADE'),
+    # ('benchmark.lshade_cnepsin', 'LSHADE-cnEpSin'),
+    ('benchmark.bipop',       'BIPOP-CMA'),
 ]
 
 SUITE_MAXF = {'cec2014': 30, 'cec2017': 30, 'cec2019': 10,
@@ -43,16 +43,18 @@ CELLS = [
     ('cec2017', 30,  600000),
     ('cec2014', 10,       0),
     ('cec2014', 30,       0),
-    ('cec2019',  9,       0),   # F1 only (auto-detected)
-    ('cec2019', 10,       0),   # F4-F10
-    ('cec2019', 16,       0),   # F2 only
-    ('cec2019', 18,       0),   # F3 only
+    # ('cec2019',  9,       0),   # F1 only (auto-detected)
+    # ('cec2019', 10,       0),   # F4-F10
+    # ('cec2019', 16,       0),   # F2 only
+    # ('cec2019', 18,       0),   # F3 only
     ('cec2020',  5,   50000),
     ('cec2020',  5,  100000),
     ('cec2020', 10, 1000000),
     ('cec2020', 15, 3000000),
+    ('cec2022',  2,   20000),
     ('cec2022', 10,  200000),
     ('cec2022', 20, 1000000),
+    ('cec2020', 2, 20000),
 ]
 
 

@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
-benchmark/arrde.py — LSRTDE (Adaptive Restart Differential Evolution)
-benchmark runner using minionpy's C++ backend as reference implementation.
+benchmark/lsrtde.py — LSRTDE (Linear-population-size-reduction Success-history
+Restart-Termination Differential Evolution) benchmark runner using minionpy's
+C++ backend as reference implementation.
 
 Writes to experiments/<suite>/d<dim>/LSRTDE-minionpy/maxevals_<N>/.
 
 Usage
 -----
-    python benchmark/arrde.py --suite cec2020 --dim 10 \\
+    python benchmark/lsrtde.py --suite cec2020 --dim 10 \\
         --functions 1,2,3,4,5,6,7,8,9,10 \\
         --runs 51 --jobs 51
 
@@ -123,7 +124,7 @@ def main():
     summary_rows = []
     params_record = {
         'cli_args':     vars(args),
-        'arrde_config': {
+        'lsrtde_config': {
             'algo_source': 'minionpy.Minimizer(algo="LSRTDE")',
         },
     }
