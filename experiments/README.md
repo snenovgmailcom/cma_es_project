@@ -17,7 +17,7 @@ Which suites contribute at each dimension (with nF and budget) is listed under t
 Per-function metrics summed across **all CEC suites at each dimension**, standard competition budget only (see *Budget* below). CMA family first (MSC-CMA and its parent BIPOP-CMA), then a separator and the DE reference band. **Bold** = best in row across all seven algorithms (min for best/mean/median, max for FBTC; ties bolded).
 
 | D · nF | Metric | MSC-CMA | BIPOP-CMA |  | ARRDE | LSRTDE | NLSHADE-RSP | j2020 | jSO |
-|:--|:--|--:|--:|:-:|--:|--:|--:|--:|
+|:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
 | **2 · 31** | best | 5.67e-8 | **0** |  | **0** | 0.620 | **0** | 4.54e-5 | **0** |
 |  | mean | **1.40** | 178 |  | 1.79 | 511 | 13.9 | 9.01 | 310 |
 |  | median | 1.84e-5 | 21.6 |  | **0** | 405 | **0** | 2.60 | 304 |
@@ -60,7 +60,7 @@ CEC2017 excludes F2 uniformly (numerical instability), so its counts are 15 / 29
 Sum over all **basic** functions at each dimension; same suites, budget, layout and bolding as the by-dimension table.
 
 | D · nF | Metric | MSC-CMA | BIPOP-CMA |  | ARRDE | LSRTDE | NLSHADE-RSP | j2020 | jSO |
-|:--|:--|--:|--:|:-:|--:|--:|--:|--:|
+|:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
 | **2 · 9** | best | **0** | **0** |  | **0** | **0** | **0** | 3.58e-05 | **0** |
 |  | mean | 0.687 | 1.7 |  | 0.162 | 5.2 | **0.111** | 0.449 | 1.4 |
 |  | median | 8.51e-06 | 2.3 |  | **0** | 2.3 | **0** | 0.111 | 2.0 |
@@ -91,7 +91,7 @@ Sum over all **basic** functions at each dimension; same suites, budget, layout 
 Sum over all **hybrid** functions at each dimension; same suites, budget, layout and bolding as the by-dimension table.
 
 | D · nF | Metric | MSC-CMA | BIPOP-CMA |  | ARRDE | LSRTDE | NLSHADE-RSP | j2020 | jSO |
-|:--|:--|--:|--:|:-:|--:|--:|--:|--:|
+|:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
 | **5 · 3** | best | 5.5e-07 | **0** |  | **0** | **0** | **0** | **0** | **0** |
 |  | mean | 1.0 | 0.754 |  | 0.0122 | 5.6 | **0** | 0.0131 | 0.0489 |
 |  | median | 0.542 | 0.624 |  | **0** | **0** | **0** | **0** | **0** |
@@ -118,7 +118,7 @@ Sum over all **hybrid** functions at each dimension; same suites, budget, layout
 Sum over all **composition** functions at each dimension; same suites, budget, layout and bolding as the by-dimension table.
 
 | D · nF | Metric | MSC-CMA | BIPOP-CMA |  | ARRDE | LSRTDE | NLSHADE-RSP | j2020 | jSO |
-|:--|:--|--:|--:|:-:|--:|--:|--:|--:|
+|:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
 | **2 · 6** | best | 3.64e-08 | **0** |  | **0** | **0** | **0** | **0** | **0** |
 |  | mean | **1.87e-06** | 89.9 |  | 0.734 | 236 | 7.8 | 5.2 | 134 |
 |  | median | 7.64e-07 | 0.444 |  | **0** | 200 | **0** | 1.2 | 100 |
