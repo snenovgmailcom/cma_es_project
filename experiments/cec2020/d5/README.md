@@ -31,15 +31,15 @@ Sums of per-function metrics, grouped by function class. Categories: **Basic** =
 
 *FBTC = Fixed-Budget Target Coverage (sum across 51 log-uniform targets in [10²…10⁻⁸] per function); fixed-budget analogue of the COCO/BBOB ECDF. Higher is better.*
 
-## Budget utilization (1x-6x)
+## Budget scaling (1x-6x)
 
 The CEC2020 D=5 standard budget is 50,000 evaluations (1x). The figures below track per-function median error as the budget grows to 2x (100k) and 6x (300k), MSC-CMA against the two strongest DE baselines on this cell. Green band = target reached (err < 1e-8); gray lines = functions already at target at 1x.
 
-![MSC-CMA vs ARRDE - budget utilization 1x-6x](figures/traj_d5_msc_vs_arrde.png)
+![MSC-CMA vs ARRDE - budget scaling 1x-6x](figures/traj_d5_msc_vs_arrde.png)
 
 MSC-CMA solves the composition basins (F9, F10) already at the standard budget, where every DE baseline is still trapped (F10 stuck at 100-347). Its remaining residuals are small multimodal floors: F3 and F6 grind down with budget, while F2 and F4 plateau at the 0.25 basin quantum. ARRDE converts extra budget into basin escapes instead: between 2x and 6x it clears F2, F4 and the F10 basin at once, leaving a single Rastrigin quantum on F3 (0.995, vs 0.962 for MSC-CMA).
 
-![MSC-CMA vs j2020 - budget utilization 1x-6x](figures/traj_d5_msc_vs_j2020.png)
+![MSC-CMA vs j2020 - budget scaling 1x-6x](figures/traj_d5_msc_vs_j2020.png)
 
 j2020 shows the opposite failure mode: it polishes local residuals quickly (F9 reaches 0 at 2x, F3 at 6x) but never leaves the F10 composition basin - six times the budget buys precision, not escape. Together the panels locate MSC-CMA's advantage at the standard budget: basin-topology detection pays off at 1x-2x, while beyond roughly 6x restart-based DEs catch up on this low-dimensional cell.
 
