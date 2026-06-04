@@ -52,19 +52,16 @@ import numpy as np
 COCO_ZERO = 1e-8
 
 # Canonical algorithm names.
-ALGO_MSC    = 'MSC-CMA'
-ALGO_BIPOP  = 'BIPOP-CMA'
-ALGO_ARRDE  = 'ARRDE'
-ALGO_LSRTDE = 'LSRTDE'
-ALGO_JSO    = 'jSO'
 ALGO_MSC             = 'MSC-CMA'
+ALGO_MSC_CONLY       = 'MSC-CMA-Conly'
 ALGO_BIPOP           = 'BIPOP-CMA'
 ALGO_ARRDE           = 'ARRDE'
 ALGO_LSRTDE          = 'LSRTDE'
-ALGO_NLSHADE_RSP     = 'NLSHADE-RSP'        
-ALGO_J2020           = 'j2020'              
-ALGO_LSHADE          = 'LSHADE'             
-ALGO_LSHADE_CNEPSIN  = 'LSHADE-cnEpSin'     
+ALGO_JSO             = 'jSO'
+ALGO_NLSHADE_RSP     = 'NLSHADE-RSP'
+ALGO_J2020           = 'j2020'
+ALGO_LSHADE          = 'LSHADE'
+ALGO_LSHADE_CNEPSIN  = 'LSHADE-cnEpSin'
 
 
 # =========================================================================

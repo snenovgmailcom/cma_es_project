@@ -13,10 +13,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Tuple
 import numpy as np
 
-try:
-    from .basin_id import BasinId
-except ImportError:  # compatibility for scripts that put algorithms/ on sys.path
-    from basin_id import BasinId
+from basin_id import BasinId
 
 
 # =========================================================================

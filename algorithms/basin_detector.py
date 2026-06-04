@@ -20,25 +20,16 @@ from typing import Dict, List, Optional, Tuple
 from scipy.spatial import cKDTree as KDTree
 from scipy.stats import qmc
 
-try:
-    from .config import MSCConfig
-    from .basin_id import BasinId
-except ImportError:  # compatibility for scripts that put algorithms/ on sys.path
-    from config import MSCConfig
-    from basin_id import BasinId
+from config import MSCConfig
+from basin_id import BasinId
 
 # --- C++ acceleration (optional, ~20× faster NB tree) ---
 try:
-    from .cpp.nb_tree import (nearest_better_tree as _nb_tree_cpp,
-                              nbc_clustering as _nbc_clustering_cpp)
+    from cpp.nb_tree import (nearest_better_tree as _nb_tree_cpp,
+                             nbc_clustering as _nbc_clustering_cpp)
     _HAS_CPP = True
 except ImportError:
-    try:
-        from cpp.nb_tree import (nearest_better_tree as _nb_tree_cpp,
-                                  nbc_clustering as _nbc_clustering_cpp)
-        _HAS_CPP = True
-    except ImportError:
-        _HAS_CPP = False
+    _HAS_CPP = False
 
 
 # σ₀ anchor: top-fraction of basin points by f-value defines the "elite center"
@@ -84,15 +75,6 @@ class BasinInfo:
 # Phase-0 sampling
 # =========================================================================
 
-def latin_hypercube(dim: int, n: int, bounds: np.ndarray, seed: int) -> np.ndarray:
-    """LHS in [lb, ub]^D. Returns (n, D) array."""
-    sampler = qmc.LatinHypercube(d=dim, seed=seed)
-    unit = sampler.random(n)
-    lb = bounds[:, 0]
-    ub = bounds[:, 1]
-    return qmc.scale(unit, lb, ub)
-
-
 def _pow2_floor(n: int) -> int:
     """Largest 2^m <= n. n >= 1."""
     return 1 << (n.bit_length() - 1) if n > 0 else 1
@@ -112,45 +94,19 @@ def _pow2_nearest(n: int) -> int:
     return lo if (n - lo) < (hi - n) else hi
 
 
-def _resolve_sobol_n(n_target: int, policy: str) -> int:
-    """Resolve target n into actual n for Sobol given the policy.
-
-    'arbitrary'   — return n_target unchanged (will trigger Sobol balance warning
-                    unless n_target happens to be a power of 2).
-    'nearest_pow2' — round to nearest 2^m (recommended default).
-    'floor_pow2'  — round down to 2^m (saves evals, less coverage).
-    'ceil_pow2'   — round up to 2^m (more evals, better coverage).
-    """
-    if policy == 'arbitrary':
-        return n_target
-    if policy == 'nearest_pow2':
-        return _pow2_nearest(n_target)
-    if policy == 'floor_pow2':
-        return _pow2_floor(n_target)
-    if policy == 'ceil_pow2':
-        return _pow2_ceil(n_target)
-    raise ValueError(f"Unknown sobol_n_policy: {policy!r}. "
-                     f"Use 'arbitrary', 'nearest_pow2', 'floor_pow2', "
-                     f"or 'ceil_pow2'.")
-
-
 def sample_points(dim: int, n: int, bounds: np.ndarray, seed: int,
-                  method: str = 'lhs',
-                  sobol_n_policy: str = 'arbitrary') -> np.ndarray:
+                  method: str = 'sobol') -> np.ndarray:
     """Sample n points in [lb, ub]^D using the given method.
 
     Methods:
         'lhs'    — Latin Hypercube (randomized, seed-dependent)
-        'sobol'  — Sobol sequence (deterministic, seed ignored)
-        'halton' — Halton sequence (deterministic, seed ignored)
+        'sobol'  — Sobol sequence; n is rounded to the nearest 2^m for
+                   proper balance (Sobol requires a power-of-2 sample size)
+        'halton' — Halton sequence
 
-    For 'sobol', sobol_n_policy controls how n is mapped to a power-of-2
-    sample size (Sobol balance requires 2^m points). With 'arbitrary'
-    (default), n is used as-is and SciPy will emit a balance warning.
-
-    The returned array length is the actual sample size (which may differ
-    from n if sobol_n_policy != 'arbitrary'). Callers should use len() on
-    the returned array for budget tracking, not the requested n.
+    The returned array length is the actual sample size, which for 'sobol'
+    may differ from n. Callers must use len() on the returned array for
+    budget tracking, not the requested n.
 
     Returns (n_eff, D) array.
     """
@@ -163,13 +119,9 @@ def sample_points(dim: int, n: int, bounds: np.ndarray, seed: int,
         sampler = qmc.LatinHypercube(d=dim, seed=seed)
         unit = sampler.random(n)
     elif method == 'sobol':
-        n_eff = _resolve_sobol_n(n, sobol_n_policy)
+        n_eff = _pow2_nearest(n)
         sampler = qmc.Sobol(d=dim, scramble=True, seed=seed)
-        if sobol_n_policy == 'arbitrary':
-            unit = sampler.random(n_eff)
-        else:
-            m = int(math.log2(n_eff))
-            unit = sampler.random_base2(m)
+        unit = sampler.random_base2(int(math.log2(n_eff)))
     elif method == 'halton':
         sampler = qmc.Halton(d=dim, scramble=True, seed=seed)
         unit = sampler.random(n)
@@ -465,29 +417,18 @@ class NBCDetector:
         # 1. Sample + evaluate (or accept pre-sampled inputs)
         if pre_sampled is not None:
             points, fvals = pre_sampled
-            points = np.asarray(points, dtype=float)
-            fvals = np.asarray(fvals, dtype=float)
-            if points.ndim != 2 or points.shape[1] != D:
-                raise ValueError(
-                    f"NBCDetector.discover: pre_sampled points must be "
-                    f"shape (N, {D}), got {points.shape}.")
-            if fvals.ndim != 1 or fvals.shape[0] != points.shape[0]:
-                raise ValueError(
-                    f"NBCDetector.discover: pre_sampled fvals must be "
-                    f"shape ({points.shape[0]},), got {fvals.shape}.")
-            self.points = points
-            self.fvals = fvals
+            self.points = np.asarray(points, dtype=float)
+            self.fvals = np.asarray(fvals, dtype=float)
             # Caller already incremented its own nfev counter when it
             # evaluated these points; detector contributes 0 here.
             self.nfev = 0
         else:
             M = cfg.n_phase0
             self.points = sample_points(D, M, self.bounds, self.seed,
-                                        method=cfg.sampling_method,
-                                        sobol_n_policy=cfg.sobol_n_policy)
-            # Actual sample size may differ from M for sobol_n_policy != 'arbitrary'
-            # (Sobol requires 2^m points for balance). Use the array length as the
-            # source of truth for budget tracking.
+                                        method=cfg.sampling_method)
+            # Actual sample size may differ from M for Sobol (rounded to a
+            # power of 2). Use the array length as the source of truth for
+            # budget tracking.
             M = len(self.points)
             self.fvals = np.array(
                 func([x.tolist() for x in self.points]), dtype=float)
@@ -512,12 +453,8 @@ class NBCDetector:
         self.nb_edge_len_raw = edge_len_raw
         self.nb_mu = mu
 
-        # 4. Staircase: find φ for n_initial_basins (or use override)
-        if cfg.phi_override > 0:
-            phi_used = cfg.phi_override
-            phi_history = [(phi_used, -1)]  # -1 = override, not staircase
-        else:
-            phi_used, phi_history = self._staircase_phi(cfg.n_initial_basins)
+        # 4. Staircase: find φ for n_initial_basins
+        phi_used, phi_history = self._staircase_phi(cfg.n_initial_basins)
 
         # 5. Re-cluster at chosen φ
         labels = self._cluster_at_phi(phi_used)

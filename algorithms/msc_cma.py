@@ -30,8 +30,8 @@ Sobol/Halton cross-cycle Phase-0 reuse (alt-CB only):
     Phase-0.  NBC clustering is re-run with the odd cycle's own params
     (k, nbc_b, min_basin_size), giving a B-style basin geometry on the
     same points.
-    Disabled by enable_phase0_reuse=False.  No effect for LHS (no nesting),
-    single-cfg mode, or when the previous cycle's sample is too small.
+    No effect for LHS (no nesting), single-cfg mode (--conly), or when the
+    previous cycle's sample is too small.
 """
 
 from __future__ import annotations
@@ -42,23 +42,11 @@ from typing import Dict, List, Optional, Tuple
 import cma
 import numpy as np
 
-try:
-    from .basin_detector import BasinInfo, NBCDetector, _resolve_sobol_n
-    from .basin_id import BasinId
-    from .config import MSCConfig, resolve_refine_frac
-    from .result import (BasinSnapshot, CycleStats, PhaseStats, RestartRecord,
-                         RunResult)
-except ImportError:  # compatibility for scripts that put algorithms/ on sys.path
-    from basin_detector import BasinInfo, NBCDetector, _resolve_sobol_n
-    from basin_id import BasinId
-    from config import MSCConfig, resolve_refine_frac
-    from result import (BasinSnapshot, CycleStats, PhaseStats, RestartRecord,
-                        RunResult)
-
-
-# Popsize sizing: fraction of basin members used as λ before clamping to
-# [Hansen-default floor, cfg.cma_popsize cap].  Now read from MSCConfig.popsize_frac.
-POPSIZE_FRAC_DEFAULT = 0.2
+from basin_detector import BasinInfo, NBCDetector, _pow2_nearest
+from basin_id import BasinId
+from config import MSCConfig
+from result import (BasinSnapshot, CycleStats, PhaseStats, RestartRecord,
+                    RunResult)
 
 
 # =========================================================================
@@ -98,19 +86,11 @@ class MSC_CMA:
                  seed: int,
                  config: Optional[MSCConfig] = None,
                  disp: bool = False,
-                 # alt-CB scheduler: when non-empty, cycle through
-                 # mode_schedule[cycle % len(mode_schedule)] for ALL cycles.
-                 # No decision step.  Pass mode_schedule=[cfg_C, cfg_B] for
-                 # the canonical alt-CB (cycle 0=C, 1=B, 2=C, ...).  When set,
-                 # `config` becomes the cfg used for refine_budget reservation
-                 # at solve() entry; if None, mode_schedule[0] is used.
-                 mode_schedule: Optional[List[MSCConfig]] = None,
-                 # Sobol/Halton cross-cycle Phase-0 reuse (alt-CB only).
-                 # When True (default): odd cycles reuse first N points from
-                 # immediately preceding even cycle's sample (no new evals).
-                 # No effect for LHS, single-cfg mode, or when prev sample
-                 # smaller than current cycle's needed N.
-                 enable_phase0_reuse: bool = True):
+                 # alt-CB scheduler: when set, cycle i uses
+                 # mode_schedule[i % len(mode_schedule)] for ALL cycles.
+                 # Pass mode_schedule=[cfg_C, cfg_B] for the canonical alt-CB
+                 # (cycle 0=C, 1=B, 2=C, ...).  None → single-cfg (C-only).
+                 mode_schedule: Optional[List[MSCConfig]] = None):
         self.func = func
         self.bounds = np.asarray(bounds, dtype=float)
         self.dim = len(bounds)
@@ -123,14 +103,8 @@ class MSC_CMA:
         self.mode_schedule = mode_schedule
         self.mode_label = 'default'
 
-        if self.mode_schedule is not None:
-            if len(self.mode_schedule) < 1:
-                raise ValueError(
-                    "MSC_CMA: mode_schedule must have at least 1 entry.")
-            if config is None:
-                # Initial cfg for refine_budget reservation: first slot.
-                config = self.mode_schedule[0]
-
+        # `config` is the cfg used for refine_budget reservation at solve()
+        # entry (mode_schedule[0] in alt-CB; the C-class cfg for --conly).
         self.cfg = config or MSCConfig()
         self.rng = np.random.default_rng(seed)
 
@@ -155,12 +129,10 @@ class MSC_CMA:
         # is producing diverse adaptive λ or always hitting the cap.
         self.popsize_hist: Dict[int, int] = {}
 
-        # Phase-0 cross-cycle reuse state.  When sampling=sobol/halton and
-        # alt-CB mode active, a fresh Phase-0 sample is cached so the next
-        # (odd) cycle can re-use a prefix of it instead of paying evals.
-        # Single slot (overwritten on each fresh sample).  Reset across
-        # solver runs only.
-        self.enable_phase0_reuse = enable_phase0_reuse
+        # Phase-0 cross-cycle reuse state (alt-CB + Sobol/Halton).  A fresh
+        # Phase-0 sample is cached so the next (odd) cycle can reuse a prefix
+        # of it instead of paying evals.  Single slot (overwritten on each
+        # fresh sample).
         self._phase0_cached_cycle: Optional[int] = None
         self._phase0_cached_points: Optional[np.ndarray] = None
         self._phase0_cached_fvals: Optional[np.ndarray] = None
@@ -176,8 +148,6 @@ class MSC_CMA:
         """Batch evaluate.  Updates global best.  Returns list of floats."""
         X_arr = np.asarray(X)
         F = self.func(X_arr)
-        if not isinstance(F, list):
-            F = list(F)
         self.nfev += len(F)
         idx = int(np.argmin(F))
         if F[idx] < self.best_f:
@@ -299,12 +269,9 @@ class MSC_CMA:
                 stop_reason = _first_stop_key(es.stop())
 
             final_sigma = float(es.sigma)
-            try:
-                if float(es.result.fbest) < best_f_run:
-                    best_f_run = float(es.result.fbest)
-                    best_x_run = np.asarray(es.result.xbest, dtype=float)
-            except Exception:
-                pass
+            if float(es.result.fbest) < best_f_run:
+                best_f_run = float(es.result.fbest)
+                best_x_run = np.asarray(es.result.xbest, dtype=float)
 
         except Exception as exc:
             stop_reason = f'exception:{type(exc).__name__}'
@@ -332,21 +299,9 @@ class MSC_CMA:
     def _make_detector_for_cycle(self, cycle: int,
                                  cfg: MSCConfig
                                  ) -> tuple:
-        """Create the Phase-0 detector for a cycle, preserving sampling
-        rotation.  Returns (detector, sampling_method_used)."""
+        """Create the Phase-0 detector for a cycle.
+        Returns (detector, sampling_method_used)."""
         cycle_seed = self.seed + cycle * 10000
-
-        if cfg.rotate_sampling:
-            from dataclasses import replace as _dc_replace
-
-            rotation = ('lhs', 'sobol', 'halton')
-            method = rotation[cycle % len(rotation)]
-            cycle_cfg = _dc_replace(cfg, sampling_method=method)
-            detector = NBCDetector(self.dim, self.bounds, cycle_cfg, cycle_seed)
-            if self.disp:
-                print(f"  rotate_sampling: cycle {cycle} -> {method}")
-            return detector, method
-
         return (NBCDetector(self.dim, self.bounds, cfg, cycle_seed),
                 cfg.sampling_method)
 
@@ -365,46 +320,45 @@ class MSC_CMA:
             for b in basins_sorted
         ]
 
-    def _try_reuse_phase0(self, cycle: int, cfg: MSCConfig, sampling_method: str
-                          ) -> Optional[Tuple[np.ndarray, np.ndarray]]:
-        """Return (points, fvals) prefix from previous cycle's cache if all
-        reuse conditions hold; otherwise None.
+    def _reuse_needed_n(self, cfg: MSCConfig) -> int:
+        """Number of cached points the current cycle would consume on reuse.
+        Sobol is rounded to a power of 2 to match sample_points."""
+        n = cfg.n_phase0
+        if cfg.sampling_method == 'sobol':
+            n = _pow2_nearest(n)
+        return n
 
-        Conditions (all must hold):
-          - enable_phase0_reuse is True
+    def _reuse_eligible(self, cycle: int, cfg: MSCConfig) -> bool:
+        """True if this cycle can reuse the previous cycle's Phase-0 sample.
+
+        All must hold:
           - alt-CB mode active (mode_schedule is not None)
           - cycle > 0
-          - sampling_method ∈ {'sobol','halton'}  (nested-sequence property)
+          - sampling_method ∈ {'sobol','halton'} (nested-sequence property)
           - cache holds the immediately preceding cycle (cycle - 1)
-          - cached sample size ≥ N needed for this cycle's M·D
-
-        Returns the prefix slice (points[:N], fvals[:N]) on success.
+          - cached sample size ≥ N needed for this cycle
         """
-        if not self.enable_phase0_reuse:
-            return None
         if self.mode_schedule is None:
-            return None
+            return False
         if cycle <= 0:
-            return None
-        if sampling_method not in ('sobol', 'halton'):
-            return None
+            return False
+        if cfg.sampling_method not in ('sobol', 'halton'):
+            return False
         if self._phase0_cached_cycle != cycle - 1:
-            return None
+            return False
         if self._phase0_cached_points is None:
+            return False
+        return len(self._phase0_cached_points) >= self._reuse_needed_n(cfg)
+
+    def _try_reuse_phase0(self, cycle: int, cfg: MSCConfig
+                          ) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+        """Return (points, fvals) prefix from the previous cycle's cache when
+        reuse is eligible; otherwise None."""
+        if not self._reuse_eligible(cycle, cfg):
             return None
-
-        needed_n = cfg.n_phase0
-        # Sobol balance policy may round needed_n to a power of 2.
-        if (sampling_method == 'sobol'
-                and cfg.sobol_n_policy != 'arbitrary'):
-            needed_n = _resolve_sobol_n(needed_n, cfg.sobol_n_policy)
-
-        cached_n = len(self._phase0_cached_points)
-        if cached_n < needed_n:
-            return None
-
-        return (self._phase0_cached_points[:needed_n],
-                self._phase0_cached_fvals[:needed_n])
+        n = self._reuse_needed_n(cfg)
+        return (self._phase0_cached_points[:n],
+                self._phase0_cached_fvals[:n])
 
     def _run_phase0(self, cycle: int, cfg: MSCConfig,
                     phase_stats: PhaseStats):
@@ -417,7 +371,7 @@ class MSC_CMA:
 
         # Try cross-cycle Sobol/Halton reuse (alt-CB only).  When successful,
         # detector skips sampling+evaluation and operates on the cached prefix.
-        pre_sampled = self._try_reuse_phase0(cycle, cfg, sampling_method)
+        pre_sampled = self._try_reuse_phase0(cycle, cfg)
 
         if pre_sampled is not None:
             basins_sorted, phi_used, phi_history = detector.discover(
@@ -437,8 +391,7 @@ class MSC_CMA:
             # Cache fresh sample for potential reuse by the next cycle.
             # Only cache when reuse could conceivably apply downstream
             # (alt-CB + Sobol/Halton).  Otherwise it would never be read.
-            if (self.enable_phase0_reuse
-                    and self.mode_schedule is not None
+            if (self.mode_schedule is not None
                     and sampling_method in ('sobol', 'halton')):
                 self._phase0_cached_cycle = cycle
                 self._phase0_cached_points = detector.points.copy()
@@ -608,20 +561,13 @@ class MSC_CMA:
         cfg = self.cfg
         D = self.dim
 
-        # Budget reservation for refinement (auto-resolved if refine_frac<0).
-        # For alt-CB, cfg here is mode_schedule[0] (the cfg used as the
-        # placeholder at __init__).  In practice, refine_frac differs by
-        # <5% across alt-CB cfgs, so reserving based on slot-0 is safe.
-        resolved_rf = resolve_refine_frac(cfg, self.maxevals)
-        refine_budget = int(resolved_rf * self.maxevals)
+        # Budget reservation for refinement.  refine_frac is an explicit
+        # fraction on every config (B and C), so the reservation is a direct
+        # product; refinement later spends everything left down to maxevals,
+        # so this is a floor, not a hard allocation.  For alt-CB, cfg here is
+        # mode_schedule[0] (the C-class cfg passed at __init__).
+        refine_budget = int(cfg.refine_frac * self.maxevals)
         main_budget = self.maxevals - refine_budget
-
-        if self.disp and cfg.refine_frac < 0:
-            ratio = (self.maxevals / cfg.ref_budget
-                     if cfg.ref_budget > 0 else float('nan'))
-            print(f"  refine_frac=auto -> {resolved_rf:.4f} "
-                  f"(maxevals/ref_budget = {self.maxevals:,}/"
-                  f"{cfg.ref_budget:,} = {ratio:.2f}x)")
 
         # Accumulate across all cycles
         all_restarts: List[RestartRecord] = []
@@ -654,9 +600,14 @@ class MSC_CMA:
 
             remaining_before_cycle = main_budget - self.nfev
 
-            # Minimum budget to start a new cycle: Phase-0 needs n_phase0 evals
-            # plus at least a few restarts.  Use active_cfg's n_phase0.
-            min_cycle_budget = active_cfg.n_phase0 + D * 50
+            # Minimum budget to start a new cycle.  When this cycle is reuse-
+            # eligible its Phase-0 costs 0 evals (it reuses the previous
+            # cycle's sample), so only the Phase-1 restart budget is required;
+            # otherwise Phase-0 needs n_phase0 evals up front.
+            if self._reuse_eligible(cycle, active_cfg):
+                min_cycle_budget = D * 50
+            else:
+                min_cycle_budget = active_cfg.n_phase0 + D * 50
             if remaining_before_cycle < min_cycle_budget:
                 break
 
