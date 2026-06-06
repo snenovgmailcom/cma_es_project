@@ -14,7 +14,12 @@ COL_ORDER = ['MSC-CMA', 'BIPOP-CMA', None,   # None = separator column
 DISPLAY = {'NLSHADE-RSP': 'NLSHADE'}
 METRICS = ['mean', 'median', 'best', 'worst', 'std', 'FBTC']
 
+# Dropped uniformly for every algorithm (CEC2017 f2 is deprecated).
+DEPRECATED_FUNCS = {'cec2017': {'f2'}}
+
 def load(base, maxevals):
+    suite = os.path.basename(os.path.dirname(base.rstrip('/'))).lower()
+    drop = DEPRECATED_FUNCS.get(suite, set())
     algos = {}
     for d in sorted(glob.glob(os.path.join(base, '*', f'maxevals_{maxevals}'))):
         algo = d.split(os.sep)[-2]
@@ -22,6 +27,8 @@ def load(base, maxevals):
         for p in sorted(glob.glob(os.path.join(d, 'f*.pkl'))):
             with open(p, 'rb') as f:
                 rec = pickle.load(f)
+            if rec['func'] in drop:
+                continue
             e = np.asarray(rec['errors'], float)
             ef = _floor(e)
             funcs[rec['func']] = {

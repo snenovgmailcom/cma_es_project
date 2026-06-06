@@ -213,7 +213,7 @@ class MSC_CMA:
             opts['tolfun']          = 0          # fitness tolerance (was 1e-11)
             opts['tolx']            = 0          # x tolerance (was 1e-12)
             opts['tolfunhist']      = 0          # long-term fitness change
-            opts['tolflatfitness']  = 0          # flat fitness detector
+            opts['tolflatfitness']  = 10**9          # flat fitness detector
             opts['tolstagnation']   = 0          # no-improvement counter
             opts['tolfacupx']       = 1e30       # step-size blowup (was 1e3)
             opts['tolupsigma']      = 1e30       # creeping detector (was 1e20)

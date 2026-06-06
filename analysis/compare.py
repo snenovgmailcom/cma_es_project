@@ -139,6 +139,25 @@ def _detect_suite(base_dir: str) -> str:
 
 
 # =========================================================================
+# Deprecated / excluded functions — dropped UNIFORMLY for every algorithm,
+# so all methods are compared on the same function set.
+#
+# CEC2017 f2 was deprecated by the organizers (numerically unstable across
+# platforms); the convention is to evaluate on the remaining 29 functions.
+#
+# Disable with --keep-deprecated to reproduce the with-f2 numbers.
+# =========================================================================
+
+DEPRECATED_FUNCS = {
+    'CEC2017': {'f2'},
+}
+
+# Toggled by --keep-deprecated in main(); module-level so every load path
+# (median/mean/ecdf/hits/latex/by-category/all-metrics) sees the same set.
+EXCLUDE_DEPRECATED = True
+
+
+# =========================================================================
 # BH correction
 # =========================================================================
 
@@ -202,6 +221,9 @@ def paired_wilcoxon(errors_a: np.ndarray, errors_b: np.ndarray,
 def discover_algorithms(base_dir: str, maxevals: int = None) -> dict:
     algorithms = {}
 
+    drop = (DEPRECATED_FUNCS.get(_detect_suite(base_dir), set())
+            if EXCLUDE_DEPRECATED else set())
+
     for alg_dir in sorted(os.listdir(base_dir)):
         alg_path = os.path.join(base_dir, alg_dir)
         if not os.path.isdir(alg_path):
@@ -234,6 +256,8 @@ def discover_algorithms(base_dir: str, maxevals: int = None) -> dict:
             with open(p, 'rb') as f:
                 d = pickle.load(f)
             fn = d['func']
+            if fn in drop:
+                continue
             funcs[fn] = d
 
         # Use directory name as the algorithm key, not the pkl's `algorithm`
@@ -888,7 +912,22 @@ def main():
                          'and print one consolidated category x metric x '
                          'algorithm table instead of six separate runs. '
                          'Overrides --metric.')
+    ap.add_argument('--keep-deprecated', action='store_true',
+                    help='Keep deprecated functions (e.g. CEC2017 f2) instead '
+                         'of dropping them uniformly for all algorithms.')
     args = ap.parse_args()
+
+    global EXCLUDE_DEPRECATED
+    EXCLUDE_DEPRECATED = not args.keep_deprecated
+    _drop_note = DEPRECATED_FUNCS.get(_detect_suite(args.base_dir), set())
+    if _drop_note:
+        if EXCLUDE_DEPRECATED:
+            print(f"NOTE: deprecated function(s) "
+                  f"{', '.join(sorted(_drop_note))} excluded uniformly for "
+                  f"all algorithms (--keep-deprecated to include).")
+        else:
+            print(f"NOTE: --keep-deprecated: deprecated function(s) "
+                  f"{', '.join(sorted(_drop_note))} KEPT.")
 
     if args.all_metrics:
         # Consolidated path: iterate all scalar metrics, one category table.

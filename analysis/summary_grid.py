@@ -141,6 +141,19 @@ def partition_for(suite, dim):
     return KNOWN_PARTITIONS.get((suite, dim))
 
 
+# =========================================================================
+# Deprecated / excluded functions — dropped UNIFORMLY for every algorithm,
+# in every cell of the listed suite, so all methods are compared on the
+# same function set. CEC2017 f2 was deprecated by the organizers; the
+# convention is to evaluate on the remaining 29 functions.
+# Disable with --keep-deprecated.
+# =========================================================================
+
+DEPRECATED_FUNCS = {
+    'cec2017': {'f2'},
+}
+
+
 def normalize_algo(raw_name):
     for pat, canon in ALGO_PATTERNS:
         if pat.match(raw_name):
@@ -289,12 +302,16 @@ def load_cell_metrics(pkl_dir):
 # Aggregation
 # =========================================================================
 
-def aggregate(root):
+def aggregate(root, exclude_deprecated=True):
     """Returns {(suite, dim, maxevals): {canon_algo: {func: metrics}}}.
 
     Multiple raw algos that normalize to the same canonical name are MERGED
     (last write wins per function — this only matters if both MSC-CMA and
     MSC-CMA-B1M exist in the same cell, which shouldn't happen).
+
+    Deprecated functions (DEPRECATED_FUNCS) are dropped for EVERY algorithm
+    in the affected suite, before merging, so every downstream table, the
+    CSV, and the by-dim aggregation see the same reduced function set.
     """
     grid = defaultdict(lambda: defaultdict(dict))
     raw_seen = defaultdict(set)
@@ -303,6 +320,11 @@ def aggregate(root):
         cell_key = (suite, dim, maxevals)
         raw_seen[cell_key].add(raw_algo)
         per_func = load_cell_metrics(md)
+        if exclude_deprecated:
+            drop = DEPRECATED_FUNCS.get(suite, set())
+            for f in list(per_func):
+                if f in drop:
+                    del per_func[f]
         # Merge into canonical bucket
         existing = grid[cell_key].get(canon, {})
         existing.update(per_func)
@@ -640,9 +662,20 @@ def main():
     p.add_argument('--all-algos', action='store_true',
                    help='Auto-discover and include every algo directory '
                         'present in the experiments tree.')
+    p.add_argument('--keep-deprecated', action='store_true',
+                   help='Keep deprecated functions (e.g. CEC2017 f2) instead '
+                        'of dropping them uniformly for all algorithms.')
     args = p.parse_args()
 
-    grid, raw_seen = aggregate(args.root)
+    grid, raw_seen = aggregate(args.root,
+                               exclude_deprecated=not args.keep_deprecated)
+    if args.keep_deprecated:
+        print("  (--keep-deprecated: deprecated funcs KEPT)")
+    elif any(DEPRECATED_FUNCS.values()):
+        drops = ', '.join(f"{s}:{','.join(sorted(fs))}"
+                          for s, fs in sorted(DEPRECATED_FUNCS.items()))
+        print(f"  (deprecated funcs excluded uniformly: {drops}; "
+              f"--keep-deprecated to include)")
     if not grid:
         sys.exit(f"No populated experiments cells found under {args.root}/")
 
