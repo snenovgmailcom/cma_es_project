@@ -112,6 +112,12 @@ under `experiments/`. Each leaf is at
 }
 ```
 
+## AI assistance
+
+Parts of the code in this repository were written with the assistance of
+Claude (Anthropic). All code has been read, reviewed, and verified by the
+authors, who take full responsibility for its correctness.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
