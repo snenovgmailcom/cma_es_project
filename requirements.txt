@@ -1,0 +1,18 @@
+# MSC-CMA-ES dependencies
+# Python 3.13 (the paper used 3.13.5, Intel Distribution for Python).
+# Pinned versions are those used for the reported experiments.
+
+numpy==2.3.1
+scipy==1.15.3
+cma==4.4.2          # pycma: CMA-ES engine + BIPOP-CMA-ES baseline
+minionpy==1.5.0     # C++ reference DE baselines (ARRDE, jSO, j2020, NL-SHADE-RSP, LSRTDE)
+matplotlib          # analysis/ figure generation
+joblib              # parallel seeds in the benchmark runners
+
+# Build-time only, optional: pybind11 is needed to compile the C++
+# nearest-better tree (algorithms/cpp). Without it the code falls back
+# to the pure-Python implementation automatically.
+# pybind11
+
+# Optional, only required by benchmark/probe_modcma.py:
+# modcma
