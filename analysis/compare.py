@@ -2,13 +2,17 @@
 """
 analysis/compare.py — multi-algorithm comparison for v26 (extended).
 
-Adds two new metrics:
-  --metric ecdf   : COCO ECDF area (51 log-spaced targets in [1e-8, 1e2]),
-                    per-function scalar in [0,1]. HIGHER is better.
-  --metric hits   : Per-CEC-display-target hit counts (7 targets) — shown as
-                    a separate per-function block. Not a scalar; aggregation
-                    is per-target totals + per-target win counts. No Wilcoxon
-                    table for this metric (use 'mean' or 'ecdf' for stats).
+Adds two extra metrics (article terminology):
+  --metric fbtc   : Fixed-Budget Target Coverage (FBTC) — mean attainment over
+                    51 log-uniform targets in [1e+2, 1e-8] at the final budget;
+                    per-function scalar in [0, 1]. HIGHER is better. This is the
+                    fixed-budget coverage used in the paper, NOT the COCO
+                    runtime-integrated ECDF.
+  --metric thr    : THR_k — per-CEC-display-target hit counts (7 targets), shown
+                    as a separate per-function block (visualisation only). Not a
+                    scalar; no Wilcoxon table (use 'mean' or 'fbtc' for stats).
+
+Deprecated metric aliases still accepted: 'ecdf' -> 'fbtc', 'hits' -> 'thr'.
 
 Usage
 -----
@@ -16,21 +20,20 @@ Usage
         --base-dir experiments/cec2020/d10 \
         --metric median --ref MSC-CMA --correction bh
 
-    # COCO ECDF table
+    # FBTC (fixed-budget target coverage) table
     python analysis/compare.py \
         --base-dir experiments/cec2020/d10 \
-        --metric ecdf --ref MSC-CMA --correction bh
+        --metric fbtc --ref MSC-CMA --correction bh
 
-    # CEC hits-per-target table
+    # THR_k per-target table
     python analysis/compare.py \
         --base-dir experiments/cec2020/d10 \
-        --metric hits --ref MSC-CMA
+        --metric thr --ref MSC-CMA
 
-    # ARRDE Appendix-A style LaTeX output
+    # Composition functions only (Wilcoxon on the thesis-driving class)
     python analysis/compare.py \
-        --base-dir experiments/cec2020/d10 \
-        --ref MSC-CMA --maxevals 1000000 \
-        --latex
+        --base-dir experiments/cec2020/d20 --maxevals 10_000_000 \
+        --ref MSC-CMA --metric median --func-class composition
 """
 
 import argparse
@@ -58,7 +61,7 @@ def _floor(arr: np.ndarray, eps: float = COCO_ZERO) -> np.ndarray:
 
 
 # =========================================================================
-# COCO ECDF helpers
+# COCO FBTC helpers
 # =========================================================================
 
 # 51 log-spaced targets in [1e-8, 1e2] — matches BBOB convention.
@@ -68,8 +71,8 @@ COCO_TAUS = 10.0 ** np.linspace(2.0, -8.0, 51)
 CEC_TAUS = [1e1, 1e0, 1e-1, 1e-2, 1e-3, 1e-5, 1e-8]
 
 
-def ecdf_area(errs: np.ndarray, taus=COCO_TAUS) -> float:
-    """COCO-style ECDF area: mean attainment rate over targets.
+def fbtc_area(errs: np.ndarray, taus=COCO_TAUS) -> float:
+    """COCO-style FBTC area: mean attainment rate over targets.
 
     For each target tau, fraction of seeds with err <= tau.
     Mean across all targets in [0, 1]. Higher is better.
@@ -81,11 +84,11 @@ def ecdf_area(errs: np.ndarray, taus=COCO_TAUS) -> float:
     return float(np.mean([np.sum(a <= t) / n for t in taus]))
 
 
-def per_seed_ecdf(errs: np.ndarray, taus=COCO_TAUS) -> np.ndarray:
-    """Per-seed ECDF: for each seed, fraction of targets it reaches.
+def per_seed_fbtc(errs: np.ndarray, taus=COCO_TAUS) -> np.ndarray:
+    """Per-seed FBTC: for each seed, fraction of targets it reaches.
 
     Returns array of length len(errs), each value in [0, 1].
-    Used for paired Wilcoxon on ECDF metric.
+    Used for paired Wilcoxon on FBTC metric.
     """
     a = np.asarray(errs, dtype=np.float64)
     if len(a) == 0:
@@ -139,25 +142,6 @@ def _detect_suite(base_dir: str) -> str:
 
 
 # =========================================================================
-# Deprecated / excluded functions — dropped UNIFORMLY for every algorithm,
-# so all methods are compared on the same function set.
-#
-# CEC2017 f2 was deprecated by the organizers (numerically unstable across
-# platforms); the convention is to evaluate on the remaining 29 functions.
-#
-# Disable with --keep-deprecated to reproduce the with-f2 numbers.
-# =========================================================================
-
-DEPRECATED_FUNCS = {
-    'CEC2017': {'f2'},
-}
-
-# Toggled by --keep-deprecated in main(); module-level so every load path
-# (median/mean/ecdf/hits/latex/by-category/all-metrics) sees the same set.
-EXCLUDE_DEPRECATED = True
-
-
-# =========================================================================
 # BH correction
 # =========================================================================
 
@@ -190,7 +174,7 @@ def paired_wilcoxon(errors_a: np.ndarray, errors_b: np.ndarray,
                     higher_better: bool = False):
     """Wilcoxon signed-rank test (two-sided), COCO/CEC-conformant.
 
-    For higher_better=True (e.g. per-seed ECDF), test for a > b.
+    For higher_better=True (e.g. per-seed FBTC), test for a > b.
     For higher_better=False (default, errors), test for a < b.
     """
     a = np.asarray(errors_a, dtype=np.float64)
@@ -220,9 +204,6 @@ def paired_wilcoxon(errors_a: np.ndarray, errors_b: np.ndarray,
 
 def discover_algorithms(base_dir: str, maxevals: int = None) -> dict:
     algorithms = {}
-
-    drop = (DEPRECATED_FUNCS.get(_detect_suite(base_dir), set())
-            if EXCLUDE_DEPRECATED else set())
 
     for alg_dir in sorted(os.listdir(base_dir)):
         alg_path = os.path.join(base_dir, alg_dir)
@@ -256,8 +237,6 @@ def discover_algorithms(base_dir: str, maxevals: int = None) -> dict:
             with open(p, 'rb') as f:
                 d = pickle.load(f)
             fn = d['func']
-            if fn in drop:
-                continue
             funcs[fn] = d
 
         # Use directory name as the algorithm key, not the pkl's `algorithm`
@@ -274,13 +253,37 @@ def discover_algorithms(base_dir: str, maxevals: int = None) -> dict:
 
 
 # =========================================================================
-# Compare (scalar metrics including 'ecdf')
+# Compare (scalar metrics including 'fbtc')
 # =========================================================================
 
+FUNC_CLASSES = {
+    'cec2014': {'basic': range(1, 17), 'hybrid': range(17, 23), 'composition': range(23, 31)},
+    'cec2017': {'basic': range(1, 11), 'hybrid': range(11, 21), 'composition': range(21, 31)},
+    'cec2020': {'basic': range(1, 5),  'hybrid': range(5, 8),   'composition': range(8, 11)},
+    'cec2022': {'basic': range(1, 6),  'hybrid': range(6, 9),   'composition': range(9, 13)},
+}
+
+
+def restrict_to_class(common, base_dir, func_class):
+    """Subset `common` to one CEC function class (basic/hybrid/composition).
+    func_class == 'all' is a no-op."""
+    if func_class == 'all':
+        return common
+    suite = _detect_suite(base_dir).lower()
+    cls = FUNC_CLASSES.get(suite)
+    if cls is None:
+        raise ValueError(f"No function-class map for suite '{suite}'")
+    keep = {f'f{i}' for i in cls[func_class]}
+    out = [fn for fn in common if fn in keep]
+    if not out:
+        raise ValueError(f"No '{func_class}' functions present in {base_dir}")
+    return out
+
+
 def run_comparison(base_dir, ref, metric, correction, alpha,
-                   maxevals=None):
+                   maxevals=None, func_class='all'):
     """Run scalar-metric comparison. metric is one of
-    {median, mean, best, worst, std, ecdf}."""
+    {median, mean, best, worst, std, fbtc}."""
     algorithms = discover_algorithms(base_dir, maxevals)
 
     if not algorithms:
@@ -302,7 +305,9 @@ def run_comparison(base_dir, ref, metric, correction, alpha,
     if not common:
         raise ValueError("No common functions across all algorithms")
 
-    higher_better = (metric == 'ecdf')
+    common = restrict_to_class(common, base_dir, func_class)
+
+    higher_better = (metric == 'fbtc')
     ref_data = algorithms[ref]
 
     metric_table = {a: {} for a in alg_names}
@@ -311,7 +316,7 @@ def run_comparison(base_dir, ref, metric, correction, alpha,
 
     for fn in common:
         ref_errors = _floor(ref_data[fn]['errors'])
-        ref_per_seed_ecdf = per_seed_ecdf(ref_errors) if metric == 'ecdf' else None
+        ref_per_seed_fbtc = per_seed_fbtc(ref_errors) if metric == 'fbtc' else None
 
         for alg in alg_names:
             errs = _floor(algorithms[alg][fn]['errors'])
@@ -326,15 +331,15 @@ def run_comparison(base_dir, ref, metric, correction, alpha,
                 metric_table[alg][fn] = float(np.max(errs))
             elif metric == 'std':
                 metric_table[alg][fn] = float(np.std(errs))
-            elif metric == 'ecdf':
-                metric_table[alg][fn] = ecdf_area(errs)
+            elif metric == 'fbtc':
+                metric_table[alg][fn] = fbtc_area(errs)
 
             if alg != ref:
-                if metric == 'ecdf':
-                    # Wilcoxon on per-seed ECDF vectors
-                    alg_seed_ecdf = per_seed_ecdf(errs)
+                if metric == 'fbtc':
+                    # Wilcoxon on per-seed FBTC vectors
+                    alg_seed_fbtc = per_seed_fbtc(errs)
                     _, p, _ = paired_wilcoxon(
-                        alg_seed_ecdf, ref_per_seed_ecdf,
+                        alg_seed_fbtc, ref_per_seed_fbtc,
                         higher_better=True)
                 else:
                     _, p, _ = paired_wilcoxon(errs, ref_errors)
@@ -365,7 +370,7 @@ def run_comparison(base_dir, ref, metric, correction, alpha,
 
 
 # =========================================================================
-# Print scalar table (median/mean/best/worst/std/ecdf)
+# Print scalar table (median/mean/best/worst/std/fbtc)
 # =========================================================================
 
 def print_table(common, alg_names, metric_table, sig_table,
@@ -376,7 +381,7 @@ def print_table(common, alg_names, metric_table, sig_table,
                   'bonferroni': 'Bonferroni',
                   'none': 'none'}
     corr_str = corr_label.get(correction, correction)
-    higher_better = (metric == 'ecdf')
+    higher_better = (metric == 'fbtc')
     direction_note = ('higher is better' if higher_better
                       else 'lower is better')
 
@@ -402,8 +407,8 @@ def print_table(common, alg_names, metric_table, sig_table,
         row = f"{fn:>4s}"
         for alg in alg_names:
             val = metric_table[alg][fn]
-            # Floor only applies to error metrics, not ECDF
-            if metric == 'ecdf':
+            # Floor only applies to error metrics, not FBTC
+            if metric == 'fbtc':
                 val_disp = val
                 val_str = f"{val_disp:.3f}"
             else:
@@ -422,7 +427,7 @@ def print_table(common, alg_names, metric_table, sig_table,
     print("-" * len(header))
 
     # Aggregation
-    if metric == 'ecdf':
+    if metric == 'fbtc':
         agg_label, agg_fn = 'SUM', np.sum
     elif metric in ('median', 'mean', 'std'):
         agg_label, agg_fn = 'SUM', np.sum
@@ -436,7 +441,7 @@ def print_table(common, alg_names, metric_table, sig_table,
     row = f"{agg_label:>4s}"
     for alg in alg_names:
         v = agg_fn(np.asarray(per_func_vals[alg], dtype=np.float64))
-        if metric == 'ecdf':
+        if metric == 'fbtc':
             v_str = f"{v:.3f}"
         else:
             v = 0.0 if abs(v) <= COCO_ZERO else v
@@ -464,7 +469,7 @@ def print_table(common, alg_names, metric_table, sig_table,
     print("-" * 102)
 
     def _fmt(v):
-        if metric == 'ecdf':
+        if metric == 'fbtc':
             return f"{v:10.3f}"
         return "0.000e+00" if abs(v) <= COCO_ZERO else f"{v:10.3e}"
 
@@ -480,14 +485,16 @@ def print_table(common, alg_names, metric_table, sig_table,
 # =========================================================================
 
 def print_hits_table(base_dir, alg_names, algorithms,
-                     ref, taus=CEC_TAUS):
-    """Print per-CEC-target hits for each algorithm and function."""
+                     ref, taus=CEC_TAUS, func_class='all'):
+    """Print per-CEC-target (THR_k) hit counts for each algorithm and function."""
     func_sets = [set(algorithms[a].keys()) for a in alg_names]
     common = sorted(
         set.intersection(*func_sets),
         key=lambda fn: int(fn.replace('f', '')))
     if not common:
         raise ValueError("No common functions across all algorithms")
+
+    common = restrict_to_class(common, base_dir, func_class)
 
     n_seeds_max = 0
     for alg in alg_names:
@@ -496,8 +503,8 @@ def print_hits_table(base_dir, alg_names, algorithms,
             n_seeds_max = max(n_seeds_max, n)
 
     print(f"Loaded {len(alg_names)} algorithms from {base_dir}")
-    print(f"CEC display-target hits (out of {n_seeds_max} seeds per function)")
-    print(f"{base_dir}  metric=hits")
+    print(f"THR_k — CEC display-target hit counts (out of {n_seeds_max} seeds per function)")
+    print(f"{base_dir}  metric=THR_k")
     print()
 
     # Header
@@ -684,7 +691,7 @@ def print_category_table(common, alg_names, metric_table, ref, metric,
               file=sys.stderr)
         return
 
-    higher_better = (metric == 'ecdf')
+    higher_better = (metric == 'fbtc')
 
     # Columns: reference first, then the remaining algorithms in the same
     # relative order as the per-function table.
@@ -694,7 +701,7 @@ def print_category_table(common, alg_names, metric_table, ref, metric,
     # the category sums and the overall SUM stay consistent.
     def _disp(alg, fn):
         v = metric_table[alg][fn]
-        if metric == 'ecdf':
+        if metric == 'fbtc':
             return v
         return 0.0 if abs(v) <= COCO_ZERO else v
 
@@ -725,7 +732,7 @@ def print_category_table(common, alg_names, metric_table, ref, metric,
                  for alg in col_order}
 
     def _fmt(v):
-        if metric == 'ecdf':
+        if metric == 'fbtc':
             return f"{v:.3f}"
         v = 0.0 if abs(v) <= COCO_ZERO else v
         return "0.000e+00" if v == 0.0 else f"{v:.3e}"
@@ -774,14 +781,14 @@ def print_category_table(common, alg_names, metric_table, ref, metric,
 # =========================================================================
 
 # Scalar metrics iterated by --all-metrics (excludes 'hits', which is not a
-# scalar). 'ecdf' is higher-is-better; the rest are lower-is-better.
-ALL_METRICS = ['mean', 'median', 'best', 'worst', 'std', 'ecdf']
+# scalar). 'fbtc' is higher-is-better; the rest are lower-is-better.
+ALL_METRICS = ['mean', 'median', 'best', 'worst', 'std', 'fbtc']
 
 
 def _fmt_metric(v, metric):
     """Format a per-category scalar consistently with print_table's SUM row:
-    ecdf as a [0,1] fraction, error metrics as %.3e with a COCO_ZERO floor."""
-    if metric == 'ecdf':
+    fbtc as a [0,1] fraction, error metrics as %.3e with a COCO_ZERO floor."""
+    if metric == 'fbtc':
         return f"{v:.3f}"
     v = 0.0 if abs(v) <= COCO_ZERO else v
     return "0.000e+00" if v == 0.0 else f"{v:.3e}"
@@ -833,7 +840,7 @@ def print_all_metrics_category_table(base_dir, ref, correction, alpha,
 
     def _disp(metric, alg, fn):
         v = metric_tables[metric][alg][fn]
-        if metric == 'ecdf':
+        if metric == 'fbtc':
             return v
         return 0.0 if abs(v) <= COCO_ZERO else v
 
@@ -843,7 +850,7 @@ def print_all_metrics_category_table(base_dir, ref, correction, alpha,
 
     print()
     print(f"By-category sums — all metrics  (suite={suite})")
-    print("  (ecdf: higher is better; all others: lower is better)")
+    print("  (fbtc: higher is better; all others: lower is better)")
 
     col_w = max(max(len(a) for a in col_order), 15)
     header = f"{'category':>12s}  {'metric':>7s}"
@@ -882,16 +889,31 @@ def print_all_metrics_category_table(base_dir, ref, correction, alpha,
 # CLI
 # =========================================================================
 
+def _norm_metric(v):
+    """Normalize metric name; accept deprecated aliases ecdf->fbtc, hits->thr."""
+    v = v.lower()
+    v = {'ecdf': 'fbtc', 'hits': 'thr', 'thr_k': 'thr', 'thr-k': 'thr'}.get(v, v)
+    allowed = {'median', 'mean', 'best', 'worst', 'std', 'fbtc', 'thr'}
+    if v not in allowed:
+        raise argparse.ArgumentTypeError(
+            "metric must be one of: median, mean, best, worst, std, fbtc, thr")
+    return v
+
+
 def main():
     ap = argparse.ArgumentParser(
-        description='Multi-algorithm comparison (extended). New metrics: '
-                    'ecdf (COCO area), hits (CEC per-target counts).')
+        description='Multi-algorithm comparison (extended). Extra metrics: '
+                    'fbtc (fixed-budget target coverage), thr (THR_k per-target '
+                    'hit counts).')
     ap.add_argument('--base-dir', required=True)
     ap.add_argument('--ref', required=True)
-    ap.add_argument('--metric',
-                    choices=['median', 'mean', 'best', 'worst', 'std',
-                             'ecdf', 'hits'],
-                    default='median')
+    ap.add_argument('--metric', type=_norm_metric, default='median',
+                    help='median, mean, best, worst, std, fbtc, or thr '
+                         "(default: median). Aliases: ecdf->fbtc, hits->thr.")
+    ap.add_argument('--func-class', default='all',
+                    choices=['all', 'basic', 'hybrid', 'composition'],
+                    help='Restrict to one CEC function class before testing '
+                         '(default: all functions in the cell).')
     ap.add_argument('--correction',
                     choices=['bh', 'bonferroni', 'none'], default='bh')
     ap.add_argument('--alpha', type=float, default=0.05)
@@ -908,26 +930,11 @@ def main():
                          'and the aggregate-statistics block; print only the '
                          'By-category sums table.')
     ap.add_argument('--all-metrics', action='store_true',
-                    help='Iterate over [mean, median, best, worst, std, ecdf] '
+                    help='Iterate over [mean, median, best, worst, std, fbtc] '
                          'and print one consolidated category x metric x '
                          'algorithm table instead of six separate runs. '
                          'Overrides --metric.')
-    ap.add_argument('--keep-deprecated', action='store_true',
-                    help='Keep deprecated functions (e.g. CEC2017 f2) instead '
-                         'of dropping them uniformly for all algorithms.')
     args = ap.parse_args()
-
-    global EXCLUDE_DEPRECATED
-    EXCLUDE_DEPRECATED = not args.keep_deprecated
-    _drop_note = DEPRECATED_FUNCS.get(_detect_suite(args.base_dir), set())
-    if _drop_note:
-        if EXCLUDE_DEPRECATED:
-            print(f"NOTE: deprecated function(s) "
-                  f"{', '.join(sorted(_drop_note))} excluded uniformly for "
-                  f"all algorithms (--keep-deprecated to include).")
-        else:
-            print(f"NOTE: --keep-deprecated: deprecated function(s) "
-                  f"{', '.join(sorted(_drop_note))} KEPT.")
 
     if args.all_metrics:
         # Consolidated path: iterate all scalar metrics, one category table.
@@ -945,7 +952,7 @@ def main():
                                  caption=args.caption, label=args.label)
         return
 
-    if args.metric == 'hits':
+    if args.metric == 'thr':
         # Special path: no Wilcoxon, custom display
         algorithms = discover_algorithms(args.base_dir, args.maxevals)
         if not algorithms:
@@ -956,7 +963,7 @@ def main():
                 f"Reference '{args.ref}' not found. "
                 f"Available: {', '.join(sorted(algorithms.keys()))}")
         alg_names = sorted(algorithms.keys())
-        print_hits_table(args.base_dir, alg_names, algorithms, args.ref)
+        print_hits_table(args.base_dir, alg_names, algorithms, args.ref, func_class=args.func_class)
 
         if args.by_category:
             print("\nWARNING: --by-category is not supported for "
@@ -969,10 +976,11 @@ def main():
                                  caption=args.caption, label=args.label)
         return
 
-    # Scalar metrics (including 'ecdf')
+    # Scalar metrics (including 'fbtc')
     common, alg_names, metric_table, sig_table = \
         run_comparison(args.base_dir, args.ref, args.metric,
-                       args.correction, args.alpha, args.maxevals)
+                       args.correction, args.alpha, args.maxevals,
+                       func_class=args.func_class)
 
     quiet = args.quiet and args.by_category
     if args.quiet and not args.by_category:

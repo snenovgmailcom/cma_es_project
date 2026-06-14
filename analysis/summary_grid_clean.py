@@ -56,7 +56,7 @@ all show up under the same "MSC-CMA" column):
     MSC-CMA*           → MSC-CMA
     ARRDE-*            → ARRDE
     LSRTDE-*           → LSRTDE
-    BIPOP-CMA-*        → BIPOP
+    BIPOP-CMA-*        → BIPOP-CMA
 
 Usage
 -----
@@ -65,6 +65,8 @@ Usage
     python analysis/summary_grid.py --metric fbtc
     python analysis/summary_grid.py --metric best
     python analysis/summary_grid.py --csv summary.csv
+    python analysis/summary_grid.py --func-class hybrid
+    python analysis/summary_grid.py --basic-dims --func-class composition
 """
 
 import argparse
@@ -105,11 +107,82 @@ ALGO_PATTERNS = [
     (re.compile(r'^jSO(-.*)?$'),           'jSO'),
     (re.compile(r'^j2020(-.*)?$'),         'j2020'),
     (re.compile(r'^NLSHADE-RSP(-.*)?$'),   'NLSHADE-RSP'),
-    (re.compile(r'^LSHADE-cnEpSin(-.*)?$'), 'LSHADE-cnEpSin'),  # MUST come before LSHADE
-    (re.compile(r'^LSHADE(-.*)?$'),        'LSHADE'),
     (re.compile(r'^LSRTDE(-.*)?$'),        'LSRTDE'),
-    (re.compile(r'^BIPOP-CMA(-.*)?$'),     'BIPOP'),
+    (re.compile(r'^BIPOP-CMA(-.*)?$'),     'BIPOP-CMA'),
 ]
+
+
+# =========================================================================
+# CEC function classes, per the CEC technical-report groupings.
+# 'basic' = unimodal + simple multimodal (everything before the hybrids).
+# Edit the ranges here if your suite implementation numbers differ.
+# =========================================================================
+
+FUNC_CLASSES = {
+    'cec2014': {
+        'basic':       set(range(1, 17)),   # f1-f3 unimodal, f4-f16 simple multimodal
+        'hybrid':      set(range(17, 23)),  # f17-f22
+        'composition': set(range(23, 31)),  # f23-f30
+    },
+    'cec2017': {
+        'basic':       set(range(1, 11)),   # f1-f3 unimodal (f2 deprecated), f4-f10 simple multimodal
+        'hybrid':      set(range(11, 21)),  # f11-f20
+        'composition': set(range(21, 31)),  # f21-f30
+    },
+    'cec2020': {
+        'basic':       set(range(1, 5)),    # f1 unimodal, f2-f4 basic
+        'hybrid':      set(range(5, 8)),    # f5-f7
+        'composition': set(range(8, 11)),   # f8-f10
+    },
+    'cec2022': {
+        'basic':       set(range(1, 6)),    # f1 unimodal, f2-f5 basic
+        'hybrid':      set(range(6, 9)),    # f6-f8
+        'composition': set(range(9, 13)),   # f9-f12
+    },
+}
+
+
+# =========================================================================
+# Standard (suite, dim) -> {budgets} whitelist for --basic-dims.
+# =========================================================================
+
+STANDARD_CELLS = {
+    ('cec2014', 10): {100_000, 300_000, 600_000, 1_000_000},
+    ('cec2014', 30): {300_000, 600_000, 1_000_000},
+    ('cec2017', 10): {100_000, 300_000, 600_000, 1_000_000},
+    ('cec2017', 30): {300_000, 600_000, 1_000_000},
+    ('cec2020',  5): {50_000, 100_000, 300_000, 500_000},
+    ('cec2020', 10): {1_000_000, 3_000_000, 10_000_000},
+    ('cec2020', 15): {3_000_000, 9_000_000},
+    ('cec2022', 10): {200_000, 600_000, 1_000_000},
+    ('cec2022', 20): {1_000_000, 3_000_000, 6_000_000},
+}
+
+
+# =========================================================================
+# Official CEC MaxFES per (suite, dim) for --cec-budget — exactly one
+# budget per cell, as defined by the competitions:
+#   CEC2014 / CEC2017 : 10^4 * D
+#   CEC2020           : 50K (D5), 1M (D10), 3M (D15), 10M (D20)
+#   CEC2022           : 200K (D10), 1M (D20)
+# =========================================================================
+
+CEC_BUDGET = {
+    ('cec2014', 10):    100_000,
+    ('cec2014', 30):    300_000,
+    ('cec2014', 50):    500_000,
+    ('cec2014', 100): 1_000_000,
+    ('cec2017', 10):    100_000,
+    ('cec2017', 30):    300_000,
+    ('cec2017', 50):    500_000,
+    ('cec2017', 100): 1_000_000,
+    ('cec2020',  5):     50_000,
+    ('cec2020', 10):  1_000_000,
+    ('cec2020', 15):  3_000_000,
+    ('cec2020', 20): 10_000_000,
+    ('cec2022', 10):    200_000,
+    ('cec2022', 20):  1_000_000,
+}
 
 
 # =========================================================================
@@ -176,6 +249,36 @@ def normalize_algo(raw_name):
         if pat.match(raw_name):
             return canon
     return raw_name
+
+
+def filter_func_class(grid, func_class):
+    """Restrict every cell to functions of one class.
+
+    func_class : 'all' (no-op), 'basic', 'hybrid', or 'composition'.
+    Cells from suites missing in FUNC_CLASSES are dropped with a warning.
+    Algorithms left with zero functions in a cell are removed from it;
+    cells left with zero algorithms are removed from the grid.
+    """
+    if func_class == 'all':
+        return grid
+    out = {}
+    for cell_key, algos in grid.items():
+        suite = cell_key[0]
+        classes = FUNC_CLASSES.get(suite)
+        if classes is None:
+            print(f"WARNING: no FUNC_CLASSES entry for suite '{suite}' "
+                  f"— cell {cell_key} dropped under --func-class",
+                  file=sys.stderr)
+            continue
+        keep = {f'f{i}' for i in classes[func_class]}
+        new_algos = {}
+        for algo, per_func in algos.items():
+            sub = {f: m for f, m in per_func.items() if f in keep}
+            if sub:
+                new_algos[algo] = sub
+        if new_algos:
+            out[cell_key] = new_algos
+    return out
 
 
 # =========================================================================
@@ -414,6 +517,7 @@ def print_table(grid, metric, algo_order):
         n_funcs = len(fset)
 
         sums = {}
+        partial = []
         for algo in algo_order:
             funcs = cell.get(algo, {})
             if not funcs:
@@ -421,12 +525,18 @@ def print_table(grid, metric, algo_order):
                 continue
             vals = [funcs[f][metric] for f in fset if f in funcs]
             sums[algo] = float(np.sum(vals)) if vals else None
+            if vals and len(vals) < n_funcs:
+                partial.append((algo, len(vals)))
 
         row = (f"{suite:<8} {dim:>3} {_fmt_budget(maxevals):>7} "
                f"{n_funcs:>3} | ")
         row += ' '.join(f'{_fmt_value(sums.get(a), metric):>10}'
                         for a in algo_order)
         print(row)
+        for algo, nf in partial:
+            print(f"  !! PARTIAL: {algo} has {nf}/{n_funcs} funcs in this "
+                  f"cell — SUM not comparable (missing: "
+                  f"{','.join(sorted(fset - set(cell[algo]), key=lambda s: int(s[1:]) if s[1:].isdigit() else 0))})")
 
 
 # =========================================================================
@@ -535,7 +645,7 @@ def print_by_dim_bucket(grid, bucket, algo_order):
     print('-' * len(header))
 
     SHORT = {'MSC-CMA': 'MSC', 'ARRDE': 'ARRDE',
-             'LSRTDE': 'LSRTDE', 'BIPOP': 'BIPOP'}
+             'LSRTDE': 'LSRTDE', 'BIPOP-CMA': 'BIPOP-CMA'}
 
     for dim in sorted(by_dim.keys()):
         first = True
@@ -561,6 +671,137 @@ def print_by_dim_bucket(grid, bucket, algo_order):
         print()
 
 
+def print_class_summary(grid, algo_order, common=True, latex=False):
+    """Per-class totals (Basic / Hybrid / Composition x mean / median /
+    best / FBTC) summed over the cells currently in `grid`.  This is the
+    Table 1 ("per-class totals") layout used in the article.
+
+    Run WITHOUT --func-class: this routine subsets the three classes
+    itself via FUNC_CLASSES.  With --common-cells, each cell is restricted
+    to the functions present for ALL algorithms (guards against partial
+    cells contaminating the totals).
+    """
+    classes = ['basic', 'hybrid', 'composition']
+    metrics = [('mean', False), ('median', False),
+               ('best', False), ('fbtc', True)]   # fbtc: higher is better
+    tot = {c: {a: {m: 0.0 for m, _ in metrics} for a in algo_order}
+           for c in classes}
+    partial = []
+    for (suite, dim, mx), cell in sorted(grid.items()):
+        cf = FUNC_CLASSES.get(suite)
+        if cf is None:
+            continue
+        present = [set(cell[a]) for a in algo_order if cell.get(a)]
+        if not present:
+            continue
+        union = set.union(*present)
+        funcs = set.intersection(*present) if common else union
+        for a in algo_order:                         # audit partial coverage
+            miss = union - set(cell.get(a, {}))
+            if miss:
+                partial.append((suite, dim, mx, a, sorted(miss)))
+        for cls in classes:
+            cfuncs = {f'f{i}' for i in cf[cls]} & funcs
+            for a in algo_order:
+                fa = cell.get(a, {})
+                for m, _ in metrics:
+                    tot[cls][a][m] += sum(fa[fn][m] for fn in cfuncs if fn in fa)
+
+    label = {'mean': 'mean', 'median': 'median', 'best': 'best', 'fbtc': 'FBTC'}
+    for cls in classes:
+        print(f'\\multirow{{4}}{{*}}{{{cls.capitalize()}}}'
+              if latex else f'\n{cls.capitalize()}')
+        for m, higher in metrics:
+            vals = {a: tot[cls][a][m] for a in algo_order}
+            win = (max if higher else min)(vals, key=vals.get)
+
+            def fmt(a):
+                s = f'{vals[a]:.2f}'
+                if latex:
+                    return f'\\textbf{{{s}}}' if a == win else s
+                return f'*{s}' if a == win else f' {s}'
+            body = (' & ' if latex else '  ').join(fmt(a) for a in algo_order)
+            print((f' & {label[m]:6} & {body} \\\\') if latex
+                  else f'  {label[m]:7} {body}')
+        if latex:
+            print('\\midrule')
+    if common and partial:
+        print('\n# PARTIAL cells (functions missing for some algorithm — '
+              'EXCLUDED under --common-cells):', file=sys.stderr)
+        for suite, dim, mx, a, miss in partial:
+            print(f'#   {suite} d{dim} @{mx}  {a}: missing {",".join(miss)}',
+                  file=sys.stderr)
+
+
+def print_dim_summary(grid, algo_order, common=True, latex=False):
+    """Per-dimension totals (SUM mean / median / FBTC) across the cells at
+    each dimension.  Rows = dimension (with function count), columns =
+    algorithms.  A TOTAL row sums all dimensions, but note that the summed
+    errors live on very different scales across D, so the per-dimension rows
+    are the comparable unit; the TOTAL is reported for completeness only.
+    Run WITHOUT --func-class.  With --common-cells each cell is restricted to
+    functions present for ALL algorithms.
+    """
+    from collections import defaultdict
+    metrics = [('mean', False), ('median', False), ('fbtc', True)]
+    perdim = defaultdict(lambda: {a: {m: 0.0 for m, _ in metrics}
+                                  for a in algo_order})
+    nfdim = defaultdict(int)
+    partial = []
+    for (suite, dim, mx), cell in sorted(grid.items()):
+        present = [set(cell[a]) for a in algo_order if cell.get(a)]
+        if not present:
+            continue
+        union = set.union(*present)
+        funcs = set.intersection(*present) if common else union
+        for a in algo_order:
+            miss = union - set(cell.get(a, {}))
+            if miss:
+                partial.append((suite, dim, mx, a, sorted(miss)))
+        nfdim[dim] += len(funcs)
+        for a in algo_order:
+            fa = cell.get(a, {})
+            for m, _ in metrics:
+                perdim[dim][a][m] += sum(fa[fn][m] for fn in funcs if fn in fa)
+
+    dims = sorted(perdim)
+    total = {a: {m: sum(perdim[d][a][m] for d in dims) for m, _ in metrics}
+             for a in algo_order}
+    nftot = sum(nfdim[d] for d in dims)
+    label = {'mean': 'mean', 'median': 'median', 'fbtc': 'FBTC'}
+
+    def emit(rowname, vals_by_algo):
+        first = True
+        if latex:
+            print(f'\\multirow{{3}}{{*}}{{{rowname}}}')
+        else:
+            print(rowname)
+        for m, higher in metrics:
+            vals = {a: vals_by_algo[a][m] for a in algo_order}
+            win = (max if higher else min)(vals, key=vals.get)
+
+            def fmt(a):
+                s = f'{vals[a]:.2f}'
+                if latex:
+                    return f'\\textbf{{{s}}}' if a == win else s
+                return f'*{s}' if a == win else f' {s}'
+            body = (' & ' if latex else '  ').join(fmt(a) for a in algo_order)
+            print((f' & {label[m]:6} & {body} \\\\') if latex
+                  else f'  {label[m]:7} {body}')
+        if latex:
+            print('\\midrule')
+
+    for d in dims:
+        emit(f'$D{{=}}{d}$ ({nfdim[d]})', perdim[d])
+    emit(f'TOTAL ({nftot})', total)
+    if common and partial:
+        print('\n# PARTIAL cells (functions missing for some algorithm — '
+              'EXCLUDED under --common-cells):', file=sys.stderr)
+        for suite, dim, mx, a, miss in partial:
+            print(f'#   {suite} d{dim} @{mx}  {a}: missing {",".join(miss)}',
+                  file=sys.stderr)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--root', default='experiments')
@@ -571,7 +812,7 @@ def main():
     p.add_argument('--csv', default='',
                    help='Optional CSV output path (long format)')
     p.add_argument('--by-dim', action='store_true',
-                   help='Add by-dimension aggregation tables (ALL, HIGH, LOW)')
+                   help='Add the by-dimension aggregation table (all functions).')
     p.add_argument('--keep-deprecated', action='store_true',
                    help='Keep functions normally dropped as deprecated '
                         '(e.g. CEC2017 f2). Default: removed for all algos.')
@@ -579,9 +820,40 @@ def main():
                    help='Comma-separated extra algo dir names to include as '
                         'separate columns (e.g. check_frozen,MSC-CMA-v2). '
                         'They are matched literally against directory names.')
+    p.add_argument('--func-class', default='all',
+                   choices=['all', 'basic', 'hybrid', 'composition'],
+                   help='Restrict every cell to one CEC function class '
+                        '(see FUNC_CLASSES). Default: all functions.')
+    p.add_argument('--basic-dims', '--basic_dims', dest='basic_dims',
+                   action='store_true',
+                   help='Keep only the standard (suite, dim, budget) cells '
+                        'listed in STANDARD_CELLS.')
+    p.add_argument('--cec-budget', '--CEC-budget', dest='cec_budget',
+                   action='store_true',
+                   help='Keep only the OFFICIAL CEC budget per (suite, dim) '
+                        '— exactly one row per cell, see CEC_BUDGET.')
     p.add_argument('--all-algos', action='store_true',
                    help='Auto-discover and include every algo directory '
                         'present in the experiments tree.')
+    p.add_argument('--class-summary', action='store_true',
+                   help='Emit per-class totals (Basic/Hybrid/Composition x '
+                        'mean/median/best/FBTC) over the selected cells — '
+                        'the Table 1 layout. Run without --func-class.')
+    p.add_argument('--dim-summary', action='store_true',
+                   help='Emit per-dimension totals (rows = D, with function '
+                        'counts; SUM mean/median/FBTC) over the selected '
+                        'cells, with a TOTAL row. Run without --func-class.')
+    p.add_argument('--max-dim', type=int, default=None,
+                   help='Drop cells with dim > MAX_DIM (e.g. --max-dim 20 '
+                        'excludes the d30 cells).')
+    p.add_argument('--drop-cell', action='append', default=[], metavar='SUITE:DIM',
+                   help='Exclude a (suite, dim) cell, e.g. --drop-cell cec2020:20. '
+                        'Repeatable.')
+    p.add_argument('--common-cells', action='store_true',
+                   help='Per cell, restrict to functions present for ALL '
+                        'algorithms (guards partial cells). Recommended for totals.')
+    p.add_argument('--latex', action='store_true',
+                   help='Emit LaTeX table rows (use with --class-summary).')
     args = p.parse_args()
 
     grid, raw_seen, excluded = aggregate(
@@ -589,15 +861,53 @@ def main():
     if not grid:
         sys.exit(f"No populated experiments cells found under {args.root}/")
 
+    # Optional cell whitelist.
+    if args.basic_dims:
+        grid = {k: v for k, v in grid.items()
+                if k[2] in STANDARD_CELLS.get((k[0], k[1]), set())}
+        if not grid:
+            sys.exit("No cells left after --basic-dims filter.")
+
+    # Optional: only the official CEC budget per (suite, dim).
+    if args.cec_budget:
+        grid = {k: v for k, v in grid.items()
+                if CEC_BUDGET.get((k[0], k[1])) == k[2]}
+        if not grid:
+            sys.exit("No cells left after --cec-budget filter.")
+
+    # Optional: drop high dimensions (e.g. --max-dim 20 excludes d30).
+    if args.max_dim is not None:
+        grid = {k: v for k, v in grid.items() if k[1] <= args.max_dim}
+        if not grid:
+            sys.exit(f"No cells left after --max-dim={args.max_dim}.")
+
+    # Optional: drop explicit (suite, dim) cells.
+    if args.drop_cell:
+        drop = {tuple(c.split(':')) for c in args.drop_cell}
+        grid = {k: v for k, v in grid.items()
+                if (k[0], str(k[1])) not in drop}
+        if not grid:
+            sys.exit("No cells left after --drop-cell filter.")
+
+    # --class-summary / --dim-summary subset classes themselves, so skip here.
+    if (args.class_summary or args.dim_summary) and args.func_class != 'all':
+        print("NOTE: --class-summary/--dim-summary ignore --func-class.",
+              file=sys.stderr)
+    if not (args.class_summary or args.dim_summary):
+        grid = filter_func_class(grid, args.func_class)
+        if not grid:
+            sys.exit(f"No cells left after --func-class={args.func_class}.")
+
     # Filter: keep only cells where MSC-CMA has at least one function.
     grid = {k: v for k, v in grid.items() if v.get('MSC-CMA')}
     if not grid:
         sys.exit("No cells with MSC-CMA data found — nothing to compare.")
 
-    # Algorithm column order: canonical 4, plus user-requested extras,
+    # Algorithm column order: MSC-CMA first, BIPOP-CMA second, then the
+    # remaining algorithms alphabetically. Plus user-requested extras,
     # plus everything else discovered if --all-algos.
-    canonical = ['MSC-CMA', 'ARRDE', 'jSO', 'LSHADE-cnEpSin',
-                 'j2020', 'NLSHADE-RSP', 'LSHADE', 'LSRTDE', 'BIPOP']
+    canonical = ['MSC-CMA', 'BIPOP-CMA',
+                 'ARRDE', 'j2020', 'jSO', 'LSRTDE', 'NLSHADE-RSP']
     extras_cli = [a.strip() for a in args.extra_algos.split(',') if a.strip()]
 
     if args.all_algos:
@@ -608,7 +918,7 @@ def main():
         extras_disc = []
 
     # Preserve order: canonical[0] (MSC-CMA), extras (CLI first, then
-    # auto-discovered), then canonical[1:] (ARRDE/LSRTDE/BIPOP).
+    # auto-discovered), then canonical[1:] (BIPOP-CMA, rest alphabetical).
     seen = {'MSC-CMA'}
     extras = []
     for a in extras_cli + extras_disc:
@@ -619,6 +929,13 @@ def main():
     # Inventory header
     print(f"Root: {args.root}")
     print(f"Cells with MSC-CMA: {len(grid)}")
+    if args.basic_dims:
+        print("  (--basic-dims: standard cell whitelist applied)")
+    if args.cec_budget:
+        print("  (--cec-budget: official CEC budget per suite/dim only)")
+    if args.func_class != 'all':
+        print(f"  (--func-class={args.func_class}: "
+              f"per-suite function subset, see FUNC_CLASSES)")
     if excluded:
         parts = ', '.join(f"{s} {'/'.join(sorted(fs))}"
                           for s, fs in sorted(excluded.items()))
@@ -629,6 +946,24 @@ def main():
                     for n in s if n.startswith('MSC-CMA-B'))
     if n_raw_msc:
         print(f"  (collapsed MSC-CMA-B* variants: {n_raw_msc} budget-marked dirs)")
+
+    # Table 1 layout: per-class totals over the selected cells.
+    if args.class_summary:
+        print_class_summary(grid, algo_order,
+                            common=args.common_cells, latex=args.latex)
+        if args.csv:
+            write_csv(args.csv, grid, algo_order)
+            print(f"\nCSV → {args.csv}")
+        return
+
+    # Per-dimension totals over the selected cells.
+    if args.dim_summary:
+        print_dim_summary(grid, algo_order,
+                          common=args.common_cells, latex=args.latex)
+        if args.csv:
+            write_csv(args.csv, grid, algo_order)
+            print(f"\nCSV → {args.csv}")
+        return
 
     if args.metric in ('mean', 'all'):
         print_table(grid, 'mean', algo_order)
@@ -645,8 +980,6 @@ def main():
 
     if args.by_dim:
         print_by_dim_bucket(grid, 'ALL',  algo_order)
-        print_by_dim_bucket(grid, 'HIGH', algo_order)
-        print_by_dim_bucket(grid, 'LOW',  algo_order)
 
     if args.csv:
         write_csv(args.csv, grid, algo_order)
