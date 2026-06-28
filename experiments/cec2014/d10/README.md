@@ -21,6 +21,23 @@ Parallel-coordinate rank of all seven algorithms on four aggregate metrics (wors
 
 *Basic = unimodal (F1–F3) + simple multimodal (F4–F16), per the CEC2014 definition.*
 
+## Budget scaling
+
+FBTC by budget, monotone envelope (running maximum over budgets). Higher is better; each axis runs over the five common budgets (100k–1M evaluations). MSC-CMA in red.
+
+<table>
+<tr>
+<td><img src="budget_basic.png" width="320" alt="Basic"></td>
+<td><img src="budget_hybrid.png" width="320" alt="Hybrid"></td>
+<td><img src="budget_composition.png" width="320" alt="Composition"></td>
+</tr>
+<tr>
+<td align="center">Basic (F1–F16)</td>
+<td align="center">Hybrid (F17–F22)</td>
+<td align="center">Composition (F23–F30)</td>
+</tr>
+</table>
+
 ## Summary table
 
 | Category | Metric | MSC-CMA | BIPOP-CMA |   | ARRDE | LSRTDE | NLSHADE | j2020 | jSO |
