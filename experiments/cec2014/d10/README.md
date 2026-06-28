@@ -2,6 +2,18 @@
 
 Sums of per-function metrics, grouped by function class. Categories: **Basic** = unimodal + simple multimodal (F1–F16), **Hybrid** = F17–F22, **Composition** = F23–F30. Total: 30 functions. Budget: 100,000 evaluations. **Bold** = best in row.
 
+## Ranking across metrics
+
+Parallel-coordinate rank of all seven algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
+
+![Basic class ranking](rank_basic.png)
+
+![Hybrid class ranking](rank_hybrid.png)
+
+![Composition class ranking](rank_composition.png)
+
+## Summary table
+
 | Category | Metric | MSC-CMA | BIPOP-CMA |   | ARRDE | LSRTDE | NLSHADE | j2020 | jSO |
 |:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
 | **Basic** (n=16) | mean | 98.5 | 133 |   | 132 | **52.7** | 138 | 118 | 83.6 |
