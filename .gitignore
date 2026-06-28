@@ -27,3 +27,4 @@ venv/
 .claude/settings.local.json
 *.pkl
 __pycache__/
+analysis/ela_profile.py
