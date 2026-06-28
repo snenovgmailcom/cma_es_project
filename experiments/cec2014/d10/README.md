@@ -19,6 +19,8 @@ Parallel-coordinate rank of all seven algorithms on four aggregate metrics (wors
 </tr>
 </table>
 
+*Basic = unimodal (F1–F3) + simple multimodal (F4–F16), per the CEC2014 definition.*
+
 ## Summary table
 
 | Category | Metric | MSC-CMA | BIPOP-CMA |   | ARRDE | LSRTDE | NLSHADE | j2020 | jSO |
