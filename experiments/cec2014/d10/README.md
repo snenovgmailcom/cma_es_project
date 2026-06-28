@@ -6,11 +6,18 @@ Sums of per-function metrics, grouped by function class. Categories: **Basic** =
 
 Parallel-coordinate rank of all seven algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
 
-![Basic class ranking](rank_basic.png)
-
-![Hybrid class ranking](rank_hybrid.png)
-
-![Composition class ranking](rank_composition.png)
+<table>
+<tr>
+<td><img src="rank_basic.png" width="320" alt="Basic"></td>
+<td><img src="rank_hybrid.png" width="320" alt="Hybrid"></td>
+<td><img src="rank_composition.png" width="320" alt="Composition"></td>
+</tr>
+<tr>
+<td align="center">Basic (F1–F16)</td>
+<td align="center">Hybrid (F17–F22)</td>
+<td align="center">Composition (F23–F30)</td>
+</tr>
+</table>
 
 ## Summary table
 
