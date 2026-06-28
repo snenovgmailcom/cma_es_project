@@ -21,6 +21,19 @@ Parallel-coordinate rank of all seven algorithms on four aggregate metrics (wors
 
 *Basic = unimodal + simple multimodal, per the CEC2020 definition.*
 
+## Budget scaling
+
+FBTC by budget, monotone envelope (running maximum over budgets). Higher is better. The budget axis is per class: a budget is shown only where all seven algorithms cover the whole class. MSC-CMA in red.
+
+<table>
+<tr>
+<td><img src="budget_composition.png" width="320" alt="Composition"></td>
+</tr>
+<tr>
+<td align="center">Composition</td>
+</tr>
+</table>
+
 ## Summary table
 
 | Category | Metric | MSC-CMA | BIPOP-CMA |  | ARRDE | LSRTDE | NLSHADE | j2020 | jSO |
