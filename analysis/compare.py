@@ -258,7 +258,7 @@ def discover_algorithms(base_dir: str, maxevals: int = None) -> dict:
 
 FUNC_CLASSES = {
     'cec2014': {'basic': range(1, 17), 'hybrid': range(17, 23), 'composition': range(23, 31)},
-    'cec2017': {'basic': range(1, 11), 'hybrid': range(11, 21), 'composition': range(21, 31)},
+    'cec2017': {'basic': [1, 3, 4, 5, 6, 7, 8, 9, 10], 'hybrid': range(11, 21), 'composition': range(21, 31)},  # f2 withdrawn (CEC2017)
     'cec2020': {'basic': range(1, 5),  'hybrid': range(5, 8),   'composition': range(8, 11)},
     'cec2022': {'basic': range(1, 6),  'hybrid': range(6, 9),   'composition': range(9, 13)},
 }

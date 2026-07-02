@@ -243,6 +243,14 @@ DEPRECATED_FUNCS = {
     'cec2017': {'f2'},
 }
 
+# Keep FUNC_CLASSES consistent with DEPRECATED_FUNCS (single source of truth):
+# a function withdrawn from a suite must not remain in any of its classes,
+# otherwise the "whole class present" budget check can never be satisfied.
+for _suite, _dep in DEPRECATED_FUNCS.items():
+    _depnums = {int(f[1:]) for f in _dep}          # {'f2'} -> {2}
+    for _cls in FUNC_CLASSES.get(_suite, {}).values():
+        _cls -= _depnums                            # sets mutated in place
+
 
 def normalize_algo(raw_name):
     for pat, canon in ALGO_PATTERNS:
