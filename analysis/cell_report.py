@@ -394,8 +394,7 @@ def fig_table(prefix, made, suffix=''):
 
 
 def build_readme(suite, dimlbl, official, data, rank_made, budget_made,
-                 class_def_note, extended=None, ext_label=None,
-                 rank_ext_made=None):
+                 class_def_note, ext_sections=None):
     o = []
     o.append(f'# {suite.upper()} / {dimlbl} — by-category summary')
     o.append('')
@@ -429,19 +428,18 @@ def build_readme(suite, dimlbl, official, data, rank_made, budget_made,
         o.append(bt)
         o.append('')
 
-    if extended and rank_ext_made:
-        et = fig_table('rank', rank_ext_made, suffix=f'_{ext_label}')
-        if et:
-            o.append(f'## Ranking across metrics (budget {ext_label.upper()})')
-            o.append('')
-            o.append(f'Same parallel-coordinate rank, recomputed at '
-                     f'{extended:,} evaluations. Extended budget = the largest '
-                     f'with full seven-algorithm coverage for this cell; only '
-                     f'classes with complete {ext_label.upper()} data are '
-                     f'shown. MSC-CMA in red.')
-            o.append('')
-            o.append(et)
-            o.append('')
+    for eb, elabel, made in (ext_sections or []):
+        et = fig_table('rank', made, suffix=f'_{elabel}')
+        if not et:
+            continue
+        o.append(f'## Ranking across metrics (budget {elabel.upper()})')
+        o.append('')
+        o.append(f'Same parallel-coordinate rank, recomputed at {eb:,} '
+                 f'evaluations. Only classes with full seven-algorithm coverage '
+                 f'at {elabel.upper()} are shown. MSC-CMA in red.')
+        o.append('')
+        o.append(et)
+        o.append('')
 
     o.append('## Summary table')
     o.append('')
@@ -479,11 +477,12 @@ def main():
     ap.add_argument('--official', type=int, required=True,
                     help='official CEC budget (MaxFES) for the table/ranking')
     ap.add_argument('--algos', default=','.join(ALGO_ORDER))
-    ap.add_argument('--extended', type=int, default=None,
-                    help='optional higher budget; generates '
-                         'rank_<class>_<label>.png (e.g. rank_composition_1M.png) '
-                         'and adds a second ranking section to the README. '
-                         'Example: --extended 1000000')
+    ap.add_argument('--extended', type=str, default=None,
+                    help='optional higher budget(s), comma-separated; each '
+                         'generates rank_<class>_<label>.png (e.g. '
+                         'rank_composition_1M.png) and adds a ranking section. '
+                         'Classes without full 7-algorithm coverage at a given '
+                         'budget are skipped. Example: --extended 1000000,10000000')
     ap.add_argument('--no-readme', action='store_true')
     ap.add_argument('--no-figures', action='store_true')
     args = ap.parse_args()
@@ -531,36 +530,44 @@ def main():
             rank_made[c] = os.path.exists(os.path.join(base, f'rank_{c}.png'))
             budget_made[c] = os.path.exists(os.path.join(base, f'budget_{c}.png'))
 
-    # Extended-budget ranking (optional): a second, higher budget shown as
-    # rank_<class>_<label>.png next to the official one, without overwriting it.
-    ext_label = _fmt_budget(args.extended) if args.extended else None
-    rank_ext_made = {}
-    if args.extended:
-        ext_data = {}
-        for a in algos:
-            d = load_budget(base, a, args.extended, drop)
-            if d:
-                ext_data[a] = d
-        ext_missing = [a for a in algos if a not in ext_data]
-        if ext_missing:
-            print(f"  extended ({args.extended}) incomplete — missing: "
-                  f"{', '.join(ext_missing)}; extended ranking skipped")
-        elif not args.no_figures:
-            for c in CLASSES:
-                rp = os.path.join(base, f'rank_{c}_{ext_label}.png')
-                rank_ext_made[c] = fig_ranking(ext_data, algos, suite, c, rp)
-                print(f"  rank {c:<12} @{ext_label:<5} "
-                      f"{'ok' if rank_ext_made[c] else 'skip'}")
-        else:
-            for c in CLASSES:
-                rank_ext_made[c] = os.path.exists(
-                    os.path.join(base, f'rank_{c}_{ext_label}.png'))
+    # Extended-budget ranking (optional): one or more higher budgets, each shown
+    # as rank_<class>_<label>.png next to the official one, without overwriting
+    # it. Given as a comma list, e.g. --extended 1000000,10000000. For each
+    # budget, only the classes with full seven-algorithm coverage are rendered
+    # (so a 10M budget with composition-only data yields just that panel).
+    ext_budgets = [int(b) for b in str(args.extended).split(',') if b.strip()] \
+        if args.extended else []
+    ext_sections = []  # list of (budget, label, rank_ext_made) in given order
+    for eb in ext_budgets:
+        elabel = _fmt_budget(eb)
+        made = {}
+        for c in CLASSES:
+            members = class_members(suite, c)
+            # class covered iff every algo has the whole class at this budget
+            covered = bool(members) and all(
+                members.issubset(set(load_budget(base, a, eb, drop)))
+                for a in algos)
+            rp = os.path.join(base, f'rank_{c}_{elabel}.png')
+            if not covered:
+                if not args.no_figures:
+                    print(f"  rank {c:<12} @{elabel:<5} skip (incomplete)")
+                    made[c] = False
+                else:
+                    made[c] = os.path.exists(rp)
+                continue
+            if not args.no_figures:
+                edata = {a: load_budget(base, a, eb, drop) for a in algos}
+                made[c] = fig_ranking(edata, algos, suite, c, rp)
+                print(f"  rank {c:<12} @{elabel:<5} "
+                      f"{'ok' if made[c] else 'skip'}")
+            else:
+                made[c] = os.path.exists(rp)
+        ext_sections.append((eb, elabel, made))
 
     if not args.no_readme:
         md = build_readme(suite, dimlabel, args.official, data,
                           rank_made, budget_made, note,
-                          extended=args.extended, ext_label=ext_label,
-                          rank_ext_made=rank_ext_made)
+                          ext_sections=ext_sections)
         with open(os.path.join(base, 'README.md'), 'w') as fh:
             fh.write(md + '\n')
         print(f"  README.md written ({base}/README.md)")
