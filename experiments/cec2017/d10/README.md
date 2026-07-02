@@ -40,7 +40,7 @@ FBTC by budget, monotone envelope (running maximum over budgets). Higher is bett
 
 ## Ranking across metrics (budget 1M)
 
-Same parallel-coordinate rank, recomputed at 1,000,000 evaluations. Extended budget = the largest with full seven-algorithm coverage for this cell; only classes with complete 1M data are shown. MSC-CMA in red.
+Same parallel-coordinate rank, recomputed at 1,000,000 evaluations. Only classes with full seven-algorithm coverage at 1M are shown. MSC-CMA in red.
 
 <table>
 <tr>
@@ -51,6 +51,19 @@ Same parallel-coordinate rank, recomputed at 1,000,000 evaluations. Extended bud
 <tr>
 <td align="center">Basic</td>
 <td align="center">Hybrid</td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
+## Ranking across metrics (budget 10M)
+
+Same parallel-coordinate rank, recomputed at 10,000,000 evaluations. Only classes with full seven-algorithm coverage at 10M are shown. MSC-CMA in red.
+
+<table>
+<tr>
+<td><img src="rank_composition_10M.png" width="320" alt="Composition"></td>
+</tr>
+<tr>
 <td align="center">Composition</td>
 </tr>
 </table>
