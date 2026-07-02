@@ -2,7 +2,7 @@
 
 Sums of per-function metrics, grouped by function class. Budget: 10,000,000 evaluations. **Bold** = best in row.
 
-## Ranking across metrics
+## Ranking across metrics (budget 10M)
 
 Parallel-coordinate rank of all seven algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
 
@@ -28,6 +28,19 @@ FBTC by budget, monotone envelope (running maximum over budgets). Higher is bett
 <table>
 <tr>
 <td><img src="budget_composition.png" width="320" alt="Composition"></td>
+</tr>
+<tr>
+<td align="center">Composition</td>
+</tr>
+</table>
+
+## Ranking across metrics (budget 40M)
+
+Same parallel-coordinate rank, recomputed at 40,000,000 evaluations. Only classes with full seven-algorithm coverage at 40M are shown. MSC-CMA in red.
+
+<table>
+<tr>
+<td><img src="rank_composition_40M.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
 <td align="center">Composition</td>
@@ -69,4 +82,4 @@ FBTC by budget, monotone envelope (running maximum over budgets). Higher is bett
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-06-28 by analysis/cell_report.py from `*/maxevals_10000000/f*.pkl` (table) and all common budgets (budget scaling).*
+*Generated 2026-07-02 by analysis/cell_report.py from `*/maxevals_10000000/f*.pkl` (table) and all common budgets (budget scaling).*
