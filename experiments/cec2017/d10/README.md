@@ -61,12 +61,14 @@ Same parallel-coordinate rank, recomputed at 10,000,000 evaluations. Only classe
 
 <table>
 <tr>
-<td width="33%"></td><td width="33%"></td>
-<td><img src="rank_composition_10M.png" width="320" alt="Composition"></td>
+  <td width="33%"><img src="https://via.placeholder.com/320x1/ffffff/ffffff.png" width="320" alt=""></td>
+  <td width="33%"><img src="https://via.placeholder.com/320x1/ffffff/ffffff.png" width="320" alt=""></td>
+  <td width="33%"><a href="rank_composition_10M.png"><img src="rank_composition_10M.png" width="320" alt="Composition"></a></td>
 </tr>
 <tr>
-<td width="33%"></td><td width="33%"></td>
-<td align="center">Composition</td>
+  <td width="33%" align="center"></td>
+  <td width="33%" align="center"></td>
+  <td width="33%" align="center"><b>Composition</b></td>
 </tr>
 </table>
 
