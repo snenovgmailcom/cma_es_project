@@ -68,7 +68,7 @@ Same parallel-coordinate rank, recomputed at 10,000,000 evaluations. Only classe
 <tr>
   <td width="33%"></td>
   <td width="33%"></td>
-  <td width="33%" align="center"><b>Composition</b></td>
+  <td width="33%" align="center">Composition</td>
 </tr>
 </table>
 
