@@ -376,7 +376,7 @@ def fig_budget(base_dir, algos, suite, cls, out_path):
     ax.set_ylabel(f'FBTC (sum over {nmax} functions)', fontsize=11)
     ax.set_title(f'{suite.upper()}  {dimlabel} — {cls} class', fontsize=12)
     ax.grid(axis='y', ls=':', alpha=0.5)
-    loc = 'upper left' if cls == 'composition' else 'lower right'
+    loc = 'best'
     ax.legend(ncol=2, fontsize=8.5, loc=loc)
     for sp in ('top', 'right'):
         ax.spines[sp].set_visible(False)
