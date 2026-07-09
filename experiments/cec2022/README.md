@@ -105,4 +105,4 @@ Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, cover
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-06-28 by analysis/suite_report.py.*
+*Generated 2026-07-09 by analysis/suite_report.py.*

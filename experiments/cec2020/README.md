@@ -89,6 +89,19 @@ Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, cover
 </tr>
 </table>
 
+## Budget scaling — D=15
+
+FBTC by budget, monotone envelope; higher is better.
+
+<table>
+<tr>
+<td><img src="d15/budget_d15_composition.png" width="300" alt="Composition"></td>
+</tr>
+<tr>
+<td align="center">Composition</td>
+</tr>
+</table>
+
 ## Ranking — D=20
 
 Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, coverage, best-SUM). Best value at the top of each axis; MSC-CMA in red.
@@ -193,4 +206,4 @@ FBTC by budget, monotone envelope; higher is better.
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-06-28 by analysis/suite_report.py.*
+*Generated 2026-07-09 by analysis/suite_report.py.*
