@@ -163,7 +163,28 @@ def class_sums(data, algos, members, key):
     return {a: sum(data[a][f][key] for f in common) for a in algos}, common
 
 
-def fig_ranking(data, algos, suite, cls, out_path):
+def _tie_groups(ranked, s, rtol=1e-9, atol=1e-9):
+    """Split a value-sorted algo list into consecutive near-equal groups.
+
+    Given the COCO_ZERO=1e-8 floor already applied upstream (per run, per
+    function, before summing), genuine ties at the SUM level are expected to
+    land bit-identical or within float summation noise. rtol/atol are kept
+    tight on purpose: values that only agree after _fmt()'s display rounding
+    (e.g. 100.001 vs 100.008, both printed "100") must NOT be merged — that
+    would misrepresent the data. Only real ties collapse.
+    """
+    groups, i, n = [], 0, len(ranked)
+    while i < n:
+        j = i
+        while j + 1 < n and np.isclose(s[ranked[j + 1]], s[ranked[i]],
+                                        rtol=rtol, atol=atol):
+            j += 1
+        groups.append(ranked[i:j + 1])
+        i = j + 1
+    return groups
+
+
+def fig_ranking(data, algos, suite, cls, out_path, tie_rtol=1e-9, tie_atol=1e-9):
     members = class_members(suite, cls)
     sums = {}
     for label, key, hb in RANK_AXES:
@@ -174,40 +195,94 @@ def fig_ranking(data, algos, suite, cls, out_path):
 
     nax = len(RANK_AXES)
     ypos = {}
+    axis_groups = {}
     for ai, (label, key, hb) in enumerate(RANK_AXES):
         s, _ = sums[label]
         ranked = sorted(algos, key=lambda a: (-s[a] if hb else s[a]))
-        n = len(ranked)
-        for rank, a in enumerate(ranked):
-            ypos[(ai, a)] = n - 1 - rank
+        groups = _tie_groups(ranked, s, rtol=tie_rtol, atol=tie_atol)
+        axis_groups[ai] = groups
+        ng = len(groups)
+        for gi, grp in enumerate(groups):
+            if ng == 1:
+                # Everyone ties on this axis (e.g. all seven hit the target
+                # to floor precision). No ranking info at all here -- but
+                # "top = best" is a promise made for every axis, so the one
+                # group still anchors at the top rather than falling out of
+                # the generic formula's 0/0-ish bottom default.
+                y = len(algos) - 1
+            else:
+                # Rescaled (not raw ng-1-gi): stretches the surviving groups
+                # across the FULL 0..len(algos)-1 span, so the best group on
+                # an axis still sits at the visual top even when ties
+                # compress it to fewer rows than there are algorithms.
+                y = (ng - 1 - gi) * (len(algos) - 1) / (ng - 1)
+            for a in grp:
+                ypos[(ai, a)] = y
 
     fig, ax = plt.subplots(figsize=(13, 6.5))
     xs = np.arange(nax)
     for a in algos:
         ys = [ypos[(ai, a)] for ai in range(nax)]
         st = STYLE[a]
-        ax.plot(xs, ys, color=st['color'],
-                lw=3.2 if a == 'MSC-CMA' else 1.4,
-                zorder=5 if a == 'MSC-CMA' else 2, alpha=0.95,
-                solid_capstyle='round')
-        ax.scatter([0, nax - 1], [ys[0], ys[-1]], color=st['color'],
-                   s=120 if a == 'MSC-CMA' else 70, zorder=6)
+        # Use the algorithm's OWN style (lw/ls/zorder) instead of a bare
+        # "is it MSC-CMA?" check. STYLE already encodes the CMA-vs-DE
+        # visual hierarchy (BIPOP-CMA: lw=2.4, ls='--' vs DE: lw=1.6,
+        # solid) -- it just wasn't being read here, so BIPOP-CMA rendered
+        # identically to any DE line and the CMA-vs-CMA comparison (the
+        # actual headline result) was invisible at a glance.
+        ax.plot(xs, ys, color=st['color'], lw=st['lw'], ls=st['ls'],
+                zorder=st['zorder'], alpha=0.95, solid_capstyle='round',
+                dash_capstyle='round')
+
+    # Endpoint markers: singleton -> the algo's own marker shape+size, as
+    # defined in STYLE (also previously ignored -- every algo rendered as
+    # a plain circle regardless of its 'marker' entry).
+    for ai in (0, nax - 1):
+        for grp in axis_groups[ai]:
+            y = ypos[(ai, grp[0])]
+            if len(grp) == 1:
+                a0 = grp[0]
+                st = STYLE[a0]
+                ax.scatter([xs[ai]], [y], color=st['color'],
+                           marker=st['marker'], s=st['ms'] ** 2 * 2.2,
+                           zorder=st['zorder'] + 1)
+            else:
+                ax.scatter([xs[ai]], [y], facecolor='white',
+                           edgecolor='#2c3e50', linewidth=1.6,
+                           s=150, zorder=7)
+
     for ai, (label, key, hb) in enumerate(RANK_AXES):
         s, _ = sums[label]
-        for a in algos:
-            y = ypos[(ai, a)]
-            v = s[a]
-            bold = 'bold' if a == 'MSC-CMA' else 'normal'
-            if ai == 0:
-                ax.text(-0.06, y, f'{a} {_fmt(v)}', ha='right', va='center',
-                        color=STYLE[a]['color'], fontweight=bold, fontsize=11)
-            elif ai == nax - 1:
-                ax.text(nax - 1 + 0.06, y, f'{_fmt(v)} {a}', ha='left',
-                        va='center', color=STYLE[a]['color'],
-                        fontweight=bold, fontsize=11)
+        groups = axis_groups[ai]
+        for grp in groups:
+            y = ypos[(ai, grp[0])]
+            v = s[grp[0]]  # tied group shares one (near-)identical value
+            if ai in (0, nax - 1):
+                m = len(grp)
+                step = 0.16
+                y0 = y + step * (m - 1) / 2.0
+                for k, a in enumerate(grp):
+                    bold = 'bold' if a == 'MSC-CMA' else 'normal'
+                    yk = y0 - k * step
+                    fs = 11 if m == 1 else 9
+                    if ai == 0:
+                        ax.text(-0.06, yk, f'{a} {_fmt(v)}', ha='right',
+                                va='center', color=STYLE[a]['color'],
+                                fontweight=bold, fontsize=fs)
+                    else:
+                        ax.text(nax - 1 + 0.06, yk, f'{_fmt(v)} {a}',
+                                ha='left', va='center',
+                                color=STYLE[a]['color'], fontweight=bold,
+                                fontsize=fs)
             else:
+                if len(grp) == 1:
+                    color = STYLE[grp[0]]['color']
+                    bold = 'bold' if grp[0] == 'MSC-CMA' else 'normal'
+                else:
+                    color = '#555555'
+                    bold = 'bold' if 'MSC-CMA' in grp else 'normal'
                 ax.text(ai, y + 0.18, _fmt(v), ha='center', va='bottom',
-                        color=STYLE[a]['color'], fontweight=bold, fontsize=10)
+                        color=color, fontweight=bold, fontsize=10)
     ax.set_xticks(xs)
     ax.set_xticklabels([a[0] for a in RANK_AXES], fontsize=13)
     ax.set_xlim(-1.9, nax - 1 + 1.9)
