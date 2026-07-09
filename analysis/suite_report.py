@@ -42,6 +42,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from summary_grid_clean import (  # noqa: E402
     FUNC_CLASSES, _floor, _fbtc_from_final_errs, _std_from_final_errs,
 )
+from cell_report import _tie_groups  # noqa: E402 -- single source of truth,
+                                       # shared with cell_report.py's own
+                                       # fig_ranking() so the tie-merge rule
+                                       # can't drift out of sync between the
+                                       # two report generators again.
 try:
     from _common import suite_default_maxevals  # type: ignore
 except Exception:                                # pragma: no cover
@@ -140,38 +145,87 @@ def fig_ranking(data, algos, suite, dim, cls, out):
 
     nax = len(axes)
     ypos = {}
+    axis_groups = {}
     for ai, (label, key, hb) in enumerate(axes):
         s = {a: sum(data[a][f][key] for f in common) for a in algos}
         ranked = sorted(algos, key=lambda a: (-s[a] if hb else s[a]))
-        for rank, a in enumerate(ranked):
-            ypos[(ai, a)] = len(ranked) - 1 - rank
+        groups = _tie_groups(ranked, s)
+        axis_groups[ai] = groups
+        ng = len(groups)
+        for gi, grp in enumerate(groups):
+            if ng == 1:
+                # Everyone ties on this axis -- still anchor at the top
+                # ("best" by definition of the sort), not the bottom the
+                # generic rescale formula would otherwise degenerate to.
+                y = len(algos) - 1
+            else:
+                y = (ng - 1 - gi) * (len(algos) - 1) / (ng - 1)
+            for a in grp:
+                ypos[(ai, a)] = y
 
     fig, ax = plt.subplots(figsize=(13, 6.5))
     xs = np.arange(nax)
     for a in algos:
         ys = [ypos[(ai, a)] for ai in range(nax)]
-        ax.plot(xs, ys, color=STYLE[a]['color'],
-                lw=3.2 if a == 'MSC-CMA' else 1.4,
-                zorder=5 if a == 'MSC-CMA' else 2, alpha=0.95,
-                solid_capstyle='round')
-        ax.scatter([0, nax - 1], [ys[0], ys[-1]], color=STYLE[a]['color'],
-                   s=120 if a == 'MSC-CMA' else 70, zorder=6)
+        st = STYLE[a]
+        # Use the algorithm's OWN style (lw/ls/zorder), not a bare
+        # "is it MSC-CMA?" check -- STYLE already encodes the CMA-vs-DE
+        # hierarchy (BIPOP-CMA: lw=2.4, ls='--' vs DE: lw=1.6, solid), it
+        # just wasn't being read here.
+        ax.plot(xs, ys, color=st['color'], lw=st['lw'], ls=st['ls'],
+                zorder=st['zorder'], alpha=0.95, solid_capstyle='round',
+                dash_capstyle='round')
+
+    # Endpoint markers: singleton -> the algo's own marker shape+size from
+    # STYLE (also previously ignored). Merged group -> one neutral "hub"
+    # marker (stacking N colored dots on the same pixel just hides all but
+    # the last-drawn one).
+    for ai in (0, nax - 1):
+        for grp in axis_groups[ai]:
+            y = ypos[(ai, grp[0])]
+            if len(grp) == 1:
+                a0 = grp[0]
+                st = STYLE[a0]
+                ax.scatter([xs[ai]], [y], color=st['color'],
+                           marker=st['marker'], s=st['ms'] ** 2 * 2.2,
+                           zorder=st['zorder'] + 1)
+            else:
+                ax.scatter([xs[ai]], [y], facecolor='white',
+                           edgecolor='#2c3e50', linewidth=1.6,
+                           s=150, zorder=7)
+
     for ai, (label, key, hb) in enumerate(axes):
         s = {a: sum(data[a][f][key] for f in common) for a in algos}
-        for a in algos:
-            y = ypos[(ai, a)]
-            v = s[a]
-            bold = 'bold' if a == 'MSC-CMA' else 'normal'
-            if ai == 0:
-                ax.text(-0.06, y, f'{a} {_fmt(v)}', ha='right', va='center',
-                        color=STYLE[a]['color'], fontweight=bold, fontsize=11)
-            elif ai == nax - 1:
-                ax.text(nax - 1 + 0.06, y, f'{_fmt(v)} {a}', ha='left',
-                        va='center', color=STYLE[a]['color'],
-                        fontweight=bold, fontsize=11)
+        groups = axis_groups[ai]
+        for grp in groups:
+            y = ypos[(ai, grp[0])]
+            v = s[grp[0]]  # tied group shares one (near-)identical value
+            if ai in (0, nax - 1):
+                m = len(grp)
+                step = 0.16
+                y0 = y + step * (m - 1) / 2.0
+                for k, a in enumerate(grp):
+                    bold = 'bold' if a == 'MSC-CMA' else 'normal'
+                    yk = y0 - k * step
+                    fs = 11 if m == 1 else 9
+                    if ai == 0:
+                        ax.text(-0.06, yk, f'{a} {_fmt(v)}', ha='right',
+                                va='center', color=STYLE[a]['color'],
+                                fontweight=bold, fontsize=fs)
+                    else:
+                        ax.text(nax - 1 + 0.06, yk, f'{_fmt(v)} {a}',
+                                ha='left', va='center',
+                                color=STYLE[a]['color'], fontweight=bold,
+                                fontsize=fs)
             else:
+                if len(grp) == 1:
+                    color = STYLE[grp[0]]['color']
+                    bold = 'bold' if grp[0] == 'MSC-CMA' else 'normal'
+                else:
+                    color = '#555555'
+                    bold = 'bold' if 'MSC-CMA' in grp else 'normal'
                 ax.text(ai, y + 0.18, _fmt(v), ha='center', va='bottom',
-                        color=STYLE[a]['color'], fontweight=bold, fontsize=10)
+                        color=color, fontweight=bold, fontsize=10)
     ax.set_xticks(xs)
     ax.set_xticklabels([a[0] for a in axes], fontsize=13)
     ax.set_xlim(-1.9, nax - 1 + 1.9)
