@@ -154,10 +154,17 @@ def fig_ranking(data, algos, suite, dim, cls, out):
         ng = len(groups)
         for gi, grp in enumerate(groups):
             if ng == 1:
-                # Everyone ties on this axis -- still anchor at the top
-                # ("best" by definition of the sort), not the bottom the
-                # generic rescale formula would otherwise degenerate to.
-                y = len(algos) - 1
+                v = s[grp[0]]
+                is_zero = abs(v) < 1e-9
+                if hb:
+                    max_possible = len(common)
+                    frac = min(max((v / max_possible) if max_possible else 0.0,
+                                   0.0), 1.0)
+                    y = frac * (len(algos) - 1)
+                elif is_zero:
+                    y = len(algos) - 1
+                else:
+                    y = (len(algos) - 1) / 2.0
             else:
                 y = (ng - 1 - gi) * (len(algos) - 1) / (ng - 1)
             for a in grp:

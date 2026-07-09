@@ -204,17 +204,31 @@ def fig_ranking(data, algos, suite, cls, out_path, tie_rtol=1e-9, tie_atol=1e-9)
         ng = len(groups)
         for gi, grp in enumerate(groups):
             if ng == 1:
-                # Everyone ties on this axis (e.g. all seven hit the target
-                # to floor precision). No ranking info at all here -- but
-                # "top = best" is a promise made for every axis, so the one
-                # group still anchors at the top rather than falling out of
-                # the generic formula's 0/0-ish bottom default.
-                y = len(algos) - 1
+                v = s[grp[0]]
+                is_zero = abs(v) < 1e-9
+                if hb:
+                    # Higher-is-better (FBTC): 0 is the WORST value on
+                    # this axis, not the best -- anchoring at top would
+                    # claim "everyone maxed out" when actually "everyone
+                    # scored zero". Place proportionally in the known,
+                    # bounded range [0, len(common)] instead of guessing.
+                    max_possible = len(common)
+                    frac = min(max((v / max_possible) if max_possible else 0.0,
+                                   0.0), 1.0)
+                    y = frac * (len(algos) - 1)
+                elif is_zero:
+                    # Lower-is-better (worst/median/best-SUM): 0 is an
+                    # unambiguous floor -- always the best possible value,
+                    # regardless of what the other axes show.
+                    y = len(algos) - 1
+                else:
+                    # Everyone tied at some shared NONZERO value (e.g. a
+                    # common search-space-boundary cap). There is no
+                    # upper bound for these sums, so we can't tell if this
+                    # is "good" or "bad" in absolute terms -- top would
+                    # overclaim it as best. Neutral middle instead.
+                    y = (len(algos) - 1) / 2.0
             else:
-                # Rescaled (not raw ng-1-gi): stretches the surviving groups
-                # across the FULL 0..len(algos)-1 span, so the best group on
-                # an axis still sits at the visual top even when ties
-                # compress it to fewer rows than there are algorithms.
                 y = (ng - 1 - gi) * (len(algos) - 1) / (ng - 1)
             for a in grp:
                 ypos[(ai, a)] = y
