@@ -38,6 +38,23 @@ FBTC by budget, monotone envelope (running maximum over budgets). Higher is bett
 </tr>
 </table>
 
+## Ranking across metrics (budget 600K)
+
+Same parallel-coordinate rank, recomputed at 600,000 evaluations. Only classes with full seven-algorithm coverage at 600K are shown. MSC-CMA in red.
+
+<table>
+<tr>
+<td><img src="rank_basic_600k.png" width="320" alt="Basic"></td>
+<td><img src="rank_hybrid_600k.png" width="320" alt="Hybrid"></td>
+<td><img src="rank_composition_600k.png" width="320" alt="Composition"></td>
+</tr>
+<tr>
+<td align="center">Basic</td>
+<td align="center">Hybrid</td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
 ## Ranking across metrics (budget 1M)
 
 Same parallel-coordinate rank, recomputed at 1,000,000 evaluations. Only classes with full seven-algorithm coverage at 1M are shown. MSC-CMA in red.
@@ -103,4 +120,4 @@ Same parallel-coordinate rank, recomputed at 10,000,000 evaluations. Only classe
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-07-02 by analysis/cell_report.py from `*/maxevals_200000/f*.pkl` (table) and all common budgets (budget scaling).*
+*Generated 2026-07-09 by analysis/cell_report.py from `*/maxevals_200000/f*.pkl` (table) and all common budgets (budget scaling).*

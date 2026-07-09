@@ -2,7 +2,7 @@
 
 Sums of per-function metrics, grouped by function class. Budget: 1,000,000 evaluations. **Bold** = best in row.
 
-## Ranking across metrics
+## Ranking across metrics (budget 1M)
 
 Parallel-coordinate rank of all seven algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
 
@@ -56,4 +56,4 @@ Parallel-coordinate rank of all seven algorithms on four aggregate metrics (wors
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-06-28 by analysis/cell_report.py from `*/maxevals_1000000/f*.pkl` (table) and all common budgets (budget scaling).*
+*Generated 2026-07-09 by analysis/cell_report.py from `*/maxevals_1000000/f*.pkl` (table) and all common budgets (budget scaling).*
