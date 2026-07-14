@@ -602,8 +602,7 @@ def main():
         sys.exit(f"Missing official-budget ({args.official}) data for: "
                  f"{', '.join(missing)}")
 
-    note = ('USM = unimodal and simple multimodal, per the '
-            f'{suite.upper()} definition.')
+    note = 'USM = unimodal and simple multimodal.'
 
     rank_made = {}
     budget_made = {}
