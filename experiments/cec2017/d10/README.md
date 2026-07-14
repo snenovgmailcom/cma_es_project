@@ -19,7 +19,7 @@ Parallel-coordinate rank of all seven algorithms on four aggregate metrics (wors
 </tr>
 </table>
 
-*USM = unimodal and simple multimodal, per the CEC2017 definition.*
+*USM = unimodal and simple multimodal.*
 
 ## Budget scaling
 
