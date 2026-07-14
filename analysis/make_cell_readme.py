@@ -6,12 +6,17 @@ import argparse, os, glob, pickle, datetime
 import numpy as np
 from summary_grid import _floor, _std_from_final_errs, _fbtc_from_final_errs
 
-CATS = [('Basic', ['f1','f2','f3','f4']),
+CATS = [('USM', ['f1','f2','f3','f4']),
         ('Hybrid', ['f5','f6','f7']),
         ('Composition', ['f8','f9','f10'])]
 COL_ORDER = ['MSC-CMA', 'BIPOP-CMA', None,   # None = separator column
              'ARRDE', 'LSRTDE', 'NLSHADE-RSP', 'j2020', 'jSO']
-DISPLAY = {'NLSHADE-RSP': 'NLSHADE'}
+DISPLAY = {
+    'MSC-CMA':     'MSC-CMA-ES',
+    'BIPOP-CMA':   'BIPOP-CMA-ES',
+    'LSRTDE':      'L-SRTDE',
+    'NLSHADE-RSP': 'NL-SHADE-RSP',
+}
 METRICS = ['mean', 'median', 'best', 'worst', 'std', 'FBTC']
 
 # Dropped uniformly for every algorithm (CEC2017 f2 is deprecated).
@@ -91,7 +96,7 @@ def main():
     today = datetime.date.today().isoformat()
     out = f"""# CEC2020 / D=5 — by-category summary
 
-Sums of per-function metrics, grouped by function class. Categories: **Basic** = F1–F4 (1 unimodal + 3 basic multimodal), **Hybrid** = F5–F7, **Composition** = F8–F10. Total: 10 functions. Budget: {args.maxevals:,} evaluations. **Bold** = best in row.
+Sums of per-function metrics, grouped by function class. Categories: **USM** (unimodal and simple multimodal) = F1–F4, **Hybrid** = F5–F7, **Composition** = F8–F10. Total: 10 functions. Budget: {args.maxevals:,} evaluations. **Bold** = best in row.
 
 {chr(10).join(lines)}
 

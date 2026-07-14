@@ -70,7 +70,12 @@ ALGO_ORDER = ['MSC-CMA', 'BIPOP-CMA', 'ARRDE', 'LSRTDE',
 # matching the existing per-cell READMEs.
 TABLE_COLS = ['MSC-CMA', 'BIPOP-CMA', None,
               'ARRDE', 'LSRTDE', 'NLSHADE-RSP', 'j2020', 'jSO']
-DISPLAY = {'NLSHADE-RSP': 'NLSHADE'}
+DISPLAY = {
+    'MSC-CMA':     'MSC-CMA-ES',
+    'BIPOP-CMA':   'BIPOP-CMA-ES',
+    'LSRTDE':      'L-SRTDE',
+    'NLSHADE-RSP': 'NL-SHADE-RSP',
+}
 
 STYLE = {
     'MSC-CMA':     dict(color='#d62728', lw=3.2, marker='o', ms=8, ls='-',  zorder=5),
@@ -83,7 +88,7 @@ STYLE = {
 }
 
 CLASSES = ['basic', 'hybrid', 'composition']
-CLASS_LABEL = {'basic': 'Basic', 'hybrid': 'Hybrid', 'composition': 'Composition'}
+CLASS_LABEL = {'basic': 'USM', 'hybrid': 'Hybrid', 'composition': 'Composition'}
 
 # Ranking axes: (display label, metric key, higher_is_better).
 RANK_AXES = [('worst-SUM', 'worst', False),
@@ -280,11 +285,11 @@ def fig_ranking(data, algos, suite, cls, out_path, tie_rtol=1e-9, tie_atol=1e-9)
                     yk = y0 - k * step
                     fs = 11 if m == 1 else 9
                     if ai == 0:
-                        ax.text(-0.06, yk, f'{a} {_fmt(v)}', ha='right',
+                        ax.text(-0.06, yk, f'{DISPLAY.get(a, a)} {_fmt(v)}', ha='right',
                                 va='center', color=STYLE[a]['color'],
                                 fontweight=bold, fontsize=fs)
                     else:
-                        ax.text(nax - 1 + 0.06, yk, f'{_fmt(v)} {a}',
+                        ax.text(nax - 1 + 0.06, yk, f'{_fmt(v)} {DISPLAY.get(a, a)}',
                                 ha='left', va='center',
                                 color=STYLE[a]['color'], fontweight=bold,
                                 fontsize=fs)
@@ -376,7 +381,7 @@ def fig_budget(base_dir, algos, suite, cls, out_path):
     fig, ax = plt.subplots(figsize=(7, 5.0))
     for a in algos:
         raw = [fbtc[b][a] for b in budgets]
-        ax.plot(x, _envelope(raw), label=a, **STYLE[a])
+        ax.plot(x, _envelope(raw), label=DISPLAY.get(a, a), **STYLE[a])
     if cls != 'composition':
         ax.axhline(nmax, ls=':', color='gray', lw=1)
         ax.text(x[-1], nmax, f' max={nmax}', va='center', ha='left',
@@ -597,7 +602,7 @@ def main():
         sys.exit(f"Missing official-budget ({args.official}) data for: "
                  f"{', '.join(missing)}")
 
-    note = ('Basic = unimodal + simple multimodal, per the '
+    note = ('USM = unimodal and simple multimodal, per the '
             f'{suite.upper()} definition.')
 
     rank_made = {}

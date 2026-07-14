@@ -8,18 +8,18 @@ Parallel-coordinate rank of all seven algorithms on four aggregate metrics (wors
 
 <table>
 <tr>
-<td><img src="rank_basic.png" width="320" alt="Basic"></td>
+<td><img src="rank_basic.png" width="320" alt="USM"></td>
 <td><img src="rank_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="rank_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">Basic</td>
+<td align="center">USM</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
 </table>
 
-*Basic = unimodal + simple multimodal, per the CEC2020 definition.*
+*USM = unimodal and simple multimodal, per the CEC2020 definition.*
 
 ## Budget scaling
 
@@ -34,24 +34,11 @@ FBTC by budget, monotone envelope (running maximum over budgets). Higher is bett
 </tr>
 </table>
 
-## Ranking across metrics (budget 10M)
-
-Same parallel-coordinate rank, recomputed at 10,000,000 evaluations. Only classes with full seven-algorithm coverage at 10M are shown. MSC-CMA in red.
-
-<table>
-<tr>
-<td><img src="rank_composition_10M.png" width="320" alt="Composition"></td>
-</tr>
-<tr>
-<td align="center">Composition</td>
-</tr>
-</table>
-
 ## Summary table
 
-| Category | Metric | MSC-CMA | BIPOP-CMA |  | ARRDE | LSRTDE | NLSHADE | j2020 | jSO |
+| Category | Metric | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
-| **Basic** (n=4) | mean | 11.1 | 24.8 |    | 18.8 | 50.8 | 19.2 | **8.82** | 62 |
+| **USM** (n=4) | mean | 11.1 | 24.8 |    | 18.8 | 50.8 | 19.2 | **8.82** | 62 |
 |  | median | **11.7** | 23.1 |    | 18.3 | 19.7 | 15.7 | 15.8 | 26.8 |
 |  | best | 1.22 | 0.125 |    | 15.9 | 16.3 | 15.6 | **0** | 15.8 |
 |  | worst | 28.2 | 61.2 |    | 33.3 | 154 | 141 | **18.2** | 149 |
@@ -82,4 +69,4 @@ Same parallel-coordinate rank, recomputed at 10,000,000 evaluations. Only classe
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-07-09 by analysis/cell_report.py from `*/maxevals_3000000/f*.pkl` (table) and all common budgets (budget scaling).*
+*Generated 2026-07-14 by analysis/cell_report.py from `*/maxevals_3000000/f*.pkl` (table) and all common budgets (budget scaling).*

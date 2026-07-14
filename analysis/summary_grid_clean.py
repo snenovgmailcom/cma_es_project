@@ -717,8 +717,9 @@ def print_class_summary(grid, algo_order, common=True, latex=False):
 
     label = {'mean': 'mean', 'median': 'median', 'best': 'best', 'fbtc': 'FBTC'}
     for cls in classes:
-        print(f'\\multirow{{4}}{{*}}{{{cls.capitalize()}}}'
-              if latex else f'\n{cls.capitalize()}')
+        cls_lbl = {'basic': 'USM'}.get(cls, cls.capitalize())
+        print(f'\\multirow{{4}}{{*}}{{{cls_lbl}}}'
+              if latex else f'\n{cls_lbl}')
         for m, higher in metrics:
             vals = {a: tot[cls][a][m] for a in algo_order}
             win = (max if higher else min)(vals, key=vals.get)

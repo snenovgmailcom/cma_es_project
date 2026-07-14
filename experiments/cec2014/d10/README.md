@@ -8,18 +8,18 @@ Parallel-coordinate rank of all seven algorithms on four aggregate metrics (wors
 
 <table>
 <tr>
-<td><img src="rank_basic.png" width="320" alt="Basic"></td>
+<td><img src="rank_basic.png" width="320" alt="USM"></td>
 <td><img src="rank_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="rank_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">Basic</td>
+<td align="center">USM</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
 </table>
 
-*Basic = unimodal + simple multimodal, per the CEC2014 definition.*
+*USM = unimodal and simple multimodal, per the CEC2014 definition.*
 
 ## Budget scaling
 
@@ -27,103 +27,22 @@ FBTC by budget, monotone envelope (running maximum over budgets). Higher is bett
 
 <table>
 <tr>
-<td><img src="budget_basic.png" width="320" alt="Basic"></td>
+<td><img src="budget_basic.png" width="320" alt="USM"></td>
 <td><img src="budget_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="budget_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">Basic</td>
+<td align="center">USM</td>
 <td align="center">Hybrid</td>
-<td align="center">Composition</td>
-</tr>
-</table>
-
-## Ranking across metrics (budget 300K)
-
-Same parallel-coordinate rank, recomputed at 300,000 evaluations. Only classes with full seven-algorithm coverage at 300K are shown. MSC-CMA in red.
-
-<table>
-<tr>
-<td><img src="rank_basic_300k.png" width="320" alt="Basic"></td>
-<td><img src="rank_hybrid_300k.png" width="320" alt="Hybrid"></td>
-<td><img src="rank_composition_300k.png" width="320" alt="Composition"></td>
-</tr>
-<tr>
-<td align="center">Basic</td>
-<td align="center">Hybrid</td>
-<td align="center">Composition</td>
-</tr>
-</table>
-
-## Ranking across metrics (budget 500K)
-
-Same parallel-coordinate rank, recomputed at 500,000 evaluations. Only classes with full seven-algorithm coverage at 500K are shown. MSC-CMA in red.
-
-<table>
-<tr>
-<td><img src="rank_basic_500k.png" width="320" alt="Basic"></td>
-<td><img src="rank_hybrid_500k.png" width="320" alt="Hybrid"></td>
-<td><img src="rank_composition_500k.png" width="320" alt="Composition"></td>
-</tr>
-<tr>
-<td align="center">Basic</td>
-<td align="center">Hybrid</td>
-<td align="center">Composition</td>
-</tr>
-</table>
-
-## Ranking across metrics (budget 600K)
-
-Same parallel-coordinate rank, recomputed at 600,000 evaluations. Only classes with full seven-algorithm coverage at 600K are shown. MSC-CMA in red.
-
-<table>
-<tr>
-<td><img src="rank_basic_600k.png" width="320" alt="Basic"></td>
-<td><img src="rank_hybrid_600k.png" width="320" alt="Hybrid"></td>
-<td><img src="rank_composition_600k.png" width="320" alt="Composition"></td>
-</tr>
-<tr>
-<td align="center">Basic</td>
-<td align="center">Hybrid</td>
-<td align="center">Composition</td>
-</tr>
-</table>
-
-## Ranking across metrics (budget 1M)
-
-Same parallel-coordinate rank, recomputed at 1,000,000 evaluations. Only classes with full seven-algorithm coverage at 1M are shown. MSC-CMA in red.
-
-<table>
-<tr>
-<td><img src="rank_basic_1M.png" width="320" alt="Basic"></td>
-<td><img src="rank_hybrid_1M.png" width="320" alt="Hybrid"></td>
-<td><img src="rank_composition_1M.png" width="320" alt="Composition"></td>
-</tr>
-<tr>
-<td align="center">Basic</td>
-<td align="center">Hybrid</td>
-<td align="center">Composition</td>
-</tr>
-</table>
-
-## Ranking across metrics (budget 10M)
-
-Same parallel-coordinate rank, recomputed at 10,000,000 evaluations. Only classes with full seven-algorithm coverage at 10M are shown. MSC-CMA in red.
-
-<table>
-<tr>
-<td><img src="rank_composition_10M.png" width="320" alt="Composition"></td>
-</tr>
-<tr>
 <td align="center">Composition</td>
 </tr>
 </table>
 
 ## Summary table
 
-| Category | Metric | MSC-CMA | BIPOP-CMA |  | ARRDE | LSRTDE | NLSHADE | j2020 | jSO |
+| Category | Metric | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
-| **Basic** (n=16) | mean | 98.9 | 133 |    | 132 | **52.7** | 138 | 118 | 83.6 |
+| **USM** (n=16) | mean | 98.9 | 133 |    | 132 | **52.7** | 138 | 118 | 83.6 |
 |  | median | **69** | 118 |    | 146 | 69.8 | 145 | 91.6 | 77.4 |
 |  | best | 27.8 | 5.67 |    | 4.37 | **0.539** | 8.82 | 11.4 | 4.22 |
 |  | worst | 430 | 582 |    | 380 | **209** | 559 | 462 | 287 |
@@ -154,4 +73,4 @@ Same parallel-coordinate rank, recomputed at 10,000,000 evaluations. Only classe
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-07-09 by analysis/cell_report.py from `*/maxevals_100000/f*.pkl` (table) and all common budgets (budget scaling).*
+*Generated 2026-07-14 by analysis/cell_report.py from `*/maxevals_100000/f*.pkl` (table) and all common budgets (budget scaling).*

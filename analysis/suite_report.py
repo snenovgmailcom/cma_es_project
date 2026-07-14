@@ -59,7 +59,12 @@ ALGO_ORDER = ['MSC-CMA', 'BIPOP-CMA', 'ARRDE', 'LSRTDE',
               'NLSHADE-RSP', 'j2020', 'jSO']
 TABLE_COLS = ['MSC-CMA', 'BIPOP-CMA', None,
               'ARRDE', 'LSRTDE', 'NLSHADE-RSP', 'j2020', 'jSO']
-DISPLAY = {'NLSHADE-RSP': 'NLSHADE'}
+DISPLAY = {
+    'MSC-CMA':     'MSC-CMA-ES',
+    'BIPOP-CMA':   'BIPOP-CMA-ES',
+    'LSRTDE':      'L-SRTDE',
+    'NLSHADE-RSP': 'NL-SHADE-RSP',
+}
 STYLE = {
     'MSC-CMA':     dict(color='#d62728', lw=3.2, marker='o', ms=8, ls='-',  zorder=5),
     'BIPOP-CMA':   dict(color='#7b2d8e', lw=2.4, marker='s', ms=7, ls='--', zorder=4),
@@ -70,7 +75,7 @@ STYLE = {
     'jSO':         dict(color='#b0b0b0', lw=1.6, marker='s', ms=5, ls='-',  zorder=3),
 }
 CLASSES = ['basic', 'hybrid', 'composition']
-CLASS_LABEL = {'basic': 'Basic', 'hybrid': 'Hybrid', 'composition': 'Composition'}
+CLASS_LABEL = {'basic': 'USM', 'hybrid': 'Hybrid', 'composition': 'Composition'}
 METRICS = ['mean', 'median', 'best', 'worst', 'std', 'FBTC']
 DEPRECATED = {'cec2017': {'f2'}}
 
@@ -216,11 +221,11 @@ def fig_ranking(data, algos, suite, dim, cls, out):
                     yk = y0 - k * step
                     fs = 11 if m == 1 else 9
                     if ai == 0:
-                        ax.text(-0.06, yk, f'{a} {_fmt(v)}', ha='right',
+                        ax.text(-0.06, yk, f'{DISPLAY.get(a, a)} {_fmt(v)}', ha='right',
                                 va='center', color=STYLE[a]['color'],
                                 fontweight=bold, fontsize=fs)
                     else:
-                        ax.text(nax - 1 + 0.06, yk, f'{_fmt(v)} {a}',
+                        ax.text(nax - 1 + 0.06, yk, f'{_fmt(v)} {DISPLAY.get(a, a)}',
                                 ha='left', va='center',
                                 color=STYLE[a]['color'], fontweight=bold,
                                 fontsize=fs)
@@ -307,7 +312,7 @@ def fig_budget(base, algos, suite, dim, cls, out):
     for a in algos:
         raw = [series[b][a][metric] for b in budgets]
         y = _env(raw) if metric == 'FBTC' else raw
-        ax.plot(x, y, label=a, **STYLE[a])
+        ax.plot(x, y, label=DISPLAY.get(a, a), **STYLE[a])
     if metric == 'FBTC':
         if cls != 'composition':
             ax.axhline(nmax, ls=':', color='gray', lw=1)

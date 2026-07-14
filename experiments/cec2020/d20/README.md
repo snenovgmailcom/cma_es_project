@@ -8,18 +8,18 @@ Parallel-coordinate rank of all seven algorithms on four aggregate metrics (wors
 
 <table>
 <tr>
-<td><img src="rank_basic.png" width="320" alt="Basic"></td>
+<td><img src="rank_basic.png" width="320" alt="USM"></td>
 <td><img src="rank_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="rank_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">Basic</td>
+<td align="center">USM</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
 </table>
 
-*Basic = unimodal + simple multimodal, per the CEC2020 definition.*
+*USM = unimodal and simple multimodal, per the CEC2020 definition.*
 
 ## Budget scaling
 
@@ -34,37 +34,11 @@ FBTC by budget, monotone envelope (running maximum over budgets). Higher is bett
 </tr>
 </table>
 
-## Ranking across metrics (budget 2M)
-
-Same parallel-coordinate rank, recomputed at 2,000,000 evaluations. Only classes with full seven-algorithm coverage at 2M are shown. MSC-CMA in red.
-
-<table>
-<tr>
-<td><img src="rank_composition_2M.png" width="320" alt="Composition"></td>
-</tr>
-<tr>
-<td align="center">Composition</td>
-</tr>
-</table>
-
-## Ranking across metrics (budget 40M)
-
-Same parallel-coordinate rank, recomputed at 40,000,000 evaluations. Only classes with full seven-algorithm coverage at 40M are shown. MSC-CMA in red.
-
-<table>
-<tr>
-<td><img src="rank_composition_40M.png" width="320" alt="Composition"></td>
-</tr>
-<tr>
-<td align="center">Composition</td>
-</tr>
-</table>
-
 ## Summary table
 
-| Category | Metric | MSC-CMA | BIPOP-CMA |  | ARRDE | LSRTDE | NLSHADE | j2020 | jSO |
+| Category | Metric | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
-| **Basic** (n=4) | mean | **13.8** | 17.9 |    | 21.3 | 24 | 20.7 | 16.5 | 23.3 |
+| **USM** (n=4) | mean | **13.8** | 17.9 |    | 21.3 | 24 | 20.7 | 16.5 | 23.3 |
 |  | median | **13.1** | 17.8 |    | 21 | 24.1 | 20.4 | 20.6 | 23.6 |
 |  | best | 3.37 | 6.15 |    | 20.7 | 21.3 | 20.4 | **0.031** | 20.7 |
 |  | worst | 22 | 39.5 |    | 23 | 32.2 | 23.9 | **20.8** | 27.9 |
@@ -95,4 +69,4 @@ Same parallel-coordinate rank, recomputed at 40,000,000 evaluations. Only classe
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-07-09 by analysis/cell_report.py from `*/maxevals_10000000/f*.pkl` (table) and all common budgets (budget scaling).*
+*Generated 2026-07-14 by analysis/cell_report.py from `*/maxevals_10000000/f*.pkl` (table) and all common budgets (budget scaling).*

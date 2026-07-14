@@ -116,19 +116,19 @@ def hits_per_target(errs: np.ndarray, taus=CEC_TAUS) -> list:
 # "Basic", consistent with the CEC2014/2017 grouping supplied for this tool.
 #   CEC2020 (10 funcs): F1 unimodal + F2-F4 basic; F5-F7 hybrid; F8-F10 comp.
 #   CEC2022 (12 funcs): F1 unimodal + F2-F5 basic; F6-F8 hybrid; F9-F12 comp.
-CATEGORY_ORDER = ['Basic', 'Hybrid', 'Composition']
+CATEGORY_ORDER = ['USM', 'Hybrid', 'Composition']
 
 CATEGORIES = {
-    'CEC2014': {'Basic':       range(1, 17),
+    'CEC2014': {'USM':         range(1, 17),
                 'Hybrid':      range(17, 23),
                 'Composition': range(23, 31)},
-    'CEC2017': {'Basic':       range(1, 11),
+    'CEC2017': {'USM':         range(1, 11),
                 'Hybrid':      range(11, 21),
                 'Composition': range(21, 31)},
-    'CEC2020': {'Basic':       range(1, 5),
+    'CEC2020': {'USM':         range(1, 5),
                 'Hybrid':      range(5, 8),
                 'Composition': range(8, 11)},
-    'CEC2022': {'Basic':       range(1, 6),
+    'CEC2022': {'USM':         range(1, 6),
                 'Hybrid':      range(6, 9),
                 'Composition': range(9, 13)},
 }
@@ -678,7 +678,7 @@ def print_category_table(common, alg_names, metric_table, ref, metric,
     metric, using the same algorithms as the per-function table but with
     the reference (MSC-CMA) column first.
 
-    Sanity-checks that Basic+Hybrid+Composition equals the overall SUM row
+    Sanity-checks that USM+Hybrid+Composition equals the overall SUM row
     from the per-function table; warns to stderr otherwise. For an unknown
     suite (no entry in CATEGORIES) it warns and prints nothing.
     """
@@ -766,7 +766,7 @@ def print_category_table(common, alg_names, metric_table, ref, metric,
                   if not np.isclose(total_cat[alg], total_all[alg],
                                     rtol=1e-9, atol=1e-12)]
     if uncategorized or mismatched:
-        print("\nWARNING: --by-category: Basic+Hybrid+Composition does not "
+        print("\nWARNING: --by-category: USM+Hybrid+Composition does not "
               "match the overall SUM row.", file=sys.stderr)
         if uncategorized:
             print(f"  Functions outside every {suite} category range: "

@@ -8,18 +8,18 @@ Parallel-coordinate rank of all seven algorithms on four aggregate metrics (wors
 
 <table>
 <tr>
-<td><img src="rank_basic.png" width="320" alt="Basic"></td>
+<td><img src="rank_basic.png" width="320" alt="USM"></td>
 <td><img src="rank_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="rank_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">Basic</td>
+<td align="center">USM</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
 </table>
 
-*Basic = unimodal + simple multimodal, per the CEC2020 definition.*
+*USM = unimodal and simple multimodal, per the CEC2020 definition.*
 
 ## Budget scaling
 
@@ -27,63 +27,12 @@ FBTC by budget, monotone envelope (running maximum over budgets). Higher is bett
 
 <table>
 <tr>
-<td><img src="budget_basic.png" width="320" alt="Basic"></td>
+<td><img src="budget_basic.png" width="320" alt="USM"></td>
 <td><img src="budget_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="budget_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">Basic</td>
-<td align="center">Hybrid</td>
-<td align="center">Composition</td>
-</tr>
-</table>
-
-## Ranking across metrics (budget 3M)
-
-Same parallel-coordinate rank, recomputed at 3,000,000 evaluations. Only classes with full seven-algorithm coverage at 3M are shown. MSC-CMA in red.
-
-<table>
-<tr>
-<td><img src="rank_basic_3M.png" width="320" alt="Basic"></td>
-<td><img src="rank_hybrid_3M.png" width="320" alt="Hybrid"></td>
-<td><img src="rank_composition_3M.png" width="320" alt="Composition"></td>
-</tr>
-<tr>
-<td align="center">Basic</td>
-<td align="center">Hybrid</td>
-<td align="center">Composition</td>
-</tr>
-</table>
-
-## Ranking across metrics (budget 10M)
-
-Same parallel-coordinate rank, recomputed at 10,000,000 evaluations. Only classes with full seven-algorithm coverage at 10M are shown. MSC-CMA in red.
-
-<table>
-<tr>
-<td><img src="rank_basic_10M.png" width="320" alt="Basic"></td>
-<td><img src="rank_hybrid_10M.png" width="320" alt="Hybrid"></td>
-<td><img src="rank_composition_10M.png" width="320" alt="Composition"></td>
-</tr>
-<tr>
-<td align="center">Basic</td>
-<td align="center">Hybrid</td>
-<td align="center">Composition</td>
-</tr>
-</table>
-
-## Ranking across metrics (budget 20M)
-
-Same parallel-coordinate rank, recomputed at 20,000,000 evaluations. Only classes with full seven-algorithm coverage at 20M are shown. MSC-CMA in red.
-
-<table>
-<tr>
-<td><img src="rank_basic_20M.png" width="320" alt="Basic"></td>
-<td><img src="rank_hybrid_20M.png" width="320" alt="Hybrid"></td>
-<td><img src="rank_composition_20M.png" width="320" alt="Composition"></td>
-</tr>
-<tr>
-<td align="center">Basic</td>
+<td align="center">USM</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
@@ -91,9 +40,9 @@ Same parallel-coordinate rank, recomputed at 20,000,000 evaluations. Only classe
 
 ## Summary table
 
-| Category | Metric | MSC-CMA | BIPOP-CMA |  | ARRDE | LSRTDE | NLSHADE | j2020 | jSO |
+| Category | Metric | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
-| **Basic** (n=4) | mean | 8.67 | 17.1 |    | 13.3 | 14 | 11.8 | **8.22** | 17.6 |
+| **USM** (n=4) | mean | 8.67 | 17.1 |    | 13.3 | 14 | 11.8 | **8.22** | 17.6 |
 |  | median | **6.92** | 22.7 |    | 11.6 | 11.9 | 10.8 | 10.7 | 15.7 |
 |  | best | 1.03 | 0.125 |    | 6.16 | 10.5 | 0.0625 | **0** | 10.8 |
 |  | worst | 20.6 | 36.4 |    | 22.5 | 25.5 | 28.4 | **15** | 39.9 |
@@ -124,4 +73,4 @@ Same parallel-coordinate rank, recomputed at 20,000,000 evaluations. Only classe
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-07-09 by analysis/cell_report.py from `*/maxevals_1000000/f*.pkl` (table) and all common budgets (budget scaling).*
+*Generated 2026-07-14 by analysis/cell_report.py from `*/maxevals_1000000/f*.pkl` (table) and all common budgets (budget scaling).*

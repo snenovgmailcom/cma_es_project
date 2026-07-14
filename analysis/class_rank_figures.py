@@ -68,7 +68,13 @@ STANDARD_BUDGET = {
 }
 
 CLASSES = ['basic', 'hybrid', 'composition']
-CLASS_LABEL = {'basic': 'Basic', 'hybrid': 'Hybrid',
+DISPLAY = {
+    'MSC-CMA':     'MSC-CMA-ES',
+    'BIPOP-CMA':   'BIPOP-CMA-ES',
+    'LSRTDE':      'L-SRTDE',
+    'NLSHADE-RSP': 'NL-SHADE-RSP',
+}
+CLASS_LABEL = {'basic': 'USM', 'hybrid': 'Hybrid',
                'composition': 'Composition', 'ALL': 'All functions'}
 
 ALGO_ORDER = ['MSC-CMA', 'BIPOP-CMA',
@@ -196,7 +202,7 @@ def fig_class_ranks(per_class, algos, metric, n_algos, path):
         ax.set_xlabel('mean rank (1 = best)', fontsize=9)
         ax.grid(axis='x', ls=':', alpha=0.5)
         ax.set_yticks(ypos)
-        ax.set_yticklabels(order, fontsize=9)
+        ax.set_yticklabels([DISPLAY.get(a, a) for a in order], fontsize=9)
         for sp in ('top', 'right'):
             ax.spines[sp].set_visible(False)
 
@@ -231,7 +237,8 @@ def fig_heatmap(per_cell, algos, metric, n_algos, path):
                             va='center', fontsize=7)
         ax.set_title(CLASS_LABEL[cname], fontsize=10)
         ax.set_xticks(range(len(algos)))
-        ax.set_xticklabels(algos, rotation=45, ha='right', fontsize=8)
+        ax.set_xticklabels([DISPLAY.get(a, a) for a in algos],
+                           rotation=45, ha='right', fontsize=8)
         ax.set_yticks(range(len(cells)))
         ax.set_yticklabels(labels, fontsize=8)
 

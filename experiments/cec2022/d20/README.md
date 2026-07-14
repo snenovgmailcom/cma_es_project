@@ -8,24 +8,24 @@ Parallel-coordinate rank of all seven algorithms on four aggregate metrics (wors
 
 <table>
 <tr>
-<td><img src="rank_basic.png" width="320" alt="Basic"></td>
+<td><img src="rank_basic.png" width="320" alt="USM"></td>
 <td><img src="rank_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="rank_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">Basic</td>
+<td align="center">USM</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
 </table>
 
-*Basic = unimodal + simple multimodal, per the CEC2022 definition.*
+*USM = unimodal and simple multimodal, per the CEC2022 definition.*
 
 ## Summary table
 
-| Category | Metric | MSC-CMA | BIPOP-CMA |  | ARRDE | LSRTDE | NLSHADE | j2020 | jSO |
+| Category | Metric | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
-| **Basic** (n=5) | mean | **2.42** | 17 |    | 3.12 | 45.9 | 89.4 | 28.3 | 52.7 |
+| **USM** (n=5) | mean | **2.42** | 17 |    | 3.12 | 45.9 | 89.4 | 28.3 | 52.7 |
 |  | median | **1.11** | 1.99 |    | 2.98 | 45.9 | 94.6 | 22.9 | 51.9 |
 |  | best | 3.4e-4 | **0** |    | 0.995 | 44.9 | 29.8 | 7.24 | 46.9 |
 |  | worst | 33.1 | 48.9 |    | **9.01** | 52.1 | 237 | 74.5 | 57 |
@@ -56,4 +56,4 @@ Parallel-coordinate rank of all seven algorithms on four aggregate metrics (wors
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-07-09 by analysis/cell_report.py from `*/maxevals_1000000/f*.pkl` (table) and all common budgets (budget scaling).*
+*Generated 2026-07-14 by analysis/cell_report.py from `*/maxevals_1000000/f*.pkl` (table) and all common budgets (budget scaling).*
