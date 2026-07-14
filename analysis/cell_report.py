@@ -191,17 +191,25 @@ def _tie_groups(ranked, s, rtol=1e-9, atol=1e-9):
 
 def fig_ranking(data, algos, suite, cls, out_path, tie_rtol=1e-9, tie_atol=1e-9):
     members = class_members(suite, cls)
+    # Coverage axis: FBTC unless every algorithm's class-FBTC is ~0
+    # (same rule as suite_report), in which case mean-SUM is shown instead.
+    fbtc_s, common = class_sums(data, algos, members, 'FBTC')
+    if not common:
+        return False
+    use_fbtc = any(v > 1e-12 for v in fbtc_s.values())
+    cov = ('FBTC', 'FBTC', True) if use_fbtc else ('mean-SUM', 'mean', False)
+    rank_axes = [RANK_AXES[0], RANK_AXES[1], cov, RANK_AXES[3]]
     sums = {}
-    for label, key, hb in RANK_AXES:
+    for label, key, hb in rank_axes:
         s, common = class_sums(data, algos, members, key)
         sums[label] = (s, hb)
     if not common:
         return False
 
-    nax = len(RANK_AXES)
+    nax = len(rank_axes)
     ypos = {}
     axis_groups = {}
-    for ai, (label, key, hb) in enumerate(RANK_AXES):
+    for ai, (label, key, hb) in enumerate(rank_axes):
         s, _ = sums[label]
         ranked = sorted(algos, key=lambda a: (-s[a] if hb else s[a]))
         groups = _tie_groups(ranked, s, rtol=tie_rtol, atol=tie_atol)
@@ -270,7 +278,7 @@ def fig_ranking(data, algos, suite, cls, out_path, tie_rtol=1e-9, tie_atol=1e-9)
                            edgecolor='#2c3e50', linewidth=1.6,
                            s=150, zorder=7)
 
-    for ai, (label, key, hb) in enumerate(RANK_AXES):
+    for ai, (label, key, hb) in enumerate(rank_axes):
         s, _ = sums[label]
         groups = axis_groups[ai]
         for grp in groups:
@@ -303,7 +311,7 @@ def fig_ranking(data, algos, suite, cls, out_path, tie_rtol=1e-9, tie_atol=1e-9)
                 ax.text(ai, y + 0.18, _fmt(v), ha='center', va='bottom',
                         color=color, fontweight=bold, fontsize=10)
     ax.set_xticks(xs)
-    ax.set_xticklabels([a[0] for a in RANK_AXES], fontsize=13)
+    ax.set_xticklabels([a[0] for a in rank_axes], fontsize=13)
     ax.set_xlim(-1.9, nax - 1 + 1.9)
     ax.set_ylim(-0.8, len(algos) - 0.2)
     ax.set_yticks([])
