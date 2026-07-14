@@ -30,3 +30,11 @@ __pycache__/
 analysis/ela_profile.py
 experiments/**/MSC-CMA-check/
 experiments/**/MSC-CMA-check/
+quarantine/
+funnel_*.py
+msc_vs_funnel.py
+pflacco_features_*.csv
+sep.py
+check_budget_usage.py
+comp_summary.md
+CLAUDE.md
