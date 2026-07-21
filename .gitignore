@@ -39,3 +39,4 @@ check_budget_usage.py
 comp_summary.md
 CLAUDE.md
 experiments/cec2019/
+experiments/*/d2/
