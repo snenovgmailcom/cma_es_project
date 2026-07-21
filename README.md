@@ -16,7 +16,6 @@
 <tr><td><a href="experiments/cec2022">CEC2022</a></td><td>
   <a href="experiments/cec2022/d10">D=10</a> ·
   <a href="experiments/cec2022/d20">D=20</a></td></tr>
-<tr><td colspan="2"><a href="paper_msc_cma.pdf">Paper (PDF)</a></td></tr>
 </table>
 
 **Multi-Start Clustering CMA-ES** — structure-aware restarts for CMA-ES via cyclic
