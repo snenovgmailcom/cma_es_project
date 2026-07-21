@@ -61,8 +61,8 @@ Same rank, recomputed at 10,000,000 evaluations. Only classes with full 7-algori
 
 <table>
 <tr>
-<td><img src="../spacer.png" width="300" alt=""></td>
-<td><img src="../spacer.png" width="300" alt=""></td>
+<td><img src="../spacer.png" width="300" height="1" alt=""></td>
+<td><img src="../spacer.png" width="300" height="1" alt=""></td>
 <td><img src="d10/rank_d10_composition_10M.png" width="300" alt="Composition"></td>
 </tr>
 <tr>
