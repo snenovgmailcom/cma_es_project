@@ -504,7 +504,7 @@ def fig_table(prefix, made, suffix=''):
                          f'alt="{CLASS_LABEL[c]}"></td>')
             labels.append(f'<td align="center">{CLASS_LABEL[c]}</td>')
         else:
-            cells.append(f'<td><img src="{SPACER}" width="320" alt=""></td>')
+            cells.append(f'<td><img src="{SPACER}" width="320" height="1" alt=""></td>')
             labels.append('<td></td>')
     if not any(made.get(c) for c in CLASSES):
         return ''

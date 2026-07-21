@@ -58,8 +58,8 @@ Same parallel-coordinate rank, recomputed at 10,000,000 evaluations. Only classe
 <table>
 <tr>
 <td><img src="../../spacer.png" width="320" height="1" alt=""></td>
-<td><img src="../../spacer.png" width="320"  height="1" alt=""></td>
-<td><img src="rank_composition_10M.png" width="320"  alt="Composition"></td>
+<td><img src="../../spacer.png" width="320" height="1" alt=""></td>
+<td><img src="rank_composition_10M.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
 <td></td>
