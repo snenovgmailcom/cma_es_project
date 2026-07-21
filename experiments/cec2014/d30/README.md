@@ -1,38 +1,34 @@
 # CEC2014 / D=30 — by-category summary
 
-Sums of per-function metrics, grouped by function class. Budget: 300,000 evaluations. **Bold** = best in row.
-
 ## Ranking across metrics (budget 300K)
 
-Parallel-coordinate rank of all seven algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
+Parallel-coordinate rank of all 7 algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
 
 <table>
 <tr>
-<td><img src="rank_basic.png" width="320" alt="USM"></td>
+<td><img src="rank_basic.png" width="320" alt="unimodal and simple multimodal"></td>
 <td><img src="rank_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="rank_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">USM</td>
+<td align="center">unimodal and simple multimodal</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
 </table>
 
-*USM = unimodal and simple multimodal.*
-
 ## Budget scaling
 
-FBTC by budget, monotone envelope (running maximum over budgets). Higher is better. The budget axis is per class: a budget is shown only where all seven algorithms cover the whole class. MSC-CMA in red.
+FBTC by budget, monotone envelope (running maximum over budgets). Higher is better. The budget axis is per class: a budget is shown only where all 7 algorithms cover the whole class. MSC-CMA in red.
 
 <table>
 <tr>
-<td><img src="budget_basic.png" width="320" alt="USM"></td>
+<td><img src="budget_basic.png" width="320" alt="unimodal and simple multimodal"></td>
 <td><img src="budget_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="budget_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">USM</td>
+<td align="center">unimodal and simple multimodal</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
@@ -40,16 +36,16 @@ FBTC by budget, monotone envelope (running maximum over budgets). Higher is bett
 
 ## Ranking across metrics (budget 1M)
 
-Same parallel-coordinate rank, recomputed at 1,000,000 evaluations. Only classes with full seven-algorithm coverage at 1M are shown. MSC-CMA in red.
+Same parallel-coordinate rank, recomputed at 1,000,000 evaluations. Only classes with full 7-algorithm coverage at 1M are shown. MSC-CMA in red.
 
 <table>
 <tr>
-<td><img src="rank_basic_1M.png" width="320" alt="USM"></td>
+<td><img src="rank_basic_1M.png" width="320" alt="unimodal and simple multimodal"></td>
 <td><img src="rank_hybrid_1M.png" width="320" alt="Hybrid"></td>
 <td><img src="rank_composition_1M.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">USM</td>
+<td align="center">unimodal and simple multimodal</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
@@ -57,9 +53,11 @@ Same parallel-coordinate rank, recomputed at 1,000,000 evaluations. Only classes
 
 ## Summary table
 
+Sums of per-function metrics, grouped by function class. Budget: 300,000 evaluations. **Bold** = best in row.
+
 | Category | Metric | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
-| **USM** (n=16) | mean | 513 | 1386 |    | 1892 | **457** | 370944 | 397092 | 1407 |
+| **unimodal and simple multimodal** (n=16) | mean | 513 | 1386 |    | 1892 | **457** | 370944 | 397092 | 1407 |
 |  | median | 377 | 1283 |    | 1739 | **352** | 227493 | 302835 | 1407 |
 |  | best | 74.2 | 343 |    | 936 | **34.2** | 59682 | 111591 | 857 |
 |  | worst | **1414** | 3603 |    | 3769 | 1773 | 4447100 | 1949051 | 1884 |

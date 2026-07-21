@@ -6,16 +6,16 @@ Official budgets — 10D: 100,000, 30D: 300,000.
 
 ## Ranking — D=10
 
-Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, coverage, best-SUM). Best value at the top of each axis; MSC-CMA in red.
+Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM). Best value at the top of each axis; MSC-CMA in red. Budget: 100,000 evaluations.
 
 <table>
 <tr>
-<td><img src="d10/rank_d10_basic.png" width="300" alt="USM"></td>
+<td><img src="d10/rank_d10_basic.png" width="300" alt="unimodal and simple multimodal"></td>
 <td><img src="d10/rank_d10_hybrid.png" width="300" alt="Hybrid"></td>
 <td><img src="d10/rank_d10_composition.png" width="300" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">USM</td>
+<td align="center">unimodal and simple multimodal</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
@@ -27,29 +27,59 @@ FBTC by budget, monotone envelope; higher is better.
 
 <table>
 <tr>
-<td><img src="d10/budget_d10_basic.png" width="300" alt="USM"></td>
+<td><img src="d10/budget_d10_basic.png" width="300" alt="unimodal and simple multimodal"></td>
 <td><img src="d10/budget_d10_hybrid.png" width="300" alt="Hybrid"></td>
 <td><img src="d10/budget_d10_composition.png" width="300" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">USM</td>
+<td align="center">unimodal and simple multimodal</td>
 <td align="center">Hybrid</td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
+## Ranking — D=10 (budget 1M)
+
+Same rank, recomputed at 1,000,000 evaluations. Only classes with full 7-algorithm coverage at 1M are shown.
+
+<table>
+<tr>
+<td><img src="d10/rank_d10_basic_1M.png" width="300" alt="unimodal and simple multimodal"></td>
+<td><img src="d10/rank_d10_hybrid_1M.png" width="300" alt="Hybrid"></td>
+<td><img src="d10/rank_d10_composition_1M.png" width="300" alt="Composition"></td>
+</tr>
+<tr>
+<td align="center">unimodal and simple multimodal</td>
+<td align="center">Hybrid</td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
+## Ranking — D=10 (budget 10M)
+
+Same rank, recomputed at 10,000,000 evaluations. Only classes with full 7-algorithm coverage at 10M are shown.
+
+<table>
+<tr>
+<td><img src="d10/rank_d10_composition_10M.png" width="300" alt="Composition"></td>
+</tr>
+<tr>
 <td align="center">Composition</td>
 </tr>
 </table>
 
 ## Ranking — D=30
 
-Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, coverage, best-SUM). Best value at the top of each axis; MSC-CMA in red.
+Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM). Best value at the top of each axis; MSC-CMA in red. Budget: 300,000 evaluations.
 
 <table>
 <tr>
-<td><img src="d30/rank_d30_basic.png" width="300" alt="USM"></td>
+<td><img src="d30/rank_d30_basic.png" width="300" alt="unimodal and simple multimodal"></td>
 <td><img src="d30/rank_d30_hybrid.png" width="300" alt="Hybrid"></td>
 <td><img src="d30/rank_d30_composition.png" width="300" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">USM</td>
+<td align="center">unimodal and simple multimodal</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
@@ -61,12 +91,29 @@ FBTC by budget, monotone envelope; higher is better.
 
 <table>
 <tr>
-<td><img src="d30/budget_d30_basic.png" width="300" alt="USM"></td>
+<td><img src="d30/budget_d30_basic.png" width="300" alt="unimodal and simple multimodal"></td>
 <td><img src="d30/budget_d30_hybrid.png" width="300" alt="Hybrid"></td>
 <td><img src="d30/budget_d30_composition.png" width="300" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">USM</td>
+<td align="center">unimodal and simple multimodal</td>
+<td align="center">Hybrid</td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
+## Ranking — D=30 (budget 1M)
+
+Same rank, recomputed at 1,000,000 evaluations. Only classes with full 7-algorithm coverage at 1M are shown.
+
+<table>
+<tr>
+<td><img src="d30/rank_d30_basic_1M.png" width="300" alt="unimodal and simple multimodal"></td>
+<td><img src="d30/rank_d30_hybrid_1M.png" width="300" alt="Hybrid"></td>
+<td><img src="d30/rank_d30_composition_1M.png" width="300" alt="Composition"></td>
+</tr>
+<tr>
+<td align="center">unimodal and simple multimodal</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
@@ -76,8 +123,8 @@ FBTC by budget, monotone envelope; higher is better.
 
 | Category | Dim | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--:|--:|--:|:-:|--:|--:|--:|--:|--:|
-| USM | 10 | **69** | 118 |    | 146 | 69.8 | 145 | 91.6 | 77.4 |
-| USM | 30 | 377 | 1283 |    | 1739 | **352** | 227493 | 302835 | 1407 |
+| unimodal and simple multimodal | 10 | **69** | 118 |    | 146 | 69.8 | 145 | 91.6 | 77.4 |
+| unimodal and simple multimodal | 30 | 377 | 1283 |    | 1739 | **352** | 227493 | 302835 | 1407 |
 | Hybrid | 10 | 31.2 | 55.2 |    | 2.65 | **1.9** | 24.7 | 9.45 | 2.3 |
 | Hybrid | 30 | 1795 | 1813 |    | 114 | **43.9** | 13858 | 3369 | 110 |
 | Composition | 10 | 1695 | 2054 |    | 1695 | 2054 | 1752 | 1762 | **1693** |
@@ -87,8 +134,8 @@ FBTC by budget, monotone envelope; higher is better.
 
 | Category | Dim | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--:|--:|--:|:-:|--:|--:|--:|--:|--:|
-| USM | 10 | 27.8 | 5.67 |    | 4.37 | **0.539** | 8.82 | 11.4 | 4.22 |
-| USM | 30 | 74.2 | 343 |    | 936 | **34.2** | 59682 | 111591 | 857 |
+| unimodal and simple multimodal | 10 | 27.8 | 5.67 |    | 4.37 | **0.539** | 8.82 | 11.4 | 4.22 |
+| unimodal and simple multimodal | 30 | 74.2 | 343 |    | 936 | **34.2** | 59682 | 111591 | 857 |
 | Hybrid | 10 | 2.45 | 0.788 |    | 0.0202 | 0.0215 | **0.0125** | 0.278 | 0.0226 |
 | Hybrid | 30 | 1168 | 321 |    | 43.7 | **26** | 1254 | 1635 | 62.9 |
 | Composition | 10 | 896 | 1132 |    | **896** | 1573 | 952 | 1559 | 1573 |
@@ -98,8 +145,8 @@ FBTC by budget, monotone envelope; higher is better.
 
 | Category | Dim | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--:|--:|--:|:-:|--:|--:|--:|--:|--:|
-| USM | 10 | 430 | 582 |    | 380 | **209** | 559 | 462 | 287 |
-| USM | 30 | **1414** | 3603 |    | 3769 | 1773 | 4447100 | 1949051 | 1884 |
+| unimodal and simple multimodal | 10 | 430 | 582 |    | 380 | **209** | 559 | 462 | 287 |
+| unimodal and simple multimodal | 30 | **1414** | 3603 |    | 3769 | 1773 | 4447100 | 1949051 | 1884 |
 | Hybrid | 10 | 183 | 617 |    | 50.9 | 35.8 | 187 | 78.6 | **16** |
 | Hybrid | 30 | 3188 | 3660 |    | 608 | **194** | 148061 | 8668 | 289 |
 | Composition | 10 | 1856 | 2574 |    | **1769** | 2437 | 1883 | 2283 | 2166 |
@@ -109,14 +156,14 @@ FBTC by budget, monotone envelope; higher is better.
 
 | Category | Dim | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--:|--:|--:|:-:|--:|--:|--:|--:|--:|
-| USM | 10 | 6.754 | 7.890 |    | 8.963 | 8.730 | 8.427 | 7.084 | **9.045** |
-| USM | 30 | 4.768 | 6.962 |    | 7.952 | 7.848 | 5.763 | 5.609 | **8.462** |
+| unimodal and simple multimodal | 10 | 6.754 | 7.890 |    | 8.963 | 8.730 | 8.427 | 7.084 | **9.045** |
+| unimodal and simple multimodal | 30 | 4.768 | 6.962 |    | 7.952 | 7.848 | 5.763 | 5.609 | **8.462** |
 | Hybrid | 10 | 1.038 | 0.915 |    | 1.656 | 1.732 | 1.606 | 1.428 | **1.815** |
 | Hybrid | 30 | 0.264 | 0.234 |    | 0.749 | **0.967** | 0.288 | 0.223 | 0.705 |
 | Composition | 10 | 0.210 | 0.035 |    | 0.273 | 0.112 | **0.539** | 0.134 | 0.199 |
 | Composition | 30 | 0.000 | 0.000 |    | 0.000 | 0.000 | **0.007** | 0.000 | 0.000 |
 
-*FBTC = Fixed-Budget Target Coverage (per-function sum across 51 log-uniform targets in [10²…10⁻⁸]); fixed-budget analogue of the COCO/BBOB ECDF. Higher is better.*
+*FBTC = Fixed-Budget Target Coverage (sum across 51 log-uniform targets in [10²…10⁻⁸] per function); fixed-budget analogue of the COCO/BBOB ECDF. Higher is better.*
 
 ## Environment
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
