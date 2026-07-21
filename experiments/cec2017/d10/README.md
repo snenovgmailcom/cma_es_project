@@ -1,48 +1,80 @@
 # CEC2017 / D=10 — by-category summary
 
-Sums of per-function metrics, grouped by function class. Budget: 100,000 evaluations. **Bold** = best in row.
-
 ## Ranking across metrics (budget 100K)
 
-Parallel-coordinate rank of all seven algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
+Parallel-coordinate rank of all 7 algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
 
 <table>
 <tr>
-<td><img src="rank_basic.png" width="320" alt="USM"></td>
+<td><img src="rank_basic.png" width="320" alt="unimodal and simple multimodal"></td>
 <td><img src="rank_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="rank_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">USM</td>
+<td align="center">unimodal and simple multimodal</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
 </table>
 
-*USM = unimodal and simple multimodal.*
-
 ## Budget scaling
 
-FBTC by budget, monotone envelope (running maximum over budgets). Higher is better. The budget axis is per class: a budget is shown only where all seven algorithms cover the whole class. MSC-CMA in red.
+FBTC by budget, monotone envelope (running maximum over budgets). Higher is better. The budget axis is per class: a budget is shown only where all 7 algorithms cover the whole class. MSC-CMA in red.
 
 <table>
 <tr>
-<td><img src="budget_basic.png" width="320" alt="USM"></td>
+<td><img src="budget_basic.png" width="320" alt="unimodal and simple multimodal"></td>
 <td><img src="budget_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="budget_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">USM</td>
+<td align="center">unimodal and simple multimodal</td>
 <td align="center">Hybrid</td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
+## Ranking across metrics (budget 1M)
+
+Same parallel-coordinate rank, recomputed at 1,000,000 evaluations. Only classes with full 7-algorithm coverage at 1M are shown. MSC-CMA in red.
+
+<table>
+<tr>
+<td><img src="rank_basic_1M.png" width="320" alt="unimodal and simple multimodal"></td>
+<td><img src="rank_hybrid_1M.png" width="320" alt="Hybrid"></td>
+<td><img src="rank_composition_1M.png" width="320" alt="Composition"></td>
+</tr>
+<tr>
+<td align="center">unimodal and simple multimodal</td>
+<td align="center">Hybrid</td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
+## Ranking across metrics (budget 10M)
+
+Same parallel-coordinate rank, recomputed at 10,000,000 evaluations. Only classes with full 7-algorithm coverage at 10M are shown. MSC-CMA in red.
+
+<table>
+<tr>
+<td><img src="../../spacer.png" width="320" height="1" alt=""></td>
+<td><img src="../../spacer.png" width="320" height="1" alt=""></td>
+<td><img src="rank_composition_10M.png" width="320" alt="Composition"></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
 <td align="center">Composition</td>
 </tr>
 </table>
 
 ## Summary table
 
+Sums of per-function metrics, grouped by function class. Budget: 100,000 evaluations. **Bold** = best in row.
+
 | Category | Metric | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
-| **USM** (n=9) | mean | 60.7 | 81.9 |    | 108 | **17.2** | 113 | 106 | 97.8 |
+| **unimodal and simple multimodal** (n=9) | mean | 60.7 | 81.9 |    | 108 | **17.2** | 113 | 106 | 97.8 |
 |  | median | 32.8 | 39.4 |    | 43.1 | **16.8** | 138 | 78.1 | 135 |
 |  | best | 3.17 | **1.94** |    | 7.04 | 10.5 | 13.3 | 5.19 | 10.9 |
 |  | worst | 264 | 350 |    | 375 | **35.4** | 287 | 340 | 277 |
@@ -73,4 +105,4 @@ FBTC by budget, monotone envelope (running maximum over budgets). Higher is bett
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-07-14 by analysis/cell_report.py from `*/maxevals_100000/f*.pkl` (table) and all common budgets (budget scaling).*
+*Generated 2026-07-21 by analysis/cell_report.py from `*/maxevals_100000/f*.pkl` (table) and all common budgets (budget scaling).*

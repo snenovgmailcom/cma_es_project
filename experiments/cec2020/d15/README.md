@@ -1,44 +1,63 @@
 # CEC2020 / D=15 — by-category summary
 
-Sums of per-function metrics, grouped by function class. Budget: 3,000,000 evaluations. **Bold** = best in row.
-
 ## Ranking across metrics (budget 3M)
 
-Parallel-coordinate rank of all seven algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
+Parallel-coordinate rank of all 7 algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
 
 <table>
 <tr>
-<td><img src="rank_basic.png" width="320" alt="USM"></td>
+<td><img src="rank_basic.png" width="320" alt="unimodal and simple multimodal"></td>
 <td><img src="rank_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="rank_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">USM</td>
+<td align="center">unimodal and simple multimodal</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
 </table>
 
-*USM = unimodal and simple multimodal.*
-
 ## Budget scaling
 
-FBTC by budget, monotone envelope (running maximum over budgets). Higher is better. The budget axis is per class: a budget is shown only where all seven algorithms cover the whole class. MSC-CMA in red.
+FBTC by budget, monotone envelope (running maximum over budgets). Higher is better. The budget axis is per class: a budget is shown only where all 7 algorithms cover the whole class. MSC-CMA in red.
 
 <table>
 <tr>
+<td><img src="../../spacer.png" width="320" height="1" alt=""></td>
+<td><img src="../../spacer.png" width="320" height="1" alt=""></td>
 <td><img src="budget_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
+<td></td>
+<td></td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
+## Ranking across metrics (budget 10M)
+
+Same parallel-coordinate rank, recomputed at 10,000,000 evaluations. Only classes with full 7-algorithm coverage at 10M are shown. MSC-CMA in red.
+
+<table>
+<tr>
+<td><img src="../../spacer.png" width="320" height="1" alt=""></td>
+<td><img src="../../spacer.png" width="320" height="1" alt=""></td>
+<td><img src="rank_composition_10M.png" width="320" alt="Composition"></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
 <td align="center">Composition</td>
 </tr>
 </table>
 
 ## Summary table
 
+Sums of per-function metrics, grouped by function class. Budget: 3,000,000 evaluations. **Bold** = best in row.
+
 | Category | Metric | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
-| **USM** (n=4) | mean | 11.1 | 24.8 |    | 18.8 | 50.8 | 19.2 | **8.82** | 62 |
+| **unimodal and simple multimodal** (n=4) | mean | 11.1 | 24.8 |    | 18.8 | 50.8 | 19.2 | **8.82** | 62 |
 |  | median | **11.7** | 23.1 |    | 18.3 | 19.7 | 15.7 | 15.8 | 26.8 |
 |  | best | 1.22 | 0.125 |    | 15.9 | 16.3 | 15.6 | **0** | 15.8 |
 |  | worst | 28.2 | 61.2 |    | 33.3 | 154 | 141 | **18.2** | 149 |
@@ -69,4 +88,4 @@ FBTC by budget, monotone envelope (running maximum over budgets). Higher is bett
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-07-14 by analysis/cell_report.py from `*/maxevals_3000000/f*.pkl` (table) and all common budgets (budget scaling).*
+*Generated 2026-07-21 by analysis/cell_report.py from `*/maxevals_3000000/f*.pkl` (table) and all common budgets (budget scaling).*

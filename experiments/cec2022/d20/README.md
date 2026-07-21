@@ -1,31 +1,29 @@
 # CEC2022 / D=20 — by-category summary
 
-Sums of per-function metrics, grouped by function class. Budget: 1,000,000 evaluations. **Bold** = best in row.
-
 ## Ranking across metrics (budget 1M)
 
-Parallel-coordinate rank of all seven algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
+Parallel-coordinate rank of all 7 algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
 
 <table>
 <tr>
-<td><img src="rank_basic.png" width="320" alt="USM"></td>
+<td><img src="rank_basic.png" width="320" alt="unimodal and simple multimodal"></td>
 <td><img src="rank_hybrid.png" width="320" alt="Hybrid"></td>
 <td><img src="rank_composition.png" width="320" alt="Composition"></td>
 </tr>
 <tr>
-<td align="center">USM</td>
+<td align="center">unimodal and simple multimodal</td>
 <td align="center">Hybrid</td>
 <td align="center">Composition</td>
 </tr>
 </table>
 
-*USM = unimodal and simple multimodal.*
-
 ## Summary table
+
+Sums of per-function metrics, grouped by function class. Budget: 1,000,000 evaluations. **Bold** = best in row.
 
 | Category | Metric | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--|--:|--:|:-:|--:|--:|--:|--:|--:|
-| **USM** (n=5) | mean | **2.42** | 17 |    | 3.12 | 45.9 | 89.4 | 28.3 | 52.7 |
+| **unimodal and simple multimodal** (n=5) | mean | **2.42** | 17 |    | 3.12 | 45.9 | 89.4 | 28.3 | 52.7 |
 |  | median | **1.11** | 1.99 |    | 2.98 | 45.9 | 94.6 | 22.9 | 51.9 |
 |  | best | 3.4e-4 | **0** |    | 0.995 | 44.9 | 29.8 | 7.24 | 46.9 |
 |  | worst | 33.1 | 48.9 |    | **9.01** | 52.1 | 237 | 74.5 | 57 |
@@ -56,4 +54,4 @@ Parallel-coordinate rank of all seven algorithms on four aggregate metrics (wors
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.
 Hardware: Intel Xeon Platinum 8160 @ 2.10 GHz, 192 threads, 251 GiB RAM.
 
-*Generated 2026-07-14 by analysis/cell_report.py from `*/maxevals_1000000/f*.pkl` (table) and all common budgets (budget scaling).*
+*Generated 2026-07-21 by analysis/cell_report.py from `*/maxevals_1000000/f*.pkl` (table) and all common budgets (budget scaling).*
