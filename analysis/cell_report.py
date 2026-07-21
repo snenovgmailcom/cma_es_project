@@ -489,6 +489,12 @@ def build_table(data, suite):
 # README assembly
 # ---------------------------------------------------------------------------
 
+# Transparent 1x1 image used to hold an empty column open, so that a class
+# rendered in one section lines up with the same class in every other section
+# (e.g. composition @10M sits under composition @1M).
+SPACER = '../../spacer.png'
+
+
 def fig_table(prefix, made, suffix=''):
     cells = []
     labels = []
@@ -497,7 +503,10 @@ def fig_table(prefix, made, suffix=''):
             cells.append(f'<td><img src="{prefix}_{c}{suffix}.png" width="320" '
                          f'alt="{CLASS_LABEL[c]}"></td>')
             labels.append(f'<td align="center">{CLASS_LABEL[c]}</td>')
-    if not cells:
+        else:
+            cells.append(f'<td><img src="{SPACER}" width="320" alt=""></td>')
+            labels.append('<td></td>')
+    if not any(made.get(c) for c in CLASSES):
         return ''
     return ('<table>\n<tr>\n' + '\n'.join(cells) + '\n</tr>\n<tr>\n'
             + '\n'.join(labels) + '\n</tr>\n</table>')

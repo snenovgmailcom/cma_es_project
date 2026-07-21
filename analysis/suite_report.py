@@ -397,6 +397,11 @@ def metric_table(per_dim, suite, dims, metric):
 
 # --- README assembly -------------------------------------------------------
 
+# See cell_report.SPACER: keeps empty columns open so the same class lines up
+# across sections. Suite README sits one level above the cell directories.
+SPACER = '../spacer.png'
+
+
 def fig_row(prefix, dim, made, suffix=''):
     cells, labels = [], []
     for c in CLASSES:
@@ -405,7 +410,10 @@ def fig_row(prefix, dim, made, suffix=''):
                          f'width="300" '
                          f'alt="{CLASS_LABEL[c]}"></td>')
             labels.append(f'<td align="center">{CLASS_LABEL[c]}</td>')
-    if not cells:
+        else:
+            cells.append(f'<td><img src="{SPACER}" width="300" alt=""></td>')
+            labels.append('<td></td>')
+    if not any(made.get((dim, c)) for c in CLASSES):
         return ''
     return ('<table>\n<tr>\n' + '\n'.join(cells) + '\n</tr>\n<tr>\n'
             + '\n'.join(labels) + '\n</tr>\n</table>')
