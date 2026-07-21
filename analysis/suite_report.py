@@ -75,7 +75,11 @@ STYLE = {
     'jSO':         dict(color='#b0b0b0', lw=1.6, marker='s', ms=5, ls='-',  zorder=3),
 }
 CLASSES = ['basic', 'hybrid', 'composition']
-CLASS_LABEL = {'basic': 'USM', 'hybrid': 'Hybrid', 'composition': 'Composition'}
+CLASS_LABEL = {'basic': 'unimodal and simple multimodal',
+               'hybrid': 'Hybrid', 'composition': 'Composition'}
+# Lower-case form used inside figure titles (second title line).
+CLASS_TITLE = {'basic': 'unimodal and simple multimodal',
+               'hybrid': 'hybrid', 'composition': 'composition'}
 METRICS = ['mean', 'median', 'best', 'worst', 'std', 'FBTC']
 DEPRECATED = {'cec2017': {'f2'}}
 
@@ -305,7 +309,9 @@ def fig_budget(base, algos, suite, dim, cls, out):
     # FBTC unless all-zero at every budget -> median
     any_fbtc = any(series[b][a]['FBTC'] > 1e-12
                    for b in budgets for a in algos)
-    metric = 'FBTC' if any_fbtc else 'median'
+    # Metric switching is restricted to the composition class: elsewhere a
+    # flat-zero FBTC panel is preferred over a silent change of metric.
+    metric = 'FBTC' if (any_fbtc or cls != 'composition') else 'median'
 
     x = np.arange(len(budgets))
     fig, ax = plt.subplots(figsize=(7, 5.0))
@@ -322,10 +328,11 @@ def fig_budget(base, algos, suite, dim, cls, out):
         else:
             ax.set_ylim(0, None)
         ylab = f'FBTC (sum over {nmax} functions)'
-        title = f'{suite.upper()}  D={dim} — {cls} class'
+        title = f'{suite.upper()}  D={dim}\n{CLASS_TITLE[cls]} class'
     else:
         ylab = f'Median error, summed over {nmax} functions (lower is better)'
-        title = f'{suite.upper()}  D={dim} — {cls} class (median error)'
+        title = (f'{suite.upper()}  D={dim}\n'
+                 f'{CLASS_TITLE[cls]} class (median error)')
     ax.set_xticks(x)
     ax.set_xticklabels([_bl(b) for b in budgets])
     ax.set_xlabel('Budget (MaxFES)', fontsize=11)
@@ -390,11 +397,12 @@ def metric_table(per_dim, suite, dims, metric):
 
 # --- README assembly -------------------------------------------------------
 
-def fig_row(prefix, dim, made):
+def fig_row(prefix, dim, made, suffix=''):
     cells, labels = [], []
     for c in CLASSES:
         if made.get((dim, c)):
-            cells.append(f'<td><img src="{prefix}_d{dim}_{c}.png" width="300" '
+            cells.append(f'<td><img src="{prefix}_d{dim}_{c}{suffix}.png" '
+                         f'width="300" '
                          f'alt="{CLASS_LABEL[c]}"></td>')
             labels.append(f'<td align="center">{CLASS_LABEL[c]}</td>')
     if not cells:
@@ -404,7 +412,7 @@ def fig_row(prefix, dim, made):
 
 
 def build_readme(suite, dims, per_dim, rank_made, budget_made,
-                 budget_metric, officials):
+                 budget_metric, officials, ext_sections=None):
     o = [f'# {suite.upper()} — cross-dimension summary', '']
     o.append('Aggregated sums by function category, across dimensions. '
              '**Bold** = best in row. For simplicity the suite is presented '
@@ -416,9 +424,10 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
     for dim in dims:
         o.append(f'## Ranking — D={dim}')
         o.append('')
-        o.append('Parallel-coordinate rank on four aggregate metrics '
-                 '(worst-SUM, median-SUM, coverage, best-SUM). Best value at '
-                 'the top of each axis; MSC-CMA in red.')
+        o.append(f'Parallel-coordinate rank on four aggregate metrics '
+                 f'(worst-SUM, median-SUM, FBTC, best-SUM). Best value at '
+                 f'the top of each axis; MSC-CMA in red. '
+                 f'Budget: {officials[dim]:,} evaluations.')
         o.append('')
         r = fig_row('rank', dim, rank_made)
         if r:
@@ -439,6 +448,19 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
             o.append(b)
             o.append('')
 
+        for eb, elabel, made in (ext_sections or {}).get(dim, []):
+            e = fig_row('rank', dim, made, suffix=f'_{elabel}')
+            if not e:
+                continue
+            o.append(f'## Ranking — D={dim} (budget {elabel.upper()})')
+            o.append('')
+            o.append(f'Same rank, recomputed at {eb:,} evaluations. Only '
+                     f'classes with full {len(per_dim[dim])}-algorithm '
+                     f'coverage at {elabel.upper()} are shown.')
+            o.append('')
+            o.append(e)
+            o.append('')
+
     o.append('## Median error (lower is better)')
     o.append('')
     o.append(metric_table(per_dim, suite, dims, 'median'))
@@ -455,8 +477,8 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
     o.append('')
     o.append(metric_table(per_dim, suite, dims, 'FBTC'))
     o.append('')
-    o.append('*FBTC = Fixed-Budget Target Coverage (per-function sum across '
-             '51 log-uniform targets in [10²…10⁻⁸]); fixed-budget analogue of '
+    o.append('*FBTC = Fixed-Budget Target Coverage (sum across 51 log-uniform '
+             'targets in [10²…10⁻⁸] per function); fixed-budget analogue of '
              'the COCO/BBOB ECDF. Higher is better.*')
     o.append('')
     o.append('## Environment')
@@ -479,6 +501,11 @@ def main():
                     help='comma list, e.g. 10,30')
     ap.add_argument('--official', action='append', default=[],
                     help='dim,budget  (repeatable). Missing -> suite default.')
+    ap.add_argument('--extended', action='append', default=[],
+                    help='dim,budget  (repeatable). Adds a second ranking '
+                         'section for that dimension at the higher budget. '
+                         'Only classes with full coverage at that budget are '
+                         'rendered, as in cell_report.')
     ap.add_argument('--algos', default=','.join(ALGO_ORDER))
     ap.add_argument('--root', default='experiments')
     ap.add_argument('--no-readme', action='store_true')
@@ -499,7 +526,13 @@ def main():
     for d in dims:
         officials.setdefault(d, suite_default_maxevals(suite, d))
 
+    extended = {}
+    for spec in args.extended:
+        d, b = spec.split(',')
+        extended.setdefault(int(d), []).append(int(b))
+
     per_dim, rank_made, budget_made, budget_metric = {}, {}, {}, {}
+    ext_sections = {}
     for dim in dims:
         base = os.path.join(args.root, suite, f'd{dim}')
         data = {}
@@ -533,11 +566,37 @@ def main():
                     os.path.join(base, f'budget_d{dim}_{c}.png'))
                 budget_metric[(dim, c)] = None
 
+        # Extended-budget rankings: one section per requested budget. A class
+        # is rendered only when every algorithm has the WHOLE class at that
+        # budget (same rule as cell_report), so a budget reached by the
+        # composition class alone yields a single panel.
+        for eb in sorted(extended.get(dim, [])):
+            elabel = _bl(eb)
+            made = {}
+            for c in CLASSES:
+                mem = members(suite, c)
+                rp = os.path.join(base, f'rank_d{dim}_{c}_{elabel}.png')
+                if args.no_figures:
+                    made[(dim, c)] = os.path.exists(rp)
+                    continue
+                edata = {a: load_budget(base, a, eb, drop) for a in algos}
+                covered = bool(mem) and all(
+                    mem.issubset(set(edata[a])) for a in algos)
+                if not covered:
+                    made[(dim, c)] = False
+                    print(f"  D={dim} {c:<12} rank @{elabel:<5} "
+                          f"skip (incomplete)")
+                    continue
+                made[(dim, c)] = fig_ranking(edata, algos, suite, dim, c, rp)
+                print(f"  D={dim} {c:<12} rank @{elabel:<5} "
+                      f"{'ok' if made[(dim, c)] else 'skip'}")
+            ext_sections.setdefault(dim, []).append((eb, elabel, made))
+
     if not args.no_readme:
         # figures live in experiments/<suite>/d<dim>/ but README is at suite
         # root; copy paths are relative as d<dim>/rank_... -> adjust prefix.
         md = build_readme(suite, dims, per_dim, rank_made, budget_made,
-                          budget_metric, officials)
+                          budget_metric, officials, ext_sections=ext_sections)
         # fix figure src to include the d<dim>/ subdir
         for dim in dims:
             md = md.replace(f'src="rank_d{dim}_',

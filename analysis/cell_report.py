@@ -6,7 +6,9 @@ reproducible style shared across every cell:
 
   1. Ranking figures  (rank_basic.png, rank_hybrid.png, rank_composition.png)
      Parallel-coordinate ranking of all algorithms on four aggregate metrics
-     (worst-SUM, median-SUM, FBTC, best-SUM) at the OFFICIAL CEC budget.
+     (worst-SUM, median-SUM, FBTC or mean-SUM, best-SUM) at the OFFICIAL
+     CEC budget.  The third axis falls back to mean-SUM when every algorithm
+     has class-FBTC == 0 (same rule as suite_report).
      One line per algorithm; per axis the best value sits at the top.
 
   2. Budget-scaling figures (budget_basic.png, budget_hybrid.png,
@@ -88,7 +90,11 @@ STYLE = {
 }
 
 CLASSES = ['basic', 'hybrid', 'composition']
-CLASS_LABEL = {'basic': 'USM', 'hybrid': 'Hybrid', 'composition': 'Composition'}
+CLASS_LABEL = {'basic': 'unimodal and simple multimodal',
+               'hybrid': 'Hybrid', 'composition': 'Composition'}
+# Lower-case form used inside figure titles (second title line).
+CLASS_TITLE = {'basic': 'unimodal and simple multimodal',
+               'hybrid': 'hybrid', 'composition': 'composition'}
 
 # Ranking axes: (display label, metric key, higher_is_better).
 RANK_AXES = [('worst-SUM', 'worst', False),
@@ -318,8 +324,9 @@ def fig_ranking(data, algos, suite, cls, out_path, tie_rtol=1e-9, tie_atol=1e-9)
     for sp in ('top', 'right', 'left'):
         ax.spines[sp].set_visible(False)
     ax.spines['bottom'].set_position(('data', -0.6))
-    ax.set_title(f'{suite.upper()}  {dimlabel}  —  {CLASS_LABEL[cls]} '
-                 f'({len(common)} funcs)', fontsize=14, pad=15)
+    ax.set_title(f'{suite.upper()}  {dimlabel}\n'
+                 f'{CLASS_TITLE[cls]} class ({len(common)} funcs)',
+                 fontsize=14, pad=15)
     fig.tight_layout()
     fig.savefig(out_path, dpi=150, bbox_inches='tight')
     plt.close(fig)
@@ -401,9 +408,8 @@ def fig_budget(base_dir, algos, suite, cls, out_path):
     ax.set_xticklabels([_fmt_budget(b) for b in budgets])
     ax.set_xlabel('Budget (MaxFES)', fontsize=11)
     ax.set_ylabel(f'FBTC (sum over {nmax} functions)', fontsize=11)
-    fig_cls = {'basic': 'unimodal and simple multimodal',
-               'hybrid': 'hybrid', 'composition': 'composition'}[cls]
-    ax.set_title(f'{suite.upper()}  {dimlabel}\n{fig_cls} class', fontsize=12)
+    ax.set_title(f'{suite.upper()}  {dimlabel}\n{CLASS_TITLE[cls]} class',
+                 fontsize=12)
     ax.grid(axis='y', ls=':', alpha=0.5)
     loc = 'best'
     ax.legend(ncol=2, fontsize=8.5, loc=loc)
@@ -502,13 +508,10 @@ def build_readme(suite, dimlbl, official, data, rank_made, budget_made,
     o = []
     o.append(f'# {suite.upper()} / {dimlbl} — by-category summary')
     o.append('')
-    o.append(f'Sums of per-function metrics, grouped by function class. '
-             f'Budget: {official:,} evaluations. **Bold** = best in row.')
-    o.append('')
 
     o.append(f'## Ranking across metrics (budget {_fmt_budget(official).upper()})')
     o.append('')
-    o.append('Parallel-coordinate rank of all seven algorithms on four '
+    o.append(f'Parallel-coordinate rank of all {len(data)} algorithms on four '
              'aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per '
              'function class. Each line is one algorithm; for every axis the '
              'best value is at the top. MSC-CMA in red.')
@@ -517,17 +520,15 @@ def build_readme(suite, dimlbl, official, data, rank_made, budget_made,
     if rt:
         o.append(rt)
         o.append('')
-    o.append(f'*{class_def_note}*')
-    o.append('')
 
     bt = fig_table('budget', budget_made)
     if bt:
         o.append('## Budget scaling')
         o.append('')
-        o.append('FBTC by budget, monotone envelope (running maximum over '
-                 'budgets). Higher is better. The budget axis is per class: a '
-                 'budget is shown only where all seven algorithms cover the '
-                 'whole class. MSC-CMA in red.')
+        o.append(f'FBTC by budget, monotone envelope (running maximum over '
+                 f'budgets). Higher is better. The budget axis is per class: a '
+                 f'budget is shown only where all {len(data)} algorithms cover '
+                 f'the whole class. MSC-CMA in red.')
         o.append('')
         o.append(bt)
         o.append('')
@@ -539,13 +540,16 @@ def build_readme(suite, dimlbl, official, data, rank_made, budget_made,
         o.append(f'## Ranking across metrics (budget {elabel.upper()})')
         o.append('')
         o.append(f'Same parallel-coordinate rank, recomputed at {eb:,} '
-                 f'evaluations. Only classes with full seven-algorithm coverage '
-                 f'at {elabel.upper()} are shown. MSC-CMA in red.')
+                 f'evaluations. Only classes with full {len(data)}-algorithm '
+                 f'coverage at {elabel.upper()} are shown. MSC-CMA in red.')
         o.append('')
         o.append(et)
         o.append('')
 
     o.append('## Summary table')
+    o.append('')
+    o.append(f'Sums of per-function metrics, grouped by function class. '
+             f'Budget: {official:,} evaluations. **Bold** = best in row.')
     o.append('')
     o.append(build_table(data, suite))
     o.append('')
@@ -612,7 +616,7 @@ def main():
         sys.exit(f"Missing official-budget ({args.official}) data for: "
                  f"{', '.join(missing)}")
 
-    note = 'USM = unimodal and simple multimodal.'
+    note = ''
 
     rank_made = {}
     budget_made = {}
