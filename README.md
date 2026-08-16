@@ -18,6 +18,26 @@
   <a href="experiments/cec2022/d20">D=20</a></td></tr>
 </table>
 
+<br clear="right">
+
+<table align="right">
+<tr><th colspan="2" align="left">Mann–Whitney U tests on terminal errors</th></tr>
+<tr><td>CEC2014</td><td>
+  <a href="mwu/cec2014/d10">D=10</a> ·
+  <a href="mwu/cec2014/d30">D=30</a></td></tr>
+<tr><td>CEC2017</td><td>
+  <a href="mwu/cec2017/d10">D=10</a> ·
+  <a href="mwu/cec2017/d30">D=30</a></td></tr>
+<tr><td>CEC2020</td><td>
+  <a href="mwu/cec2020/d5">D=5</a> ·
+  <a href="mwu/cec2020/d10">D=10</a> ·
+  <a href="mwu/cec2020/d15">D=15</a> ·
+  <a href="mwu/cec2020/d20">D=20</a></td></tr>
+<tr><td>CEC2022</td><td>
+  <a href="mwu/cec2022/d10">D=10</a> ·
+  <a href="mwu/cec2022/d20">D=20</a></td></tr>
+</table>
+
 **Multi-Start Clustering CMA-ES** — structure-aware restarts for CMA-ES via cyclic
 nearest-better basin discovery.
 
