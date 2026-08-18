@@ -55,12 +55,9 @@ class Setting:
     suite: str
     dimension: int
     budget: int
-    include_nea2plus: bool = False
 
     @property
     def algorithms(self) -> tuple[str, ...]:
-        if self.include_nea2plus:
-            return (*BASE_ALGORITHMS, "NEA2PLUS-PY")
         return BASE_ALGORITHMS
 
 
@@ -69,15 +66,15 @@ SETTINGS = (
     Setting("cec2014", 10, 1_000_000),
     Setting("cec2014", 30, 300_000),
     Setting("cec2014", 30, 1_000_000),
-    Setting("cec2017", 10, 100_000, True),
+    Setting("cec2017", 10, 100_000),
     Setting("cec2017", 10, 1_000_000),
     Setting("cec2017", 30, 300_000),
     Setting("cec2017", 30, 1_000_000),
-    Setting("cec2020", 5, 50_000, True),
+    Setting("cec2020", 5, 50_000),
     Setting("cec2020", 5, 1_000_000),
-    Setting("cec2020", 10, 1_000_000, True),
+    Setting("cec2020", 10, 1_000_000),
     Setting("cec2020", 10, 20_000_000),
-    Setting("cec2020", 15, 3_000_000, True),
+    Setting("cec2020", 15, 3_000_000),
     Setting("cec2020", 20, 10_000_000),
     Setting("cec2022", 10, 200_000),
     Setting("cec2022", 10, 1_000_000),
@@ -140,7 +137,6 @@ DISPLAY_NAMES = {
     "BIPOP-CMA": "BIPOP-CMA-ES",
     "LSRTDE": "L-SRTDE",
     "NLSHADE-RSP": "NL-SHADE-RSP",
-    "NEA2PLUS-PY": "NEA2+",
 }
 
 
@@ -403,8 +399,6 @@ def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]])
             for algorithm in ("ARRDE", "LSRTDE", "NLSHADE-RSP", "j2020", "jSO")
             if algorithm in competitors
         )
-        if "NEA2PLUS-PY" in competitors:
-            ordered.append("NEA2PLUS-PY")
         if set(ordered) != set(competitors):
             raise MwuError(
                 f"Unexpected competitor set in {suite} D={dimension} B={budget}: "
@@ -418,21 +412,62 @@ def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]])
                 "",
                 f"Bonferroni family size: `{family_size}` functions.",
                 "",
-                "| Function | Statistic | MSC-CMA-ES | BIPOP-CMA-ES |  | "
-                + " | ".join(
-                    display_name(algorithm) for algorithm in ordered[1:]
-                )
-                + " |",
-                "|:--|:--|--:|--:|:-:|"
-                + "|".join("--:" for _ in ordered[1:])
-                + "|",
             ]
         )
 
+        header = (
+            "| Function | "
+            + " | ".join(display_name(algorithm) for algorithm in ordered)
+            + " |"
+        )
+        alignment = "|:--|" + "|".join("--:" for _ in ordered) + "|"
+
+        lines.extend(
+            [
+                "#### Mann–Whitney U statistic",
+                "",
+                header,
+                alignment,
+            ]
+        )
         for fid in functions:
             function_rows = [lookup[(fid, algorithm)] for algorithm in ordered]
             u_cells = [format_u(row["u_competitor"]) for row in function_rows]
+            lines.append(
+                f"| **f{fid}** | "
+                + " | ".join(u_cells)
+                + " |"
+            )
+
+        lines.extend(
+            [
+                "",
+                "#### Raw two-sided p-value",
+                "",
+                header,
+                alignment,
+            ]
+        )
+        for fid in functions:
+            function_rows = [lookup[(fid, algorithm)] for algorithm in ordered]
             raw_cells = [format_p(row["p_raw"]) for row in function_rows]
+            lines.append(
+                f"| **f{fid}** | "
+                + " | ".join(raw_cells)
+                + " |"
+            )
+
+        lines.extend(
+            [
+                "",
+                "#### Bonferroni-adjusted p-value and decision",
+                "",
+                header,
+                alignment,
+            ]
+        )
+        for fid in functions:
+            function_rows = [lookup[(fid, algorithm)] for algorithm in ordered]
             adjusted_cells = []
             for row in function_rows:
                 p_adjusted = format_p(row["p_bonferroni"])
@@ -441,22 +476,9 @@ def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]])
                 if symbol != "≈":
                     cell = f"**{cell}**"
                 adjusted_cells.append(cell)
-
-            # The blank column reproduces the visual separation used by the
-            # existing result matrices between CMA-ES and the other baselines.
             lines.append(
-                f"| **f{fid}** | U | reference | {u_cells[0]} |  | "
-                + " | ".join(u_cells[1:])
-                + " |"
-            )
-            lines.append(
-                f"|  | p | — | {raw_cells[0]} |  | "
-                + " | ".join(raw_cells[1:])
-                + " |"
-            )
-            lines.append(
-                f"|  | p_Bonf | — | {adjusted_cells[0]} |  | "
-                + " | ".join(adjusted_cells[1:])
+                f"| **f{fid}** | "
+                + " | ".join(adjusted_cells)
                 + " |"
             )
         lines.append("")
@@ -495,11 +517,11 @@ def main() -> int:
         all_rows.extend(rows)
         by_cell[(setting.suite, setting.dimension)].extend(rows)
 
-    if len(all_rows) != 2051:
-        raise MwuError(f"Calculated {len(all_rows)} total rows, expected 2051")
+    if len(all_rows) != 1992:
+        raise MwuError(f"Calculated {len(all_rows)} total rows, expected 1992")
 
     if args.dry_run:
-        print(f"Dry run passed: {len(SETTINGS)} settings, {len(by_cell)} cells, 2051 tests")
+        print(f"Dry run passed: {len(SETTINGS)} settings, {len(by_cell)} cells, 1992 tests")
         return 0
 
     for (suite, dimension), rows in sorted(by_cell.items()):
