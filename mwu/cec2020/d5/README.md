@@ -10,7 +10,14 @@
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-1m-u">Mann–Whitney U statistic</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-1m-raw-p">Raw two-sided p-value</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-1m-bonferroni">Bonferroni-adjusted p-value and decision</a><br>
-<a href="#deep-statistical-comparison">Deep Statistical Comparison</a>
+<a href="#deep-statistical-comparison">Deep Statistical Comparison</a><br>
+&nbsp;&nbsp;<a href="#dsc-budget-50k">Budget 50K</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#dsc-budget-50k-ranks">DSC ranks by function</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#dsc-budget-50k-comparison">Statistical comparison</a><br>
+&nbsp;&nbsp;<a href="#dsc-budget-1m">Budget 1M</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#dsc-budget-1m-ranks">DSC ranks by function</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#dsc-budget-1m-comparison">Statistical comparison</a><br>
+&nbsp;&nbsp;<a href="#dsc-cell-summary">Cell summary</a>
 </td></tr>
 </table>
 
@@ -153,3 +160,104 @@ effect directions, sample medians, and family sizes are available in
 [`details.csv`](details.csv).
 
 ## Deep Statistical Comparison
+
+Following the fixed-budget analysis workflow described by
+[Wang et al. (2022)](https://doi.org/10.1145/3510426), we applied
+Deep Statistical Comparison through
+[DSCTool](https://doi.org/10.1016/j.asoc.2019.105977) to the 51
+run-wise terminal errors for each function.
+
+IOHanalyzer: <https://iohanalyzer.liacs.nl/>; DSCTool service used for
+the analysis: <https://ws.ijs.si/dsc/>.
+
+Settings: Anderson–Darling comparisons at `alpha=0.05`, `epsilon=0`,
+and `monte_carlo_iterations=0`; Friedman omnibus tests over functions;
+and, after rejection of the omnibus null hypothesis, Holm-adjusted
+post-hoc comparisons against the method with the best mean DSC rank.
+
+`★` means that MSC-CMA-ES has the best mean DSC rank and the Friedman
+test rejects the null hypothesis; `≈` means that the Friedman test
+rejects the null hypothesis but MSC-CMA-ES is not significantly different
+from the best-ranked method after Holm adjustment; `↓` means that the
+best-ranked method is significantly better than MSC-CMA-ES after Holm
+adjustment; and `O` means that the Friedman test does not reject the null
+hypothesis and no post-hoc interpretation is made.
+
+<a id="dsc-budget-50k"></a>
+
+### Budget 50K
+
+<a id="dsc-budget-50k-ranks"></a>
+
+#### DSC ranks by function
+
+Lower DSC ranks indicate better performance. Tied distributions
+receive fractional ranks.
+
+| Function | MSC-CMA-ES | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO | NEA2+ |
+|:--|--:|--:|--:|--:|--:|--:|--:|--:|
+| **f1** | 4 | 6.5 | 1 | 6.5 | 6.5 | 2 | 6.5 | 3 |
+| **f2** | 8 | 6 | 5 | 3 | 1 | 4 | 2 | 7 |
+| **f3** | 2 | 6 | 5 | 8 | 1 | 4 | 7 | 3 |
+| **f4** | 8 | 6.5 | 3 | 6.5 | 1 | 3 | 3 | 5 |
+| **f5** | 5 | 6 | 2 | 7 | 1 | 3 | 4 | 8 |
+| **f6** | 8 | 5 | 3 | 6 | 2 | 4 | 1 | 7 |
+| **f7** | 6.5 | 5 | 2.5 | 8 | 2.5 | 2.5 | 2.5 | 6.5 |
+| **f8** | 4 | 6 | 3 | 8 | 1 | 5 | 2 | 7 |
+| **f9** | 1 | 6 | 3 | 7.5 | 2 | 4.5 | 7.5 | 4.5 |
+| **f10** | 1 | 6 | 3.5 | 7 | 5 | 3.5 | 8 | 2 |
+
+Composition-function set: `f8–f10`.
+
+<a id="dsc-budget-50k-comparison"></a>
+
+#### Statistical comparison
+
+| Function set | n | Best-ranked method | Best mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p-value | Holm p-value | Result |
+|:--|--:|:--|--:|--:|:--:|--:|--:|--:|:--:|
+| All functions | 10 | NL-SHADE-RSP | 2.3 | 4.75 | 5/8 | 25.75 | 0.000558176 | 0.0506337 | ≈ |
+| Composition functions | 3 | MSC-CMA-ES | 2 | 2 | 1/8 | 12.2222 | 0.0934838 | — | O |
+
+<a id="dsc-budget-1m"></a>
+
+### Budget 1M
+
+<a id="dsc-budget-1m-ranks"></a>
+
+#### DSC ranks by function
+
+Lower DSC ranks indicate better performance. Tied distributions
+receive fractional ranks.
+
+| Function | MSC-CMA-ES | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| **f1** | 4 | 4 | 4 | 4 | 4 | 4 | 4 |
+| **f2** | 5 | 6 | 4 | 7 | 1 | 3 | 2 |
+| **f3** | 2 | 5 | 3.5 | 7 | 3.5 | 1 | 6 |
+| **f4** | 7 | 2 | 2 | 6 | 2 | 4 | 5 |
+| **f5** | 6 | 3 | 3 | 7 | 3 | 3 | 3 |
+| **f6** | 7 | 1 | 4 | 4 | 4 | 4 | 4 |
+| **f7** | 6 | 5 | 2.5 | 7 | 2.5 | 2.5 | 2.5 |
+| **f8** | 1 | 4 | 4 | 7 | 4 | 4 | 4 |
+| **f9** | 4 | 5 | 2 | 6.5 | 2 | 2 | 6.5 |
+| **f10** | 1 | 4 | 2 | 6 | 5 | 3 | 7 |
+
+Composition-function set: `f8–f10`.
+
+<a id="dsc-budget-1m-comparison"></a>
+
+#### Statistical comparison
+
+| Function set | n | Best-ranked method | Best mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p-value | Holm p-value | Result |
+|:--|--:|:--|--:|--:|:--:|--:|--:|--:|:--:|
+| All functions | 10 | j2020 | 3.05 | 4.3 | 5/7 | 15.8679 | 0.0144811 | 0.405746 | ≈ |
+| Composition functions | 3 | MSC-CMA-ES | 2 | 2 | 1/7 | 10.6786 | 0.0988332 | — | O |
+
+<a id="dsc-cell-summary"></a>
+
+### Cell summary
+
+| Budget | All functions | Composition functions |
+|--:|:--|:--|
+| 50K | NL-SHADE-RSP · 5/8 · ≈ | MSC-CMA-ES · 1/8 · O |
+| 1M | j2020 · 5/7 · ≈ | MSC-CMA-ES · 1/7 · O |

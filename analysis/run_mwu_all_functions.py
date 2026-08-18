@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate per-cell Mann--Whitney U results from terminal-error PKL files.
+"""Generate per-cell MWU and DSC supplementary-material READMEs.
 
 The script reads ``pkl['errors']`` exactly as stored.  It does not round,
 clip, floor, sort, or otherwise transform the 51 run-wise terminal errors.
@@ -16,6 +16,10 @@ Only these files are created/replaced under --output:
 * mann_whitney_u_all_settings.csv
 
 No existing directory is deleted and no unrelated file is modified.
+
+The Deep Statistical Comparison section is rendered from an existing,
+already-computed DSCTool result tree supplied through ``--dsc-results``.
+This script does not recompute or alter any DSC statistic.
 """
 
 from __future__ import annotations
@@ -47,6 +51,24 @@ BASE_ALGORITHMS = (
     "NLSHADE-RSP",
     "j2020",
     "jSO",
+)
+
+DSC_EIGHT_ALGORITHM_SETTINGS = {
+    ("cec2017", 10, 100_000),
+    ("cec2020", 5, 50_000),
+    ("cec2020", 10, 1_000_000),
+    ("cec2020", 15, 3_000_000),
+}
+
+DSC_TABLE_ORDER = (
+    "MSC-CMA",
+    "BIPOP-CMA",
+    "ARRDE",
+    "LSRTDE",
+    "NLSHADE-RSP",
+    "j2020",
+    "jSO",
+    "NEA2PLUS-PY",
 )
 
 
@@ -137,6 +159,7 @@ DISPLAY_NAMES = {
     "BIPOP-CMA": "BIPOP-CMA-ES",
     "LSRTDE": "L-SRTDE",
     "NLSHADE-RSP": "NL-SHADE-RSP",
+    "NEA2PLUS-PY": "NEA2+",
 }
 
 
@@ -157,6 +180,12 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=Path("mwu"),
         help="Output root (default: mwu)",
+    )
+    parser.add_argument(
+        "--dsc-results",
+        type=Path,
+        default=Path("dsc_python_results_final"),
+        help="Existing final DSCTool result root (default: dsc_python_results_final)",
     )
     parser.add_argument(
         "--dry-run",
@@ -319,6 +348,97 @@ def csv_text(rows: Iterable[Mapping[str, Any]], fields: Sequence[str]) -> str:
     return stream.getvalue()
 
 
+def read_csv_rows(path: Path) -> list[dict[str, str]]:
+    if not path.is_file():
+        raise MwuError(f"Missing DSC result file: {path}")
+    with path.open("r", encoding="utf-8", newline="") as stream:
+        return list(csv.DictReader(stream))
+
+
+def expected_dsc_algorithms(setting: Setting) -> set[str]:
+    algorithms = set(BASE_ALGORITHMS)
+    if (setting.suite, setting.dimension, setting.budget) in DSC_EIGHT_ALGORITHM_SETTINGS:
+        algorithms.add("NEA2PLUS-PY")
+    return algorithms
+
+
+def load_dsc_results(dsc_root: Path) -> dict[tuple[str, int, int], dict[str, Any]]:
+    long_rows = read_csv_rows(dsc_root / "dsc_results_final_long.csv")
+    summaries: dict[tuple[str, int, int], dict[str, dict[str, str]]] = defaultdict(dict)
+    for row in long_rows:
+        key = (row["suite"], int(row["dimension"]), int(row["budget"]))
+        scope = row["scope"]
+        if scope not in {"all", "composition"} or scope in summaries[key]:
+            raise MwuError(f"Invalid or duplicate DSC summary row: {key} {scope}")
+        summaries[key][scope] = row
+
+    loaded: dict[tuple[str, int, int], dict[str, Any]] = {}
+    for setting in SETTINGS:
+        key = (setting.suite, setting.dimension, setting.budget)
+        if set(summaries.get(key, {})) != {"all", "composition"}:
+            raise MwuError(f"Missing all/composition DSC summaries for {key}")
+        setting_dir = (
+            dsc_root
+            / setting.suite
+            / f"d{setting.dimension}"
+            / f"budget_{setting.budget}"
+        )
+        rank_rows = read_csv_rows(setting_dir / "per_function_dsc_ranks.csv")
+        expected_functions = set(FUNCTIONS[setting.suite])
+        expected_algorithms = expected_dsc_algorithms(setting)
+        rank_lookup: dict[tuple[int, str], float] = {}
+        for row in rank_rows:
+            if (
+                row["suite"] != setting.suite
+                or int(row["dimension"]) != setting.dimension
+                or int(row["budget"]) != setting.budget
+            ):
+                raise MwuError(f"Wrong DSC rank metadata in {setting_dir}")
+            fid = int(row["function_id"])
+            algorithm = row["algorithm"]
+            rank = float(row["dsc_rank"])
+            if fid not in expected_functions or algorithm not in expected_algorithms:
+                raise MwuError(
+                    f"Unexpected DSC rank key in {setting_dir}: f{fid} {algorithm}"
+                )
+            pair = (fid, algorithm)
+            if pair in rank_lookup or not math.isfinite(rank):
+                raise MwuError(f"Duplicate/nonfinite DSC rank in {setting_dir}: {pair}")
+            rank_lookup[pair] = rank
+        expected_pairs = {
+            (fid, algorithm)
+            for fid in expected_functions
+            for algorithm in expected_algorithms
+        }
+        if set(rank_lookup) != expected_pairs:
+            raise MwuError(f"Incomplete DSC rank matrix in {setting_dir}")
+
+        for scope, summary in summaries[key].items():
+            if int(summary["k"]) != len(expected_algorithms):
+                raise MwuError(f"Wrong DSC k for {key} {scope}")
+            expected_n = (
+                len(expected_functions)
+                if scope == "all"
+                else len(FUNCTION_CLASSES[setting.suite]["composition"])
+            )
+            if int(summary["n_functions"]) != expected_n:
+                raise MwuError(f"Wrong DSC function count for {key} {scope}")
+            if summary["label"] not in {"★", "≈", "↓", "O"}:
+                raise MwuError(f"Unknown DSC label for {key} {scope}")
+
+        loaded[key] = {
+            "rank_lookup": rank_lookup,
+            "algorithms": expected_algorithms,
+            "summaries": summaries[key],
+        }
+
+    if set(loaded) != {
+        (setting.suite, setting.dimension, setting.budget) for setting in SETTINGS
+    }:
+        raise MwuError("DSC setting set is incomplete")
+    return loaded
+
+
 def display_name(algorithm: str) -> str:
     return DISPLAY_NAMES.get(algorithm, algorithm)
 
@@ -356,7 +476,153 @@ def budget_anchor(budget: int) -> str:
     return f"budget-{format_budget(budget).lower()}"
 
 
-def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]]) -> str:
+def dsc_budget_anchor(budget: int) -> str:
+    return f"dsc-budget-{format_budget(budget).lower()}"
+
+
+def format_optional_p(value: str) -> str:
+    return "—" if value == "" else format_p(value)
+
+
+def render_dsc_section(
+    suite: str,
+    dimension: int,
+    dsc_by_budget: Mapping[int, Mapping[str, Any]],
+) -> list[str]:
+    lines = [
+        "## Deep Statistical Comparison",
+        "",
+        "Following the fixed-budget analysis workflow described by",
+        "[Wang et al. (2022)](https://doi.org/10.1145/3510426), we applied",
+        "Deep Statistical Comparison through",
+        "[DSCTool](https://doi.org/10.1016/j.asoc.2019.105977) to the 51",
+        "run-wise terminal errors for each function.",
+        "",
+        "IOHanalyzer: <https://iohanalyzer.liacs.nl/>; DSCTool service used for",
+        "the analysis: <https://ws.ijs.si/dsc/>.",
+        "",
+        "Settings: Anderson–Darling comparisons at `alpha=0.05`, `epsilon=0`,",
+        "and `monte_carlo_iterations=0`; Friedman omnibus tests over functions;",
+        "and, after rejection of the omnibus null hypothesis, Holm-adjusted",
+        "post-hoc comparisons against the method with the best mean DSC rank.",
+        "",
+        "`★` means that MSC-CMA-ES has the best mean DSC rank and the Friedman",
+        "test rejects the null hypothesis; `≈` means that the Friedman test",
+        "rejects the null hypothesis but MSC-CMA-ES is not significantly different",
+        "from the best-ranked method after Holm adjustment; `↓` means that the",
+        "best-ranked method is significantly better than MSC-CMA-ES after Holm",
+        "adjustment; and `O` means that the Friedman test does not reject the null",
+        "hypothesis and no post-hoc interpretation is made.",
+        "",
+    ]
+
+    ordered_budgets = sorted(dsc_by_budget)
+    for budget in ordered_budgets:
+        data = dsc_by_budget[budget]
+        rank_lookup = data["rank_lookup"]
+        algorithms = [
+            algorithm
+            for algorithm in DSC_TABLE_ORDER
+            if algorithm in data["algorithms"]
+        ]
+        functions = list(FUNCTIONS[suite])
+        anchor = dsc_budget_anchor(budget)
+        lines.extend(
+            [
+                f'<a id="{anchor}"></a>',
+                "",
+                f"### Budget {format_budget(budget)}",
+                "",
+                f'<a id="{anchor}-ranks"></a>',
+                "",
+                "#### DSC ranks by function",
+                "",
+                "Lower DSC ranks indicate better performance. Tied distributions",
+                "receive fractional ranks.",
+                "",
+                "| Function | "
+                + " | ".join(display_name(algorithm) for algorithm in algorithms)
+                + " |",
+                "|:--|" + "|".join("--:" for _ in algorithms) + "|",
+            ]
+        )
+        for fid in functions:
+            cells = [format_u(rank_lookup[(fid, algorithm)]) for algorithm in algorithms]
+            lines.append(f"| **f{fid}** | " + " | ".join(cells) + " |")
+
+        composition_ids = sorted(FUNCTION_CLASSES[suite]["composition"])
+        composition_label = (
+            f"f{composition_ids[0]}–f{composition_ids[-1]}"
+            if composition_ids == list(range(composition_ids[0], composition_ids[-1] + 1))
+            else ", ".join(f"f{fid}" for fid in composition_ids)
+        )
+        lines.extend(
+            [
+                "",
+                f"Composition-function set: `{composition_label}`.",
+                "",
+                f'<a id="{anchor}-comparison"></a>',
+                "",
+                "#### Statistical comparison",
+                "",
+                "| Function set | n | Best-ranked method | Best mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p-value | Holm p-value | Result |",
+                "|:--|--:|:--|--:|--:|:--:|--:|--:|--:|:--:|",
+            ]
+        )
+        for scope, scope_label in (("all", "All functions"), ("composition", "Composition functions")):
+            row = data["summaries"][scope]
+            lines.append(
+                "| "
+                + " | ".join(
+                    [
+                        scope_label,
+                        row["n_functions"],
+                        display_name(row["best_algorithm"]),
+                        format_u(row["best_mean_dsc_rank"]),
+                        format_u(row["msc_mean_dsc_rank"]),
+                        row["msc_position"],
+                        format_p(row["friedman_statistic"]),
+                        format_p(row["friedman_p_value"]),
+                        format_optional_p(row["holm_p_best_vs_msc"]),
+                        row["label"],
+                    ]
+                )
+                + " |"
+            )
+        lines.append("")
+
+    lines.extend(
+        [
+            '<a id="dsc-cell-summary"></a>',
+            "",
+            "### Cell summary",
+            "",
+            "| Budget | All functions | Composition functions |",
+            "|--:|:--|:--|",
+        ]
+    )
+    for budget in ordered_budgets:
+        summaries = dsc_by_budget[budget]["summaries"]
+        cells = []
+        for scope in ("all", "composition"):
+            row = summaries[scope]
+            cells.append(
+                f"{display_name(row['best_algorithm'])} · "
+                f"{row['msc_position']} · {row['label']}"
+            )
+        lines.append(
+            f"| {format_budget(budget)} | {cells[0]} | {cells[1]} |"
+        )
+    lines.append("")
+    return lines
+
+
+def render_readme(
+    suite: str,
+    dimension: int,
+    rows: Sequence[Mapping[str, Any]],
+    dsc_by_budget: Mapping[int, Mapping[str, Any]],
+) -> str:
     by_budget: dict[int, list[Mapping[str, Any]]] = defaultdict(list)
     for row in rows:
         by_budget[int(row["budget"])].append(row)
@@ -377,9 +643,21 @@ def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]])
                 f'&nbsp;&nbsp;&nbsp;&nbsp;<a href="#{anchor}-bonferroni">Bonferroni-adjusted p-value and decision</a><br>',
             ]
         )
+    lines.append(
+        '<a href="#deep-statistical-comparison">Deep Statistical Comparison</a><br>'
+    )
+    for budget in sorted(dsc_by_budget):
+        anchor = dsc_budget_anchor(budget)
+        lines.extend(
+            [
+                f'&nbsp;&nbsp;<a href="#{anchor}">Budget {format_budget(budget)}</a><br>',
+                f'&nbsp;&nbsp;&nbsp;&nbsp;<a href="#{anchor}-ranks">DSC ranks by function</a><br>',
+                f'&nbsp;&nbsp;&nbsp;&nbsp;<a href="#{anchor}-comparison">Statistical comparison</a><br>',
+            ]
+        )
     lines.extend(
         [
-            '<a href="#deep-statistical-comparison">Deep Statistical Comparison</a>',
+            '&nbsp;&nbsp;<a href="#dsc-cell-summary">Cell summary</a>',
             '</td></tr>',
             '</table>',
             "",
@@ -524,10 +802,9 @@ def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]])
             "effect directions, sample medians, and family sizes are available in",
             "[`details.csv`](details.csv).",
             "",
-            "## Deep Statistical Comparison",
-            "",
         ]
     )
+    lines.extend(render_dsc_section(suite, dimension, dsc_by_budget))
     return "\n".join(lines)
 
 
@@ -535,8 +812,13 @@ def main() -> int:
     args = parse_args()
     experiments = args.experiments.resolve()
     output = args.output.resolve()
+    dsc_root = args.dsc_results.resolve()
     if not experiments.is_dir():
         raise MwuError(f"Experiment directory does not exist: {experiments}")
+    if not dsc_root.is_dir():
+        raise MwuError(f"DSC result directory does not exist: {dsc_root}")
+
+    dsc_results = load_dsc_results(dsc_root)
 
     all_rows: list[dict[str, Any]] = []
     by_cell: dict[tuple[str, int], list[dict[str, Any]]] = defaultdict(list)
@@ -563,15 +845,23 @@ def main() -> int:
 
     for (suite, dimension), rows in sorted(by_cell.items()):
         cell = output / suite / f"d{dimension}"
+        dsc_by_budget = {
+            setting.budget: dsc_results[(suite, dimension, setting.budget)]
+            for setting in SETTINGS
+            if setting.suite == suite and setting.dimension == dimension
+        }
         atomic_write_text(cell / "details.csv", csv_text(rows, FIELDS))
-        atomic_write_text(cell / "README.md", render_readme(suite, dimension, rows))
+        atomic_write_text(
+            cell / "README.md",
+            render_readme(suite, dimension, rows, dsc_by_budget),
+        )
     atomic_write_text(
         output / "mann_whitney_u_all_settings.csv",
         csv_text(all_rows, FIELDS),
     )
 
     print(
-        f"Wrote 10 cell READMEs, 10 details.csv files, and 1 aggregate CSV under {output}"
+        f"Wrote 10 MWU+DSC cell READMEs, 10 details.csv files, and 1 aggregate CSV under {output}"
     )
     return 0
 
