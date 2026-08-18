@@ -194,18 +194,18 @@ hypothesis and no post-hoc interpretation is made.
 Lower DSC ranks indicate better performance. Tied distributions
 receive fractional ranks.
 
-| Function | MSC-CMA-ES | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO | NEA2+ |
-|:--|--:|--:|--:|--:|--:|--:|--:|--:|
-| **f1** | 1.5 | 5 | 5 | 5 | 5 | 1.5 | 5 | 8 |
-| **f2** | 3.5 | 7 | 3.5 | 3.5 | 3.5 | 1 | 6 | 8 |
-| **f3** | 2 | 3 | 6 | 7 | 5 | 4 | 8 | 1 |
-| **f4** | 8 | 6 | 4 | 7 | 1 | 2 | 3 | 5 |
-| **f5** | 3 | 7 | 1 | 6 | 5 | 2 | 4 | 8 |
-| **f6** | 7 | 5 | 3 | 5 | 1.5 | 5 | 1.5 | 8 |
-| **f7** | 7.5 | 5.5 | 3 | 5.5 | 3 | 3 | 1 | 7.5 |
-| **f8** | 1 | 6 | 5 | 7.5 | 4 | 3 | 7.5 | 2 |
-| **f9** | 1 | 6 | 4 | 8 | 3 | 5 | 7 | 2 |
-| **f10** | 1.5 | 6.5 | 3 | 8 | 5 | 4 | 6.5 | 1.5 |
+| Function | MSC-CMA-ES | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| **f1** | 1.5 | 5 | 5 | 5 | 5 | 1.5 | 5 |
+| **f2** | 3.5 | 7 | 3.5 | 3.5 | 3.5 | 1 | 6 |
+| **f3** | 1 | 2 | 5 | 6 | 4 | 3 | 7 |
+| **f4** | 7 | 5 | 4 | 6 | 1 | 2 | 3 |
+| **f5** | 3 | 7 | 1 | 6 | 5 | 2 | 4 |
+| **f6** | 7 | 5 | 3 | 5 | 1.5 | 5 | 1.5 |
+| **f7** | 7 | 5.5 | 3 | 5.5 | 3 | 3 | 1 |
+| **f8** | 1 | 5 | 4 | 6.5 | 3 | 2 | 6.5 |
+| **f9** | 1 | 5 | 3 | 7 | 2 | 4 | 6 |
+| **f10** | 1 | 5.5 | 2 | 7 | 4 | 3 | 5.5 |
 
 Composition-function set: `f8–f10`.
 
@@ -215,8 +215,8 @@ Composition-function set: `f8–f10`.
 
 | Function set | n | Best-ranked method | Best mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p-value | Holm p-value | Result |
 |:--|--:|:--|--:|--:|:--:|--:|--:|--:|:--:|
-| All functions | 10 | j2020 | 3.05 | 3.6 | 2.5/8 | 15.5833 | 0.029208 | 0.784225 | ≈ |
-| Composition functions | 3 | MSC-CMA-ES | 1.16667 | 1.16667 | 1/8 | 19.5556 | 0.00661408 | — | ★ |
+| All functions | 10 | j2020 | 2.65 | 3.3 | 3/7 | 17.5286 | 0.00752491 | 0.703075 | ≈ |
+| Composition functions | 3 | MSC-CMA-ES | 1 | 1 | 1/7 | 16.3214 | 0.0121289 | — | ★ |
 
 <a id="dsc-budget-20m"></a>
 
@@ -259,5 +259,5 @@ Composition-function set: `f8–f10`.
 
 | Budget | All functions | Composition functions |
 |--:|:--|:--|
-| 1M | j2020 · 2.5/8 · ≈ | MSC-CMA-ES · 1/8 · ★ |
+| 1M | j2020 · 3/7 · ≈ | MSC-CMA-ES · 1/7 · ★ |
 | 20M | ARRDE · 4/7 · ≈ | MSC-CMA-ES · 1/7 · ★ |

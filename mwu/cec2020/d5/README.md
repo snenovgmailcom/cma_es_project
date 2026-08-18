@@ -194,18 +194,18 @@ hypothesis and no post-hoc interpretation is made.
 Lower DSC ranks indicate better performance. Tied distributions
 receive fractional ranks.
 
-| Function | MSC-CMA-ES | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO | NEA2+ |
-|:--|--:|--:|--:|--:|--:|--:|--:|--:|
-| **f1** | 4 | 6.5 | 1 | 6.5 | 6.5 | 2 | 6.5 | 3 |
-| **f2** | 8 | 6 | 5 | 3 | 1 | 4 | 2 | 7 |
-| **f3** | 2 | 6 | 5 | 8 | 1 | 4 | 7 | 3 |
-| **f4** | 8 | 6.5 | 3 | 6.5 | 1 | 3 | 3 | 5 |
-| **f5** | 5 | 6 | 2 | 7 | 1 | 3 | 4 | 8 |
-| **f6** | 8 | 5 | 3 | 6 | 2 | 4 | 1 | 7 |
-| **f7** | 6.5 | 5 | 2.5 | 8 | 2.5 | 2.5 | 2.5 | 6.5 |
-| **f8** | 4 | 6 | 3 | 8 | 1 | 5 | 2 | 7 |
-| **f9** | 1 | 6 | 3 | 7.5 | 2 | 4.5 | 7.5 | 4.5 |
-| **f10** | 1 | 6 | 3.5 | 7 | 5 | 3.5 | 8 | 2 |
+| Function | MSC-CMA-ES | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| **f1** | 3 | 5.5 | 1 | 5.5 | 5.5 | 2 | 5.5 |
+| **f2** | 5.5 | 5.5 | 5.5 | 2.5 | 1 | 5.5 | 2.5 |
+| **f3** | 2 | 5 | 4 | 7 | 1 | 3 | 6 |
+| **f4** | 7 | 5.5 | 3 | 5.5 | 1 | 3 | 3 |
+| **f5** | 5 | 6 | 2 | 7 | 1 | 3 | 4 |
+| **f6** | 7 | 5 | 3 | 6 | 2 | 4 | 1 |
+| **f7** | 6 | 5 | 2.5 | 7 | 2.5 | 2.5 | 2.5 |
+| **f8** | 4 | 6 | 3 | 7 | 1 | 5 | 2 |
+| **f9** | 1 | 5 | 3 | 6.5 | 2 | 4 | 6.5 |
+| **f10** | 1 | 5 | 2.5 | 6 | 4 | 2.5 | 7 |
 
 Composition-function set: `f8–f10`.
 
@@ -215,8 +215,8 @@ Composition-function set: `f8–f10`.
 
 | Function set | n | Best-ranked method | Best mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p-value | Holm p-value | Result |
 |:--|--:|:--|--:|--:|:--:|--:|--:|--:|:--:|
-| All functions | 10 | NL-SHADE-RSP | 2.3 | 4.75 | 5/8 | 25.75 | 0.000558176 | 0.0506337 | ≈ |
-| Composition functions | 3 | MSC-CMA-ES | 2 | 2 | 1/8 | 12.2222 | 0.0934838 | — | O |
+| All functions | 10 | NL-SHADE-RSP | 2.1 | 4.15 | 5/7 | 23.2714 | 0.000710485 | 0.0676836 | ≈ |
+| Composition functions | 3 | MSC-CMA-ES | 2 | 2 | 1/7 | 11.2857 | 0.0799374 | — | O |
 
 <a id="dsc-budget-1m"></a>
 
@@ -259,5 +259,5 @@ Composition-function set: `f8–f10`.
 
 | Budget | All functions | Composition functions |
 |--:|:--|:--|
-| 50K | NL-SHADE-RSP · 5/8 · ≈ | MSC-CMA-ES · 1/8 · O |
+| 50K | NL-SHADE-RSP · 5/7 · ≈ | MSC-CMA-ES · 1/7 · O |
 | 1M | j2020 · 5/7 · ≈ | MSC-CMA-ES · 1/7 · O |

@@ -130,18 +130,18 @@ hypothesis and no post-hoc interpretation is made.
 Lower DSC ranks indicate better performance. Tied distributions
 receive fractional ranks.
 
-| Function | MSC-CMA-ES | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO | NEA2+ |
-|:--|--:|--:|--:|--:|--:|--:|--:|--:|
-| **f1** | 5 | 2.5 | 2.5 | 2.5 | 8 | 6 | 2.5 | 7 |
-| **f2** | 4 | 5 | 2 | 6 | 3 | 1 | 7 | 8 |
-| **f3** | 2 | 1 | 6 | 7 | 5 | 3 | 8 | 4 |
-| **f4** | 8 | 6 | 4 | 7 | 1 | 2 | 3 | 5 |
-| **f5** | 3.5 | 1.5 | 1.5 | 3.5 | 6.5 | 6.5 | 5 | 8 |
-| **f6** | 7 | 4 | 3 | 5 | 1 | 8 | 2 | 6 |
-| **f7** | 4 | 5.5 | 3 | 7 | 1.5 | 1.5 | 5.5 | 8 |
-| **f8** | 1 | 6 | 5 | 7 | 2 | 3 | 8 | 4 |
-| **f9** | 1 | 6 | 4 | 8 | 3 | 5 | 7 | 2 |
-| **f10** | 1 | 4.5 | 2 | 7 | 7 | 4.5 | 7 | 3 |
+| Function | MSC-CMA-ES | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
+|:--|--:|--:|--:|--:|--:|--:|--:|
+| **f1** | 5 | 2.5 | 2.5 | 2.5 | 7 | 6 | 2.5 |
+| **f2** | 4 | 5 | 2 | 6 | 3 | 1 | 7 |
+| **f3** | 2 | 1 | 5 | 6 | 4 | 3 | 7 |
+| **f4** | 7 | 5 | 4 | 6 | 1 | 2 | 3 |
+| **f5** | 3.5 | 1.5 | 1.5 | 3.5 | 6.5 | 6.5 | 5 |
+| **f6** | 6 | 4 | 3 | 5 | 1 | 7 | 2 |
+| **f7** | 4 | 5.5 | 3 | 7 | 1.5 | 1.5 | 5.5 |
+| **f8** | 1 | 5 | 4 | 6 | 2 | 3 | 7 |
+| **f9** | 1 | 5 | 3 | 7 | 2 | 4 | 6 |
+| **f10** | 1 | 3.5 | 2 | 6 | 6 | 3.5 | 6 |
 
 Composition-function set: `f8–f10`.
 
@@ -151,8 +151,8 @@ Composition-function set: `f8–f10`.
 
 | Function set | n | Best-ranked method | Best mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p-value | Holm p-value | Result |
 |:--|--:|:--|--:|--:|:--:|--:|--:|--:|:--:|
-| All functions | 10 | ARRDE | 3.3 | 3.65 | 2/8 | 11.9917 | 0.100833 | — | O |
-| Composition functions | 3 | MSC-CMA-ES | 1 | 1 | 1/8 | 16.3056 | 0.0224668 | — | ★ |
+| All functions | 10 | ARRDE | 3 | 3.45 | 3/7 | 11.1964 | 0.082492 | — | O |
+| Composition functions | 3 | MSC-CMA-ES | 1 | 1 | 1/7 | 14.0357 | 0.0292397 | — | ★ |
 
 <a id="dsc-cell-summary"></a>
 
@@ -160,4 +160,4 @@ Composition-function set: `f8–f10`.
 
 | Budget | All functions | Composition functions |
 |--:|:--|:--|
-| 3M | ARRDE · 2/8 · O | MSC-CMA-ES · 1/8 · ★ |
+| 3M | ARRDE · 3/7 · O | MSC-CMA-ES · 1/7 · ★ |

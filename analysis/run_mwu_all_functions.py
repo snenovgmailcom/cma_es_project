@@ -29,6 +29,7 @@ import csv
 import math
 import os
 import pickle
+import re
 import tempfile
 from collections import defaultdict
 from dataclasses import dataclass
@@ -53,13 +54,6 @@ BASE_ALGORITHMS = (
     "jSO",
 )
 
-DSC_EIGHT_ALGORITHM_SETTINGS = {
-    ("cec2017", 10, 100_000),
-    ("cec2020", 5, 50_000),
-    ("cec2020", 10, 1_000_000),
-    ("cec2020", 15, 3_000_000),
-}
-
 DSC_TABLE_ORDER = (
     "MSC-CMA",
     "BIPOP-CMA",
@@ -68,7 +62,6 @@ DSC_TABLE_ORDER = (
     "NLSHADE-RSP",
     "j2020",
     "jSO",
-    "NEA2PLUS-PY",
 )
 
 
@@ -159,7 +152,6 @@ DISPLAY_NAMES = {
     "BIPOP-CMA": "BIPOP-CMA-ES",
     "LSRTDE": "L-SRTDE",
     "NLSHADE-RSP": "NL-SHADE-RSP",
-    "NEA2PLUS-PY": "NEA2+",
 }
 
 
@@ -356,10 +348,7 @@ def read_csv_rows(path: Path) -> list[dict[str, str]]:
 
 
 def expected_dsc_algorithms(setting: Setting) -> set[str]:
-    algorithms = set(BASE_ALGORITHMS)
-    if (setting.suite, setting.dimension, setting.budget) in DSC_EIGHT_ALGORITHM_SETTINGS:
-        algorithms.add("NEA2PLUS-PY")
-    return algorithms
+    return set(BASE_ALGORITHMS)
 
 
 def load_dsc_results(dsc_root: Path) -> dict[tuple[str, int, int], dict[str, Any]]:
@@ -402,7 +391,13 @@ def load_dsc_results(dsc_root: Path) -> dict[tuple[str, int, int], dict[str, Any
                     f"Unexpected DSC rank key in {setting_dir}: f{fid} {algorithm}"
                 )
             pair = (fid, algorithm)
-            if pair in rank_lookup or not math.isfinite(rank):
+            if (
+                pair in rank_lookup
+                or not math.isfinite(rank)
+                or rank < 1
+                or rank > len(expected_algorithms)
+                or not math.isclose(2 * rank, round(2 * rank), rel_tol=0.0, abs_tol=1e-12)
+            ):
                 raise MwuError(f"Duplicate/nonfinite DSC rank in {setting_dir}: {pair}")
             rank_lookup[pair] = rank
         expected_pairs = {
@@ -412,6 +407,11 @@ def load_dsc_results(dsc_root: Path) -> dict[tuple[str, int, int], dict[str, Any
         }
         if set(rank_lookup) != expected_pairs:
             raise MwuError(f"Incomplete DSC rank matrix in {setting_dir}")
+        expected_rank_sum = len(expected_algorithms) * (len(expected_algorithms) + 1) / 2
+        for fid in expected_functions:
+            rank_sum = sum(rank_lookup[(fid, algorithm)] for algorithm in expected_algorithms)
+            if not math.isclose(rank_sum, expected_rank_sum, rel_tol=0.0, abs_tol=1e-12):
+                raise MwuError(f"Invalid DSC rank sum for {setting_dir}/f{fid}")
 
         for scope, summary in summaries[key].items():
             if int(summary["k"]) != len(expected_algorithms):
@@ -423,6 +423,10 @@ def load_dsc_results(dsc_root: Path) -> dict[tuple[str, int, int], dict[str, Any
             )
             if int(summary["n_functions"]) != expected_n:
                 raise MwuError(f"Wrong DSC function count for {key} {scope}")
+            if summary["best_algorithm"] not in expected_algorithms:
+                raise MwuError(f"Wrong DSC best algorithm for {key} {scope}")
+            if not re.fullmatch(r"(?:\d+(?:\.5)?)/7", summary["msc_position"]):
+                raise MwuError(f"Wrong DSC MSC position for {key} {scope}")
             if summary["label"] not in {"★", "≈", "↓", "O"}:
                 raise MwuError(f"Unknown DSC label for {key} {scope}")
 
