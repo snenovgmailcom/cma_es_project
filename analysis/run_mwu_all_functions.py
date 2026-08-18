@@ -135,6 +135,14 @@ FIELDS = (
     "decision",
 )
 
+DISPLAY_NAMES = {
+    "MSC-CMA": "MSC-CMA-ES",
+    "BIPOP-CMA": "BIPOP-CMA-ES",
+    "LSRTDE": "L-SRTDE",
+    "NLSHADE-RSP": "NL-SHADE-RSP",
+    "NEA2PLUS-PY": "NEA2+",
+}
+
 
 class MwuError(RuntimeError):
     pass
@@ -315,27 +323,44 @@ def csv_text(rows: Iterable[Mapping[str, Any]], fields: Sequence[str]) -> str:
     return stream.getvalue()
 
 
-def summary_rows(rows: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
-    groups: dict[tuple[int, str], list[Mapping[str, Any]]] = defaultdict(list)
-    for row in rows:
-        groups[(int(row["budget"]), str(row["competitor"]))].append(row)
-    output = []
-    for (budget, competitor), group in sorted(groups.items()):
-        decisions = [str(row["decision"]) for row in group]
-        output.append(
-            {
-                "budget": budget,
-                "competitor": competitor,
-                "competitor_better": decisions.count("competitor better"),
-                "msc_better": decisions.count("MSC-CMA-ES better"),
-                "not_significant": decisions.count("not significant"),
-                "n_functions": len(group),
-            }
-        )
-    return output
+def display_name(algorithm: str) -> str:
+    return DISPLAY_NAMES.get(algorithm, algorithm)
+
+
+def format_budget(budget: int) -> str:
+    if budget >= 1_000_000 and budget % 1_000_000 == 0:
+        return f"{budget // 1_000_000}M"
+    if budget >= 1_000 and budget % 1_000 == 0:
+        return f"{budget // 1_000}K"
+    return str(budget)
+
+
+def format_u(value: Any) -> str:
+    number = float(value)
+    if number.is_integer():
+        return str(int(number))
+    return format(number, ".6g")
+
+
+def format_p(value: Any) -> str:
+    return format(float(value), ".6g")
+
+
+def decision_symbol(decision: str) -> str:
+    if decision == "competitor better":
+        return "+"
+    if decision == "MSC-CMA-ES better":
+        return "−"
+    if decision == "not significant":
+        return "≈"
+    raise MwuError(f"Unknown decision: {decision}")
 
 
 def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]]) -> str:
+    by_budget: dict[int, list[Mapping[str, Any]]] = defaultdict(list)
+    for row in rows:
+        by_budget[int(row["budget"])].append(row)
+
     lines = [
         f"# {suite.upper()}, D={dimension}",
         "",
@@ -350,20 +375,96 @@ def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]])
         "sample. For minimization, `probability_competitor_lower` is",
         r"$P(X_{competitor}<X_{MSC})+\frac12P(X_{competitor}=X_{MSC})$.",
         "",
-        "| Budget | Competitor | Competitor better | MSC-CMA-ES better | Not significant | Functions |",
-        "|---:|---|---:|---:|---:|---:|",
+        "Each function is reported with the U statistic, the raw two-sided",
+        "p-value, and the Bonferroni-adjusted p-value. In the adjusted-p rows,",
+        "`+` means that the competitor has significantly lower terminal errors,",
+        "`−` means that MSC-CMA-ES has significantly lower terminal errors, and",
+        "`≈` means that the difference is not significant at alpha=0.05.",
+        "Significant adjusted p-values are shown in bold.",
+        "",
     ]
-    for row in summary_rows(rows):
-        lines.append(
-            f"| {row['budget']} | {row['competitor']} | "
-            f"{row['competitor_better']} | {row['msc_better']} | "
-            f"{row['not_significant']} | {row['n_functions']} |"
+
+    for budget, budget_rows in sorted(by_budget.items()):
+        competitors = sorted({str(row["competitor"]) for row in budget_rows})
+        functions = sorted({int(row["function"]) for row in budget_rows})
+        lookup = {
+            (int(row["function"]), str(row["competitor"])): row
+            for row in budget_rows
+        }
+        if len(lookup) != len(budget_rows):
+            raise MwuError(
+                f"Duplicate function/competitor result in {suite} D={dimension} "
+                f"B={budget}"
+            )
+
+        ordered = ["BIPOP-CMA"]
+        ordered.extend(
+            algorithm
+            for algorithm in ("ARRDE", "LSRTDE", "NLSHADE-RSP", "j2020", "jSO")
+            if algorithm in competitors
         )
+        if "NEA2PLUS-PY" in competitors:
+            ordered.append("NEA2PLUS-PY")
+        if set(ordered) != set(competitors):
+            raise MwuError(
+                f"Unexpected competitor set in {suite} D={dimension} B={budget}: "
+                f"{competitors}"
+            )
+
+        family_size = len(functions)
+        lines.extend(
+            [
+                f"### Budget {format_budget(budget)}",
+                "",
+                f"Bonferroni family size: `{family_size}` functions.",
+                "",
+                "| Function | Statistic | MSC-CMA-ES | BIPOP-CMA-ES |  | "
+                + " | ".join(
+                    display_name(algorithm) for algorithm in ordered[1:]
+                )
+                + " |",
+                "|:--|:--|--:|--:|:-:|"
+                + "|".join("--:" for _ in ordered[1:])
+                + "|",
+            ]
+        )
+
+        for fid in functions:
+            function_rows = [lookup[(fid, algorithm)] for algorithm in ordered]
+            u_cells = [format_u(row["u_competitor"]) for row in function_rows]
+            raw_cells = [format_p(row["p_raw"]) for row in function_rows]
+            adjusted_cells = []
+            for row in function_rows:
+                p_adjusted = format_p(row["p_bonferroni"])
+                symbol = decision_symbol(str(row["decision"]))
+                cell = f"{p_adjusted} ({symbol})"
+                if symbol != "≈":
+                    cell = f"**{cell}**"
+                adjusted_cells.append(cell)
+
+            # The blank column reproduces the visual separation used by the
+            # existing result matrices between CMA-ES and the other baselines.
+            lines.append(
+                f"| **f{fid}** | U | reference | {u_cells[0]} |  | "
+                + " | ".join(u_cells[1:])
+                + " |"
+            )
+            lines.append(
+                f"|  | p | — | {raw_cells[0]} |  | "
+                + " | ".join(raw_cells[1:])
+                + " |"
+            )
+            lines.append(
+                f"|  | p_Bonf | — | {adjusted_cells[0]} |  | "
+                + " | ".join(adjusted_cells[1:])
+                + " |"
+            )
+        lines.append("")
+
     lines.extend(
         [
-            "",
-            "Complete per-function U statistics, raw p-values, Bonferroni-adjusted",
-            "p-values, effect directions, and sample medians are available in",
+            "Full-precision U statistics, raw and Bonferroni-adjusted p-values,",
+            "effect directions, sample medians, and family sizes are available in",
             "[`details.csv`](details.csv).",
             "",
         ]
