@@ -1,3 +1,19 @@
+<table align="right">
+<tr><th align="left">Contents</th></tr>
+<tr><td align="left">
+<a href="#mannwhitney-u-tests-on-terminal-errors">Mann–Whitney U tests on terminal errors</a><br>
+&nbsp;&nbsp;<a href="#budget-200k">Budget 200K</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-200k-u">Mann–Whitney U statistic</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-200k-raw-p">Raw two-sided p-value</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-200k-bonferroni">Bonferroni-adjusted p-value and decision</a><br>
+&nbsp;&nbsp;<a href="#budget-1m">Budget 1M</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-1m-u">Mann–Whitney U statistic</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-1m-raw-p">Raw two-sided p-value</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-1m-bonferroni">Bonferroni-adjusted p-value and decision</a><br>
+<a href="#deep-statistical-comparison">Deep Statistical Comparison</a>
+</td></tr>
+</table>
+
 # CEC2022, D=10
 
 ## Mann–Whitney U tests on terminal errors
@@ -18,9 +34,13 @@ p-value, and the Bonferroni-adjusted p-value. In the adjusted-p rows,
 `≈` means that the difference is not significant at alpha=0.05.
 Significant adjusted p-values are shown in bold.
 
+<a id="budget-200k"></a>
+
 ### Budget 200K
 
 Bonferroni family size: `12` functions.
+
+<a id="budget-200k-u"></a>
 
 #### Mann–Whitney U statistic
 
@@ -39,6 +59,8 @@ Bonferroni family size: `12` functions.
 | **f11** | 0 | 0 | 0 | 0 | 0 | 0 |
 | **f12** | 1293 | 178.5 | 2571 | 1991.5 | 85.5 | 2491 |
 
+<a id="budget-200k-raw-p"></a>
+
 #### Raw two-sided p-value
 
 | Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
@@ -55,6 +77,8 @@ Bonferroni family size: `12` functions.
 | **f10** | 0.0228747 | 0.84087 | 0.0609362 | 6.93466e-17 | 3.30368e-18 | 0.0609362 |
 | **f11** | 3.20624e-18 | 2.21602e-19 | 6.87834e-19 | 2.7847e-20 | 9.71836e-19 | 9.47901e-19 |
 | **f12** | 0.961817 | 3.71581e-14 | 3.91624e-18 | 3.33292e-06 | 2.94781e-16 | 3.64248e-16 |
+
+<a id="budget-200k-bonferroni"></a>
 
 #### Bonferroni-adjusted p-value and decision
 
@@ -73,9 +97,13 @@ Bonferroni family size: `12` functions.
 | **f11** | **3.84749e-17 (+)** | **2.65922e-18 (+)** | **8.25401e-18 (+)** | **3.34164e-19 (+)** | **1.1662e-17 (+)** | **1.13748e-17 (+)** |
 | **f12** | 1 (≈) | **4.45897e-13 (+)** | **4.69949e-17 (−)** | **3.9995e-05 (−)** | **3.53738e-15 (+)** | **4.37098e-15 (−)** |
 
+<a id="budget-1m"></a>
+
 ### Budget 1M
 
 Bonferroni family size: `12` functions.
+
+<a id="budget-1m-u"></a>
 
 #### Mann–Whitney U statistic
 
@@ -94,6 +122,8 @@ Bonferroni family size: `12` functions.
 | **f11** | 0 | 0 | 0 | 0 | 0 | 0 |
 | **f12** | 1627.5 | 0 | 2599 | 549.5 | 0 | 2599 |
 
+<a id="budget-1m-raw-p"></a>
+
 #### Raw two-sided p-value
 
 | Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
@@ -110,6 +140,8 @@ Bonferroni family size: `12` functions.
 | **f10** | 1.55129e-14 | 0.717796 | 3.30368e-18 | 1.14636e-18 | 2.78238e-19 | 3.30368e-18 |
 | **f11** | 1.90203e-18 | 3.7485e-19 | 2.78699e-20 | 1.39059e-20 | 2.78775e-20 | 9.59798e-19 |
 | **f12** | 0.00785762 | 1.05314e-19 | 7.43887e-20 | 1.79226e-07 | 1.6549e-19 | 3.79536e-20 |
+
+<a id="budget-1m-bonferroni"></a>
 
 #### Bonferroni-adjusted p-value and decision
 
@@ -131,3 +163,5 @@ Bonferroni family size: `12` functions.
 Full-precision U statistics, raw and Bonferroni-adjusted p-values,
 effect directions, sample medians, and family sizes are available in
 [`details.csv`](details.csv).
+
+## Deep Statistical Comparison

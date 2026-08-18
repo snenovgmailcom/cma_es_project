@@ -352,33 +352,59 @@ def decision_symbol(decision: str) -> str:
     raise MwuError(f"Unknown decision: {decision}")
 
 
+def budget_anchor(budget: int) -> str:
+    return f"budget-{format_budget(budget).lower()}"
+
+
 def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]]) -> str:
     by_budget: dict[int, list[Mapping[str, Any]]] = defaultdict(list)
     for row in rows:
         by_budget[int(row["budget"])].append(row)
 
     lines = [
-        f"# {suite.upper()}, D={dimension}",
-        "",
-        "## Mann–Whitney U tests on terminal errors",
-        "",
-        "Independent, two-sided Mann–Whitney U tests compare each competitor",
-        "with MSC-CMA-ES on every function. Each sample contains 51 unmodified",
-        "run-wise terminal errors. Bonferroni adjustment is applied over all",
-        "functions separately for each budget and competitor.",
-        "",
-        "The U statistic in [`details.csv`](details.csv) is for the competitor",
-        "sample. For minimization, `probability_competitor_lower` is",
-        r"$P(X_{competitor}<X_{MSC})+\frac12P(X_{competitor}=X_{MSC})$.",
-        "",
-        "Each function is reported with the U statistic, the raw two-sided",
-        "p-value, and the Bonferroni-adjusted p-value. In the adjusted-p rows,",
-        "`+` means that the competitor has significantly lower terminal errors,",
-        "`−` means that MSC-CMA-ES has significantly lower terminal errors, and",
-        "`≈` means that the difference is not significant at alpha=0.05.",
-        "Significant adjusted p-values are shown in bold.",
-        "",
+        '<table align="right">',
+        '<tr><th align="left">Contents</th></tr>',
+        '<tr><td align="left">',
+        '<a href="#mannwhitney-u-tests-on-terminal-errors">Mann–Whitney U tests on terminal errors</a><br>',
     ]
+    for budget in sorted(by_budget):
+        anchor = budget_anchor(budget)
+        lines.extend(
+            [
+                f'&nbsp;&nbsp;<a href="#{anchor}">Budget {format_budget(budget)}</a><br>',
+                f'&nbsp;&nbsp;&nbsp;&nbsp;<a href="#{anchor}-u">Mann–Whitney U statistic</a><br>',
+                f'&nbsp;&nbsp;&nbsp;&nbsp;<a href="#{anchor}-raw-p">Raw two-sided p-value</a><br>',
+                f'&nbsp;&nbsp;&nbsp;&nbsp;<a href="#{anchor}-bonferroni">Bonferroni-adjusted p-value and decision</a><br>',
+            ]
+        )
+    lines.extend(
+        [
+            '<a href="#deep-statistical-comparison">Deep Statistical Comparison</a>',
+            '</td></tr>',
+            '</table>',
+            "",
+            f"# {suite.upper()}, D={dimension}",
+            "",
+            "## Mann–Whitney U tests on terminal errors",
+            "",
+            "Independent, two-sided Mann–Whitney U tests compare each competitor",
+            "with MSC-CMA-ES on every function. Each sample contains 51 unmodified",
+            "run-wise terminal errors. Bonferroni adjustment is applied over all",
+            "functions separately for each budget and competitor.",
+            "",
+            "The U statistic in [`details.csv`](details.csv) is for the competitor",
+            "sample. For minimization, `probability_competitor_lower` is",
+            r"$P(X_{competitor}<X_{MSC})+\frac12P(X_{competitor}=X_{MSC})$.",
+            "",
+            "Each function is reported with the U statistic, the raw two-sided",
+            "p-value, and the Bonferroni-adjusted p-value. In the adjusted-p rows,",
+            "`+` means that the competitor has significantly lower terminal errors,",
+            "`−` means that MSC-CMA-ES has significantly lower terminal errors, and",
+            "`≈` means that the difference is not significant at alpha=0.05.",
+            "Significant adjusted p-values are shown in bold.",
+            "",
+        ]
+    )
 
     for budget, budget_rows in sorted(by_budget.items()):
         competitors = sorted({str(row["competitor"]) for row in budget_rows})
@@ -406,8 +432,11 @@ def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]])
             )
 
         family_size = len(functions)
+        anchor = budget_anchor(budget)
         lines.extend(
             [
+                f'<a id="{anchor}"></a>',
+                "",
                 f"### Budget {format_budget(budget)}",
                 "",
                 f"Bonferroni family size: `{family_size}` functions.",
@@ -424,6 +453,8 @@ def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]])
 
         lines.extend(
             [
+                f'<a id="{anchor}-u"></a>',
+                "",
                 "#### Mann–Whitney U statistic",
                 "",
                 header,
@@ -442,6 +473,8 @@ def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]])
         lines.extend(
             [
                 "",
+                f'<a id="{anchor}-raw-p"></a>',
+                "",
                 "#### Raw two-sided p-value",
                 "",
                 header,
@@ -459,6 +492,8 @@ def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]])
 
         lines.extend(
             [
+                "",
+                f'<a id="{anchor}-bonferroni"></a>',
                 "",
                 "#### Bonferroni-adjusted p-value and decision",
                 "",
@@ -488,6 +523,8 @@ def render_readme(suite: str, dimension: int, rows: Sequence[Mapping[str, Any]])
             "Full-precision U statistics, raw and Bonferroni-adjusted p-values,",
             "effect directions, sample medians, and family sizes are available in",
             "[`details.csv`](details.csv).",
+            "",
+            "## Deep Statistical Comparison",
             "",
         ]
     )
