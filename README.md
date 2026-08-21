@@ -20,7 +20,7 @@ arXiv:2606.15830, 2026.<br>
 <td width="33%" valign="top">
 
 <table>
-<tr><th colspan="2" align="left">Results</th></tr>
+<tr><th colspan="2" align="left">Benchmark results</th></tr>
 <tr><td><a href="experiments/cec2014">CEC2014</a></td><td>
   <a href="experiments/cec2014/d10">D=10</a> ·
   <a href="experiments/cec2014/d30">D=30</a></td></tr>
@@ -76,7 +76,7 @@ References:
 <td width="33%" valign="top">
 
 <table>
-<tr><th colspan="2" align="left">MWU and DSC</th></tr>
+<tr><th colspan="2" align="left">Statistical results: MWU and DSC</th></tr>
 <tr><td>CEC2014</td><td>
   <a href="mwu/cec2014/d10">D=10</a> ·
   <a href="mwu/cec2014/d30">D=30</a></td></tr>
