@@ -22,6 +22,7 @@ Independent, two-sided Mann–Whitney U tests compare each competitor
 with MSC-CMA-ES on every function. Each sample contains 51 unmodified
 run-wise terminal errors. Bonferroni adjustment is applied over all
 functions separately for each budget and competitor.
+The test is evaluated with SciPy's asymptotic Mann–Whitney U method (`method="asymptotic"`) with continuity correction (`use_continuity=True`).
 
 The U statistic in [`details.csv`](details.csv) is for the competitor
 sample. For minimization, `probability_competitor_lower` is
@@ -105,9 +106,9 @@ effect directions, sample medians, and family sizes are available in
 
 Following the fixed-budget analysis workflow described by
 [Wang et al. (2022)](https://doi.org/10.1145/3510426), we applied
-Deep Statistical Comparison through
-[DSCTool](https://doi.org/10.1016/j.asoc.2019.105977) to the 51
-run-wise terminal errors for each function.
+[Deep Statistical Comparison (Eftimov et al., 2017)](https://doi.org/10.1016/j.ins.2017.07.015)
+through [DSCTool (Eftimov et al., 2020)](https://doi.org/10.1016/j.asoc.2019.105977)
+to the 51 run-wise terminal errors for each function.
 
 IOHanalyzer: <https://iohanalyzer.liacs.nl/>; DSCTool service used for
 the analysis: <https://ws.ijs.si/dsc/>.

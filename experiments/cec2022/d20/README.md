@@ -2,7 +2,7 @@
 
 ## Ranking across metrics (budget 1M)
 
-Parallel-coordinate rank of all 7 algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
+Parallel-coordinate rank of all 7 algorithms on four aggregate metrics (worst-SUM, median-SUM, FBTC(B), best-SUM), per function class. Each line is one algorithm; for every axis the best value is at the top. MSC-CMA in red.
 
 <table>
 <tr>
@@ -28,27 +28,27 @@ Sums of per-function metrics, grouped by function class. Budget: 1,000,000 evalu
 |  | best | 3.4e-4 | **0** |    | 0.995 | 44.9 | 29.8 | 7.24 | 46.9 |
 |  | worst | 33.1 | 48.9 |    | **9.01** | 52.1 | 237 | 74.5 | 57 |
 |  | std | 5.44 | 22.3 |    | **1.39** | 1.45 | 48.6 | 17.7 | 3.26 |
-|  | FBTC | 3.264 | 3.865 |    | **4.141** | 3.506 | 3.000 | 3.228 | 3.167 |
+|  | FBTC(B) | 3.264 | 3.865 |    | **4.141** | 3.506 | 3.000 | 3.228 | 3.167 |
 | **Hybrid** (n=3) | mean | 29.4 | 51.7 |    | 22.9 | **19** | 146 | 38.3 | 21.4 |
 |  | median | 41.4 | 52.9 |    | 22.3 | **21.8** | 67.3 | 36 | 23 |
 |  | best | 0.841 | 0.606 |    | **0.543** | 0.767 | 3.5 | 5.61 | 0.974 |
 |  | worst | 72.8 | 89.2 |    | 42.3 | 45.5 | 1920 | 60 | **41.8** |
 |  | std | 22.2 | 21.6 |    | 13.9 | 16.5 | 294 | 13.8 | **12.6** |
-|  | FBTC | 0.461 | 0.327 |    | 0.586 | **0.779** | 0.263 | 0.326 | 0.501 |
+|  | FBTC(B) | 0.461 | 0.327 |    | 0.586 | **0.779** | 0.263 | 0.326 | 0.501 |
 | **Composition** (n=4) | mean | **435** | 532 |    | 524 | 845 | 719 | 716 | 817 |
 |  | median | **435** | 451 |    | 513 | 814 | 719 | 716 | 813 |
 |  | best | 422 | 427 |    | **417** | 512 | 712 | 698 | 812 |
 |  | worst | **452** | 827 |    | 813 | 928 | 734 | 726 | 916 |
 |  | std | 6.9 | 159 |    | 94.8 | 71 | **4.54** | 5.45 | 20.4 |
-|  | FBTC | **1.082** | 0.830 |    | 0.932 | 0.020 | 0.939 | 0.427 | 0.000 |
+|  | FBTC(B) | **1.082** | 0.830 |    | 0.932 | 0.020 | 0.939 | 0.427 | 0.000 |
 | **SUM** (n=12) | mean | **466** | 601 |    | 550 | 910 | 954 | 783 | 891 |
 |  | median | **478** | 506 |    | 538 | 881 | 881 | 774 | 888 |
 |  | best | 423 | 427 |    | **419** | 558 | 745 | 711 | 860 |
 |  | worst | **558** | 965 |    | 865 | 1025 | 2891 | 861 | 1014 |
 |  | std | **34.5** | 203 |    | 110 | 89 | 347 | 37 | 36.3 |
-|  | FBTC | 4.808 | 5.022 |    | **5.659** | 4.305 | 4.202 | 3.982 | 3.668 |
+|  | FBTC(B) | 4.808 | 5.022 |    | **5.659** | 4.305 | 4.202 | 3.982 | 3.668 |
 
-*FBTC = Fixed-Budget Target Coverage (sum across 51 log-uniform targets in [10²…10⁻⁸] per function); fixed-budget analogue of the COCO/BBOB ECDF. Higher is better.*
+*FBTC(B) = Fixed-Budget Target Coverage at evaluation budget B. For each function, it is the mean attainment rate over 51 log-uniform targets in [10²…10⁻⁸] and 51 runs, computed from the terminal best-so-far errors at that budget. Class and SUM values add the per-function FBTC(B) values. Each budget is evaluated separately; FBTC(B) is not an anytime measure. Higher is better.*
 
 ## Environment
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.

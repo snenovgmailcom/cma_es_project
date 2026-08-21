@@ -6,7 +6,7 @@ Official budgets — 10D: 100,000, 30D: 300,000.
 
 ## Ranking — D=10
 
-Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM). Best value at the top of each axis; MSC-CMA in red. Budget: 100,000 evaluations.
+Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, FBTC(B), best-SUM). Best value at the top of each axis; MSC-CMA in red. Budget: 100,000 evaluations.
 
 <table>
 <tr>
@@ -23,7 +23,7 @@ Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, FBTC,
 
 ## Budget scaling — D=10
 
-FBTC by budget, monotone envelope; higher is better.
+Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each point is a separate fixed-budget experiment; higher is better.
 
 <table>
 <tr>
@@ -74,7 +74,7 @@ Same rank, recomputed at 10,000,000 evaluations. Only classes with full 7-algori
 
 ## Ranking — D=30
 
-Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM). Best value at the top of each axis; MSC-CMA in red. Budget: 300,000 evaluations.
+Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, FBTC(B), best-SUM). Best value at the top of each axis; MSC-CMA in red. Budget: 300,000 evaluations.
 
 <table>
 <tr>
@@ -91,7 +91,7 @@ Parallel-coordinate rank on four aggregate metrics (worst-SUM, median-SUM, FBTC,
 
 ## Budget scaling — D=30
 
-FBTC by budget, monotone envelope; higher is better. Composition is shown as *median error* (lower is better): no algorithm reaches even the easiest target, so FBTC is zero for all.
+Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each point is a separate fixed-budget experiment; higher is better.
 
 <table>
 <tr>
@@ -156,7 +156,7 @@ Same rank, recomputed at 1,000,000 evaluations. Only classes with full 7-algorit
 | Composition | 10 | **2697** | 3472 |    | 2783 | 820474 | 3446 | 4231 | 3297 |
 | Composition | 30 | 6451 | 10157 |    | 6085 | **5599** | 8903 | 13911 | 5884 |
 
-## FBTC — Fixed-Budget Target Coverage (higher is better)
+## FBTC(B) — Fixed-Budget Target Coverage (higher is better)
 
 | Category | Dim | MSC-CMA-ES | BIPOP-CMA-ES |  | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|:--:|--:|--:|:-:|--:|--:|--:|--:|--:|
@@ -167,7 +167,7 @@ Same rank, recomputed at 1,000,000 evaluations. Only classes with full 7-algorit
 | Composition | 10 | 1.714 | 0.143 |    | 0.635 | 0.070 | **1.785** | 0.500 | 0.011 |
 | Composition | 30 | **0.000** | **0.000** |    | **0.000** | **0.000** | **0.000** | **0.000** | **0.000** |
 
-*FBTC = Fixed-Budget Target Coverage (sum across 51 log-uniform targets in [10²…10⁻⁸] per function); fixed-budget analogue of the COCO/BBOB ECDF. Higher is better.*
+*FBTC(B) = Fixed-Budget Target Coverage at evaluation budget B. For each function, it is the mean attainment rate over 51 log-uniform targets in [10²…10⁻⁸] and 51 runs, computed from the terminal best-so-far errors at that budget. Class and SUM values add the per-function FBTC(B) values. Each budget is evaluated separately; FBTC(B) is not an anytime measure. Higher is better.*
 
 ## Environment
 Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · SciPy 1.15.3 · pycma 4.4.2 · minionpy 1.5.0.

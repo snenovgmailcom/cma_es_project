@@ -8,13 +8,13 @@ figures, followed by the per-metric summary tables.
 
 Rules (agreed):
   * Ranking axes per (dim, class): worst-SUM, median-SUM, <cov>, best-SUM,
-    where <cov> = FBTC if ANY algorithm has FBTC>0 for that (dim,class) at
+    where <cov> = FBTC(B) if ANY algorithm has FBTC>0 for that (dim,class) at
     the official budget, else mean-SUM.
   * Budget axis: auto-discovered from the directories — the budgets common
     to ALL plotted algorithms, restricted (per class) to budgets where every
     algorithm has the WHOLE class present.
-  * Budget metric per class: FBTC (monotone envelope) if any algorithm has
-    FBTC>0 at any budget; else median-SUM (lower-better, no envelope).
+  * Budget metric per class: raw FBTC(B) at each evaluated fixed budget.
+    No running maximum and no metric substitution are applied.
   * Legend: matplotlib loc='best' (internal), consistent with cell_report.
   * Dimensions are passed explicitly via --dims (controls e.g. D=2 inclusion).
   * Reads *.pkl; run where the data lives.
@@ -148,7 +148,7 @@ def fig_ranking(data, algos, suite, dim, cls, out):
     # decide coverage axis: FBTC unless all algos have FBTC==0
     fbtc_sum = {a: sum(data[a][f]['FBTC'] for f in common) for a in algos}
     use_fbtc = any(v > 1e-12 for v in fbtc_sum.values())
-    cov_label, cov_key = ('FBTC', 'FBTC') if use_fbtc else ('mean-SUM', 'mean')
+    cov_label, cov_key = ('FBTC(B)', 'FBTC') if use_fbtc else ('mean-SUM', 'mean')
     axes = [('worst-SUM', 'worst', False), ('median-SUM', 'median', False),
             (cov_label, cov_key, use_fbtc), ('best-SUM', 'best', False)]
 
@@ -260,12 +260,6 @@ def fig_ranking(data, algos, suite, dim, cls, out):
 
 # --- budget figure ---------------------------------------------------------
 
-def _env(v):
-    o, m = [], -np.inf
-    for x in v:
-        m = max(m, x)
-        o.append(m)
-    return o
 
 
 def _bl(b):
@@ -306,36 +300,27 @@ def fig_budget(base, algos, suite, dim, cls, out):
     if len(budgets) < 2:
         return False, budgets, None
     nmax = len(mem)
-    # FBTC unless all-zero at every budget -> median
-    any_fbtc = any(series[b][a]['FBTC'] > 1e-12
-                   for b in budgets for a in algos)
-    # Metric switching is restricted to the composition class: elsewhere a
-    # flat-zero FBTC panel is preferred over a silent change of metric.
-    metric = 'FBTC' if (any_fbtc or cls != 'composition') else 'median'
+    # Raw fixed-budget coverage is shown even when it is identically zero.
+    # This intentionally avoids both a running maximum and metric substitution.
+    metric = 'FBTC'
 
     x = np.arange(len(budgets))
     fig, ax = plt.subplots(figsize=(7, 5.0))
     for a in algos:
         raw = [series[b][a][metric] for b in budgets]
-        y = _env(raw) if metric == 'FBTC' else raw
-        ax.plot(x, y, label=DISPLAY.get(a, a), **STYLE[a])
-    if metric == 'FBTC':
-        if cls != 'composition':
-            ax.axhline(nmax, ls=':', color='gray', lw=1)
-            ax.text(x[-1], nmax, f' max={nmax}', va='center', ha='left',
-                    color='gray', fontsize=9)
-            ax.set_ylim(0, nmax * 1.06)
-        else:
-            ax.set_ylim(0, None)
-        ylab = f'FBTC (sum over {nmax} functions)'
-        title = f'{suite.upper()}  D={dim}\n{CLASS_TITLE[cls]} class'
+        ax.plot(x, raw, label=DISPLAY.get(a, a), **STYLE[a])
+    if cls != 'composition':
+        ax.axhline(nmax, ls=':', color='gray', lw=1)
+        ax.text(x[-1], nmax, f' max={nmax}', va='center', ha='left',
+                color='gray', fontsize=9)
+        ax.set_ylim(0, nmax * 1.06)
     else:
-        ylab = f'Median error, summed over {nmax} functions (lower is better)'
-        title = (f'{suite.upper()}  D={dim}\n'
-                 f'{CLASS_TITLE[cls]} class (median error)')
+        ax.set_ylim(0, None)
+    ylab = f'SUM(FBTC(B)) over {nmax} functions'
+    title = f'{suite.upper()}  D={dim}\n{CLASS_TITLE[cls]} class'
     ax.set_xticks(x)
     ax.set_xticklabels([_bl(b) for b in budgets])
-    ax.set_xlabel('Budget (MaxFES)', fontsize=11)
+    ax.set_xlabel('Fixed evaluation budget B (NFE)', fontsize=11)
     ax.set_ylabel(ylab, fontsize=10.5)
     ax.set_title(title, fontsize=12)
     ax.grid(axis='y', ls=':', alpha=0.5)
@@ -433,7 +418,7 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
         o.append(f'## Ranking — D={dim}')
         o.append('')
         o.append(f'Parallel-coordinate rank on four aggregate metrics '
-                 f'(worst-SUM, median-SUM, FBTC, best-SUM). Best value at '
+                 f'(worst-SUM, median-SUM, FBTC(B), best-SUM). Best value at '
                  f'the top of each axis; MSC-CMA in red. '
                  f'Budget: {officials[dim]:,} evaluations.')
         o.append('')
@@ -445,12 +430,9 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
         if b:
             o.append(f'## Budget scaling — D={dim}')
             o.append('')
-            note = ('FBTC by budget, monotone envelope; higher is better.')
-            # composition may be median
-            if budget_metric.get((dim, 'composition')) == 'median':
-                note += (' Composition is shown as *median error* '
-                         '(lower is better): no algorithm reaches even the '
-                         'easiest target, so FBTC is zero for all.')
+            note = ('Raw FBTC(B) at each evaluated fixed budget; no running maximum '
+                    'is applied. Each point is a separate fixed-budget experiment; '
+                    'higher is better.')
             o.append(note)
             o.append('')
             o.append(b)
@@ -481,13 +463,16 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
     o.append('')
     o.append(metric_table(per_dim, suite, dims, 'worst'))
     o.append('')
-    o.append('## FBTC — Fixed-Budget Target Coverage (higher is better)')
+    o.append('## FBTC(B) — Fixed-Budget Target Coverage (higher is better)')
     o.append('')
     o.append(metric_table(per_dim, suite, dims, 'FBTC'))
     o.append('')
-    o.append('*FBTC = Fixed-Budget Target Coverage (sum across 51 log-uniform '
-             'targets in [10²…10⁻⁸] per function); fixed-budget analogue of '
-             'the COCO/BBOB ECDF. Higher is better.*')
+    o.append('*FBTC(B) = Fixed-Budget Target Coverage at evaluation budget B: '
+             'for each function, the mean attainment rate over 51 log-uniform targets '
+             'in [10²…10⁻⁸] and 51 runs, computed from the terminal best-so-far errors '
+             'at that budget. The tables sum per-function FBTC(B) within each class. '
+             'Each budget is evaluated separately; FBTC(B) is not an anytime measure. '
+             'Higher is better.*')
     o.append('')
     o.append('## Environment')
     o.append('Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · '

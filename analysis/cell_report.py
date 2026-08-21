@@ -12,8 +12,8 @@ reproducible style shared across every cell:
      One line per algorithm; per axis the best value sits at the top.
 
   2. Budget-scaling figures (budget_basic.png, budget_hybrid.png,
-     budget_composition.png) — FBTC vs budget, MONOTONE ENVELOPE
-     (running maximum over budgets; see paper, sec:budget).
+     budget_composition.png) — raw FBTC(B) vs fixed evaluation budget.
+     Each point is a separate fixed-budget experiment; no running maximum is applied.
      PER-CLASS budget axis: a budget B is included for class C only if ALL
      plotted algorithms have the ENTIRE class C present at B. Classes with
      fewer than two such budgets get no panel.
@@ -99,7 +99,7 @@ CLASS_TITLE = {'basic': 'unimodal and simple multimodal',
 # Ranking axes: (display label, metric key, higher_is_better).
 RANK_AXES = [('worst-SUM', 'worst', False),
              ('median-SUM', 'median', False),
-             ('FBTC', 'FBTC', True),
+             ('FBTC(B)', 'FBTC', True),
              ('best-SUM', 'best', False)]
 
 METRICS = ['mean', 'median', 'best', 'worst', 'std', 'FBTC']
@@ -203,7 +203,7 @@ def fig_ranking(data, algos, suite, cls, out_path, tie_rtol=1e-9, tie_atol=1e-9)
     if not common:
         return False
     use_fbtc = any(v > 1e-12 for v in fbtc_s.values())
-    cov = ('FBTC', 'FBTC', True) if use_fbtc else ('mean-SUM', 'mean', False)
+    cov = ('FBTC(B)', 'FBTC', True) if use_fbtc else ('mean-SUM', 'mean', False)
     rank_axes = [RANK_AXES[0], RANK_AXES[1], cov, RANK_AXES[3]]
     sums = {}
     for label, key, hb in rank_axes:
@@ -334,15 +334,9 @@ def fig_ranking(data, algos, suite, cls, out_path, tie_rtol=1e-9, tie_atol=1e-9)
 
 
 # ---------------------------------------------------------------------------
-# Budget-scaling figures (monotone envelope, per-class budget axis)
+# Budget-scaling figures (raw FBTC(B), per-class budget axis)
 # ---------------------------------------------------------------------------
 
-def _envelope(vals):
-    out, m = [], -np.inf
-    for v in vals:
-        m = max(m, v)
-        out.append(m)
-    return out
 
 
 def _fmt_budget(b):
@@ -396,7 +390,7 @@ def fig_budget(base_dir, algos, suite, cls, out_path):
     fig, ax = plt.subplots(figsize=(7, 5.0))
     for a in algos:
         raw = [fbtc[b][a] for b in budgets]
-        ax.plot(x, _envelope(raw), label=DISPLAY.get(a, a), **STYLE[a])
+        ax.plot(x, raw, label=DISPLAY.get(a, a), **STYLE[a])
     if cls != 'composition':
         ax.axhline(nmax, ls=':', color='gray', lw=1)
         ax.text(x[-1], nmax, f' max={nmax}', va='center', ha='left',
@@ -406,8 +400,8 @@ def fig_budget(base_dir, algos, suite, cls, out_path):
         ax.set_ylim(0, None)
     ax.set_xticks(x)
     ax.set_xticklabels([_fmt_budget(b) for b in budgets])
-    ax.set_xlabel('Budget (MaxFES)', fontsize=11)
-    ax.set_ylabel(f'FBTC (sum over {nmax} functions)', fontsize=11)
+    ax.set_xlabel('Fixed evaluation budget B (NFE)', fontsize=11)
+    ax.set_ylabel(f'SUM(FBTC(B)) over {nmax} functions', fontsize=11)
     ax.set_title(f'{suite.upper()}  {dimlabel}\n{CLASS_TITLE[cls]} class',
                  fontsize=12)
     ax.grid(axis='y', ls=':', alpha=0.5)
@@ -476,7 +470,8 @@ def build_table(data, suite):
                     s = f'**{s}**'
                 cells.append(s)
             cat = f'**{label}** (n={n})' if first else ''
-            rows.append(f'| {cat} | {metric} | ' + ' | '.join(cells) + ' |')
+            display_metric = 'FBTC(B)' if metric == 'FBTC' else metric
+            rows.append(f'| {cat} | {display_metric} | ' + ' | '.join(cells) + ' |')
             first = False
 
     for label, members in class_groups:
@@ -521,7 +516,7 @@ def build_readme(suite, dimlbl, official, data, rank_made, budget_made,
     o.append(f'## Ranking across metrics (budget {_fmt_budget(official).upper()})')
     o.append('')
     o.append(f'Parallel-coordinate rank of all {len(data)} algorithms on four '
-             'aggregate metrics (worst-SUM, median-SUM, FBTC, best-SUM), per '
+             'aggregate metrics (worst-SUM, median-SUM, FBTC(B), best-SUM), per '
              'function class. Each line is one algorithm; for every axis the '
              'best value is at the top. MSC-CMA in red.')
     o.append('')
@@ -534,10 +529,10 @@ def build_readme(suite, dimlbl, official, data, rank_made, budget_made,
     if bt:
         o.append('## Budget scaling')
         o.append('')
-        o.append(f'FBTC by budget, monotone envelope (running maximum over '
-                 f'budgets). Higher is better. The budget axis is per class: a '
-                 f'budget is shown only where all {len(data)} algorithms cover '
-                 f'the whole class. MSC-CMA in red.')
+        o.append(f'Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. '
+                 f'Each point is a separate fixed-budget experiment. Higher is better. '
+                 f'The budget axis is per class: a budget is shown only where all '
+                 f'{len(data)} algorithms cover the whole class. MSC-CMA in red.')
         o.append('')
         o.append(bt)
         o.append('')
@@ -562,9 +557,12 @@ def build_readme(suite, dimlbl, official, data, rank_made, budget_made,
     o.append('')
     o.append(build_table(data, suite))
     o.append('')
-    o.append('*FBTC = Fixed-Budget Target Coverage (sum across 51 log-uniform '
-             'targets in [10²…10⁻⁸] per function); fixed-budget analogue of '
-             'the COCO/BBOB ECDF. Higher is better.*')
+    o.append('*FBTC(B) = Fixed-Budget Target Coverage at evaluation budget B: '
+             'for each function, the mean attainment rate over 51 log-uniform targets '
+             'in [10²…10⁻⁸] and 51 runs, computed from the terminal best-so-far errors '
+             'at that budget. Class and SUM rows add the per-function FBTC(B) values. '
+             'Each budget is evaluated separately; FBTC(B) is not an anytime measure. '
+             'Higher is better.*')
     o.append('')
     o.append('## Environment')
     o.append('Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · '
