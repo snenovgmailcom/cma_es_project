@@ -47,7 +47,7 @@ arXiv:2606.15830, 2026.<br>
 
 <p>
 Individual-function comparisons use independent two-sided
-<strong>Mann–Whitney U (MW-U) tests</strong> on the 51 run-wise terminal errors,
+<strong>Mann–Whitney U (MWU) tests</strong> on the 51 run-wise terminal errors,
 with Bonferroni adjustment over the functions of each
 suite–dimension–budget setting.
 </p>
@@ -76,7 +76,7 @@ References:
 <td width="33%" valign="top">
 
 <table>
-<tr><th colspan="2" align="left">MW-U and DSC</th></tr>
+<tr><th colspan="2" align="left">MWU and DSC</th></tr>
 <tr><td>CEC2014</td><td>
   <a href="mwu/cec2014/d10">D=10</a> ·
   <a href="mwu/cec2014/d30">D=30</a></td></tr>
@@ -137,7 +137,7 @@ algorithms/    Core MSC-CMA-ES
 analysis/      Aggregation, comparison, and figures
   cell_report.py    per-cell report: ranking + budget-scaling figures + README
   suite_report.py   per-suite report: per-dimension figures + cross-dim README
-  compare.py        per-function Wilcoxon comparison vs a reference algorithm
+  compare.py        per-function comparison vs a reference algorithm
   summary_grid_clean.py  shared metric/class definitions (FBTC, function classes)
 benchmark/     Runners and wrappers
   msc.py            run MSC-CMA-ES on a CEC suite
