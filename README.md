@@ -16,6 +16,7 @@ arXiv:2606.15830, 2026.<br>
 </blockquote>
 
 </td>
+
 <td width="33%" valign="top">
 
 <table>
@@ -38,22 +39,44 @@ arXiv:2606.15830, 2026.<br>
 
 </td>
 </tr>
+
 <tr>
 <td width="67%" valign="top">
 
 <strong>Statistical analysis</strong>
 
-<p>Individual-function comparisons use independent two-sided <strong>Mann–Whitney U tests</strong> on the 51 run-wise terminal errors, with Bonferroni adjustment over the functions of each suite–dimension–budget setting.</p>
+<p>
+Individual-function comparisons use independent two-sided
+<strong>Mann–Whitney U (MW-U) tests</strong> on the 51 run-wise terminal errors,
+with Bonferroni adjustment over the functions of each
+suite–dimension–budget setting.
+</p>
 
-<p><strong>Deep Statistical Comparison (DSC)</strong> is performed through <a href="https://ws.ijs.si/dsc/">DSCTool</a> following the fixed-budget analysis perspective implemented in <a href="https://iohanalyzer.liacs.nl/">IOHanalyzer</a>. Per-function rankings use Anderson–Darling comparisons (<code>alpha=0.05</code>, <code>epsilon=0</code>, <code>monte_carlo_iterations=0</code>), followed by Friedman omnibus tests and Holm-adjusted post-hoc comparisons when the omnibus null hypothesis is rejected.</p>
+<p>
+<strong>Deep Statistical Comparison (DSC)</strong> is performed through
+<a href="https://ws.ijs.si/dsc/">DSCTool</a> following the fixed-budget
+analysis perspective implemented in
+<a href="https://iohanalyzer.liacs.nl/">IOHanalyzer</a>.
+Per-function rankings use Anderson–Darling comparisons
+(<code>alpha=0.05</code>, <code>epsilon=0</code>,
+<code>monte_carlo_iterations=0</code>), followed by Friedman omnibus tests
+and Holm-adjusted post-hoc comparisons when the omnibus null hypothesis
+is rejected.
+</p>
 
-<p>References: <a href="https://doi.org/10.1145/3510426">Wang et al. (2022), IOHanalyzer</a> · <a href="https://doi.org/10.1016/j.ins.2017.07.015">Eftimov et al. (2017), Deep Statistics</a> · <a href="https://doi.org/10.1016/j.asoc.2019.105977">Eftimov et al. (2020), DSCTool</a></p>
+<p>
+References:
+<a href="https://doi.org/10.1145/3510426">Wang et al. (2022), IOHanalyzer</a> ·
+<a href="https://doi.org/10.1016/j.ins.2017.07.015">Eftimov et al. (2017), Deep Statistics</a> ·
+<a href="https://doi.org/10.1016/j.asoc.2019.105977">Eftimov et al. (2020), DSCTool</a>
+</p>
 
 </td>
+
 <td width="33%" valign="top">
 
 <table>
-<tr><th colspan="2" align="left">Mann–Whitney U tests on terminal errors</th></tr>
+<tr><th colspan="2" align="left">MW-U and DSC</th></tr>
 <tr><td>CEC2014</td><td>
   <a href="mwu/cec2014/d10">D=10</a> ·
   <a href="mwu/cec2014/d30">D=30</a></td></tr>
