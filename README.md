@@ -1,6 +1,24 @@
 # MSC-CMA-ES
 
-<table align="right">
+<table>
+<tr>
+<td width="67%" valign="top">
+
+<strong>Multi-Start Clustering CMA-ES</strong> — structure-aware restarts for CMA-ES via cyclic nearest-better basin discovery.
+
+<p>Reference implementation, baselines, and experimental results for the paper:</p>
+
+<blockquote>
+D. Nedanovski, S. Nenov, D. Pilev.<br>
+<em>MSC-CMA-ES: Structure-Aware Restarts for CMA-ES via Cyclic Nearest-Better Basin Discovery.</em><br>
+arXiv:2606.15830, 2026.<br>
+<a href="https://doi.org/10.48550/arXiv.2606.15830">https://doi.org/10.48550/arXiv.2606.15830</a>
+</blockquote>
+
+</td>
+<td width="33%" valign="top">
+
+<table>
 <tr><th colspan="2" align="left">Results</th></tr>
 <tr><td><a href="experiments/cec2014">CEC2014</a></td><td>
   <a href="experiments/cec2014/d10">D=10</a> ·
@@ -18,9 +36,23 @@
   <a href="experiments/cec2022/d20">D=20</a></td></tr>
 </table>
 
-<br clear="right">
+</td>
+</tr>
+<tr>
+<td width="67%" valign="top">
 
-<table align="right">
+<strong>Statistical analysis</strong>
+
+<p>Individual-function comparisons use independent two-sided <strong>Mann–Whitney U tests</strong> on the 51 run-wise terminal errors, with Bonferroni adjustment over the functions of each suite–dimension–budget setting.</p>
+
+<p><strong>Deep Statistical Comparison (DSC)</strong> is performed through <a href="https://ws.ijs.si/dsc/">DSCTool</a> following the fixed-budget analysis perspective implemented in <a href="https://iohanalyzer.liacs.nl/">IOHanalyzer</a>. Per-function rankings use Anderson–Darling comparisons (<code>alpha=0.05</code>, <code>epsilon=0</code>, <code>monte_carlo_iterations=0</code>), followed by Friedman omnibus tests and Holm-adjusted post-hoc comparisons when the omnibus null hypothesis is rejected.</p>
+
+<p>References: <a href="https://doi.org/10.1145/3510426">Wang et al. (2022), IOHanalyzer</a> · <a href="https://doi.org/10.1016/j.ins.2017.07.015">Eftimov et al. (2017), Deep Statistics</a> · <a href="https://doi.org/10.1016/j.asoc.2019.105977">Eftimov et al. (2020), DSCTool</a></p>
+
+</td>
+<td width="33%" valign="top">
+
+<table>
 <tr><th colspan="2" align="left">Mann–Whitney U tests on terminal errors</th></tr>
 <tr><td>CEC2014</td><td>
   <a href="mwu/cec2014/d10">D=10</a> ·
@@ -38,14 +70,9 @@
   <a href="mwu/cec2022/d20">D=20</a></td></tr>
 </table>
 
-**Multi-Start Clustering CMA-ES** — structure-aware restarts for CMA-ES via cyclic
-nearest-better basin discovery.
-
-Reference implementation, baselines, and experimental results for the paper:
-
-> D. Nedanovski, S. Nenov, D. Pilev.
-> *MSC-CMA-ES: Structure-Aware Restarts for CMA-ES via Cyclic Nearest-Better Basin Discovery.*
-> arXiv:2606.15830, 2026. https://doi.org/10.48550/arXiv.2606.15830
+</td>
+</tr>
+</table>
 
 ## Overview
 
