@@ -1,0 +1,729 @@
+{
+  "result" : {
+    "valid_methods" : [ "friedman", "friedman-aligned-rank", "iman-davenport" ],
+    "ranked_matrix" : [ {
+      "problem" : "F1_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 6.5
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 6.5
+      } ]
+    }, {
+      "problem" : "F2_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 1.5
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 1.5
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 7.0
+      } ]
+    }, {
+      "problem" : "F3_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 7.0
+      } ]
+    }, {
+      "problem" : "F4_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 5.0
+      } ]
+    }, {
+      "problem" : "F5_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 2.0
+      } ]
+    }, {
+      "problem" : "F6_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 1.5
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 1.5
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 7.0
+      } ]
+    }, {
+      "problem" : "F7_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 5.0
+      } ]
+    }, {
+      "problem" : "F8_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 6.5
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 6.5
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 2.0
+      } ]
+    }, {
+      "problem" : "F9_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 6.5
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 6.5
+      } ]
+    }, {
+      "problem" : "F10_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 3.0
+      } ]
+    }, {
+      "problem" : "F11_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 5.5
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 1.5
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 1.5
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 5.5
+      } ]
+    }, {
+      "problem" : "F12_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 4.5
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 4.5
+      } ]
+    }, {
+      "problem" : "F13_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 5.0
+      } ]
+    }, {
+      "problem" : "F14_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 1.0
+      } ]
+    }, {
+      "problem" : "F15_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 5.0
+      } ]
+    }, {
+      "problem" : "F16_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 4.0
+      } ]
+    }, {
+      "problem" : "F17_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 4.5
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 4.5
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 7.0
+      } ]
+    }, {
+      "problem" : "F18_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 4.5
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 4.5
+      } ]
+    }, {
+      "problem" : "F19_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 5.5
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 5.5
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 4.0
+      } ]
+    }, {
+      "problem" : "F20_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 4.0
+      } ]
+    }, {
+      "problem" : "F21_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 4.5
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 4.5
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 7.0
+      } ]
+    }, {
+      "problem" : "F22_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 4.5
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 6.5
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 4.5
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 6.5
+      } ]
+    }, {
+      "problem" : "F23_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 7.0
+      } ]
+    }, {
+      "problem" : "F24_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 6.0
+      } ]
+    }, {
+      "problem" : "F25_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 7.0
+      } ]
+    }, {
+      "problem" : "F26_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 5.0
+      } ]
+    }, {
+      "problem" : "F27_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 4.5
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 2.5
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 4.5
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 6.0
+      } ]
+    }, {
+      "problem" : "F28_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 5.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 7.0
+      } ]
+    }, {
+      "problem" : "F29_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 4.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 7.0
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 6.0
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 5.0
+      } ]
+    }, {
+      "problem" : "F30_30D",
+      "result" : [ {
+        "algorithm" : "ARRDE",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 6.5
+      }, {
+        "algorithm" : "j2020",
+        "rank" : 6.5
+      }, {
+        "algorithm" : "jSO",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "LSRTDE",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 4.5
+      }, {
+        "algorithm" : "NLSHADE-RSP",
+        "rank" : 4.5
+      } ]
+    } ],
+    "number_algorithms" : 7,
+    "parametric_tests" : false
+  },
+  "success" : true
+}

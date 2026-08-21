@@ -1,0 +1,8 @@
+suite,dimension,budget,scope,position_average,position_min,position_max,position_label,position_interval,tie_size,dense_group,algorithm,rank_sum2,mean_dsc_rank,k,n_functions,omnibus_method,omnibus_statistic,omnibus_p_value,omnibus_message
+cec2014,30,1000000,composition,1.0,1,1,1/7,1/7,1,1,LSRTDE,38,2.375,7,8,friedman,22.004464285714285,0.0012086198904378564,The null hypothesis is rejected.
+cec2014,30,1000000,composition,2.0,2,2,2/7,2/7,1,2,ARRDE,47,2.9375,7,8,friedman,22.004464285714285,0.0012086198904378564,The null hypothesis is rejected.
+cec2014,30,1000000,composition,3.5,3,4,3.5/7,3-4/7 (tie),2,3,BIPOP-CMA,54,3.375,7,8,friedman,22.004464285714285,0.0012086198904378564,The null hypothesis is rejected.
+cec2014,30,1000000,composition,3.5,3,4,3.5/7,3-4/7 (tie),2,3,jSO,54,3.375,7,8,friedman,22.004464285714285,0.0012086198904378564,The null hypothesis is rejected.
+cec2014,30,1000000,composition,5.0,5,5,5/7,5/7,1,4,MSC-CMA,62,3.875,7,8,friedman,22.004464285714285,0.0012086198904378564,The null hypothesis is rejected.
+cec2014,30,1000000,composition,6.0,6,6,6/7,6/7,1,5,NLSHADE-RSP,95,5.9375,7,8,friedman,22.004464285714285,0.0012086198904378564,The null hypothesis is rejected.
+cec2014,30,1000000,composition,7.0,7,7,7/7,7/7,1,6,j2020,98,6.125,7,8,friedman,22.004464285714285,0.0012086198904378564,The null hypothesis is rejected.

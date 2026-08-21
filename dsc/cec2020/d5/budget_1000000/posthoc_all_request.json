@@ -1,0 +1,1 @@
+{"algorithm_means":[{"algorithm":"ARRDE","mean":3.1},{"algorithm":"BIPOP-CMA","mean":3.9},{"algorithm":"LSRTDE","mean":6.15},{"algorithm":"MSC-CMA","mean":4.3},{"algorithm":"NLSHADE-RSP","mean":3.1},{"algorithm":"j2020","mean":3.05},{"algorithm":"jSO","mean":4.4}],"k":7,"n":10,"base_algorithm":"j2020","method":{"name":"friedman","alpha":0.05}}

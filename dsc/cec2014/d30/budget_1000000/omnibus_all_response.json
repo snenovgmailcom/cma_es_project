@@ -1,0 +1,34 @@
+{
+  "result" : {
+    "message" : "The null hypothesis is rejected.",
+    "p_value" : 7.590383876987516E-11,
+    "t" : 58.88214285714278,
+    "method" : {
+      "name" : "friedman",
+      "alpha" : 0.05
+    },
+    "algorithm_means" : [ {
+      "algorithm" : "ARRDE",
+      "mean" : 3.0166666666666666
+    }, {
+      "algorithm" : "BIPOP-CMA",
+      "mean" : 3.6
+    }, {
+      "algorithm" : "LSRTDE",
+      "mean" : 2.7333333333333334
+    }, {
+      "algorithm" : "MSC-CMA",
+      "mean" : 4.6
+    }, {
+      "algorithm" : "NLSHADE-RSP",
+      "mean" : 5.266666666666667
+    }, {
+      "algorithm" : "j2020",
+      "mean" : 5.833333333333333
+    }, {
+      "algorithm" : "jSO",
+      "mean" : 2.95
+    } ]
+  },
+  "success" : true
+}

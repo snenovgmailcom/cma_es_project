@@ -1,0 +1,88 @@
+{
+  "result" : [ {
+    "name" : "ZValue",
+    "algorithms" : [ {
+      "algorithm" : "ARRDE",
+      "value" : -0.8798335881615017
+    }, {
+      "algorithm" : "BIPOP-CMA",
+      "value" : -3.3640696017939766
+    }, {
+      "algorithm" : "j2020",
+      "value" : -1.3973827576682674
+    }, {
+      "algorithm" : "jSO",
+      "value" : -1.9666868441257095
+    }, {
+      "algorithm" : "LSRTDE",
+      "value" : -4.036883522152772
+    }, {
+      "algorithm" : "MSC-CMA",
+      "value" : -2.1219515949777397
+    } ]
+  }, {
+    "name" : "UnadjustedPValue",
+    "algorithms" : [ {
+      "algorithm" : "ARRDE",
+      "value" : 0.1894747330486391
+    }, {
+      "algorithm" : "BIPOP-CMA",
+      "value" : 3.840108585239946E-4
+    }, {
+      "algorithm" : "j2020",
+      "value" : 0.0811492506628545
+    }, {
+      "algorithm" : "jSO",
+      "value" : 0.024609662254695616
+    }, {
+      "algorithm" : "LSRTDE",
+      "value" : 2.7082972184944733E-5
+    }, {
+      "algorithm" : "MSC-CMA",
+      "value" : 0.01692090153755867
+    } ]
+  }, {
+    "name" : "Holm",
+    "algorithms" : [ {
+      "algorithm" : "ARRDE",
+      "value" : 0.1894747330486391
+    }, {
+      "algorithm" : "BIPOP-CMA",
+      "value" : 0.001920054292619973
+    }, {
+      "algorithm" : "j2020",
+      "value" : 0.162298501325709
+    }, {
+      "algorithm" : "jSO",
+      "value" : 0.07382898676408685
+    }, {
+      "algorithm" : "LSRTDE",
+      "value" : 1.6249783310966838E-4
+    }, {
+      "algorithm" : "MSC-CMA",
+      "value" : 0.06768360615023468
+    } ]
+  }, {
+    "name" : "Hochberg",
+    "algorithms" : [ {
+      "algorithm" : "ARRDE",
+      "value" : 0.1894747330486391
+    }, {
+      "algorithm" : "BIPOP-CMA",
+      "value" : 0.001920054292619973
+    }, {
+      "algorithm" : "j2020",
+      "value" : 0.162298501325709
+    }, {
+      "algorithm" : "jSO",
+      "value" : 0.07382898676408685
+    }, {
+      "algorithm" : "LSRTDE",
+      "value" : 1.6249783310966838E-4
+    }, {
+      "algorithm" : "MSC-CMA",
+      "value" : 0.06768360615023468
+    } ]
+  } ],
+  "success" : true
+}

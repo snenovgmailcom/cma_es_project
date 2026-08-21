@@ -1,0 +1,88 @@
+{
+  "result" : [ {
+    "name" : "ZValue",
+    "algorithms" : [ {
+      "algorithm" : "ARRDE",
+      "value" : -0.6210590034081189
+    }, {
+      "algorithm" : "BIPOP-CMA",
+      "value" : -2.432481096681799
+    }, {
+      "algorithm" : "j2020",
+      "value" : -1.7596671763230034
+    }, {
+      "algorithm" : "jSO",
+      "value" : -2.8465204322872113
+    }, {
+      "algorithm" : "LSRTDE",
+      "value" : -4.192148273004801
+    }, {
+      "algorithm" : "NLSHADE-RSP",
+      "value" : -0.4657942525560893
+    } ]
+  }, {
+    "name" : "UnadjustedPValue",
+    "algorithms" : [ {
+      "algorithm" : "ARRDE",
+      "value" : 0.2672804010172525
+    }, {
+      "algorithm" : "BIPOP-CMA",
+      "value" : 0.0074978871247985135
+    }, {
+      "algorithm" : "j2020",
+      "value" : 0.03923212713278378
+    }, {
+      "algorithm" : "jSO",
+      "value" : 0.002209994632377534
+    }, {
+      "algorithm" : "LSRTDE",
+      "value" : 1.3816264614074126E-5
+    }, {
+      "algorithm" : "NLSHADE-RSP",
+      "value" : 0.320681389721716
+    } ]
+  }, {
+    "name" : "Holm",
+    "algorithms" : [ {
+      "algorithm" : "ARRDE",
+      "value" : 0.534560802034505
+    }, {
+      "algorithm" : "BIPOP-CMA",
+      "value" : 0.029991548499194054
+    }, {
+      "algorithm" : "j2020",
+      "value" : 0.11769638139835134
+    }, {
+      "algorithm" : "jSO",
+      "value" : 0.01104997316188767
+    }, {
+      "algorithm" : "LSRTDE",
+      "value" : 8.289758768444476E-5
+    }, {
+      "algorithm" : "NLSHADE-RSP",
+      "value" : 0.534560802034505
+    } ]
+  }, {
+    "name" : "Hochberg",
+    "algorithms" : [ {
+      "algorithm" : "ARRDE",
+      "value" : 0.320681389721716
+    }, {
+      "algorithm" : "BIPOP-CMA",
+      "value" : 0.029991548499194054
+    }, {
+      "algorithm" : "j2020",
+      "value" : 0.11769638139835134
+    }, {
+      "algorithm" : "jSO",
+      "value" : 0.01104997316188767
+    }, {
+      "algorithm" : "LSRTDE",
+      "value" : 8.289758768444476E-5
+    }, {
+      "algorithm" : "NLSHADE-RSP",
+      "value" : 0.320681389721716
+    } ]
+  } ],
+  "success" : true
+}
