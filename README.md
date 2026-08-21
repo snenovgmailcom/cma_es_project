@@ -91,6 +91,11 @@ References:
 <tr><td>CEC2022</td><td>
   <a href="mwu/cec2022/d10">D=10</a> ·
   <a href="mwu/cec2022/d20">D=20</a></td></tr>
+  <tr>
+<td colspan="2" align="center">
+<a href="dsc/README.md"><strong>DSC summary — all 17 settings</strong></a>
+</td>
+</tr>
 </table>
 
 </td>
@@ -205,8 +210,8 @@ python analysis/suite_report.py --suite cec2017 --dims 10,30 \
 ```
 
 Ranking figures place the seven algorithms on four aggregate axes
-(worst / median / coverage / best); budget-scaling figures show the
-fixed-budget target coverage (FBTC) as a monotone envelope across budgets.
+(worst / median / coverage / best); budget-scaling figures show raw FBTC(B) separately at each evaluated
+fixed budget.
 
 ## Results
 
