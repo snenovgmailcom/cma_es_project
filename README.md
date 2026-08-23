@@ -125,7 +125,15 @@ DOI: 10.1007/978-3-030-79553-5_1.
 </p>
 
 <p>
-<b>CMAES-NBC-qN</b> is the nearest-better-clustering CMA-ES variant proposed by Nguyen, combining NBC-based population adaptation with a quasi-Newton local-search mechanism. Since run-wise data and an executable implementation were not available to us, this comparison uses only the numerical results reported in Nguyen (2024), <em>Adapting the population size in CMA-ES using nearest-better clustering method for multimodal optimization</em>, DOI: 10.1016/j.asoc.2024.112361; no Mann–Whitney U or DSC analysis is applied to CMAES-NBC-qN.
+<b>CMAES-NBC-qN</b> is the nearest-better-clustering CMA-ES variant proposed
+by Nguyen, combining NBC-based population adaptation with a quasi-Newton
+local-search mechanism. This comparison uses the numerical results reported
+in Nguyen (2024),
+<em>Adapting the population size in CMA-ES using nearest-better clustering
+method for multimodal optimization</em>,
+DOI: 10.1016/j.asoc.2024.112361. Since the individual run-wise
+CMAES-NBC-qN values are not available, no Mann–Whitney U or DSC analysis
+is performed against MSC-CMA-ES.
 </p>
 
 </td>
@@ -136,24 +144,19 @@ DOI: 10.1007/978-3-030-79553-5_1.
 <tr><th colspan="2" align="left">MSC-CMA-ES vs NEA2+</th></tr>
 
 <tr><td>CEC2017</td><td>
-  <a href="related_comparisons/nea2plus/cec2017/d10/budget_100000/README.md">
-  D=10</a>
+<a href="related_comparisons/nea2plus/cec2017/d10/budget_100000/README.md">
+D=10 · 100K</a>
 </td></tr>
 
 <tr><td>CEC2020</td><td>
-  <a href="related_comparisons/nea2plus/cec2020/d5/budget_50000/README.md">
-  D=5 </a> · 
-  <a href="related_comparisons/nea2plus/cec2020/d10/budget_1000000/README.md">
-  D=10 </a> · 
-  <a href="related_comparisons/nea2plus/cec2020/d15/budget_3000000/README.md">
-  D=15 <a/>
+<a href="related_comparisons/nea2plus/cec2020/d5/budget_50000/README.md">D=5 · 50K</a><br>
+<a href="related_comparisons/nea2plus/cec2020/d10/budget_1000000/README.md">D=10 · 1M</a><br>
+<a href="related_comparisons/nea2plus/cec2020/d15/budget_3000000/README.md">D=15 · 3M</a>
 </td></tr>
 
 <tr><td>CEC2022</td><td>
-  <a href="related_comparisons/nea2plus/cec2022/d10/budget_200000/README.md">
-  D=10</a> · 
-  <a href="related_comparisons/nea2plus/cec2022/d20/budget_1000000/README.md">
-  D=20</a>
+<a href="related_comparisons/nea2plus/cec2022/d10/budget_200000/README.md">D=10 · 200K</a><br>
+<a href="related_comparisons/nea2plus/cec2022/d20/budget_1000000/README.md">D=20 · 1M</a>
 </td></tr>
 
 <tr>
@@ -162,19 +165,17 @@ DOI: 10.1007/978-3-030-79553-5_1.
 <strong>Overview — 6 settings</strong></a>
 </td>
 </tr>
-<tr></tr>
-<tr>
-<th colspan="2" align="left">MSC-CMA-ES vs CMAES-NBC-qN</th>
-</tr>
+
+<tr><th colspan="2" align="left">MSC-CMA-ES vs CMAES-NBC-qN</th></tr>
 
 <tr><td>CEC2014</td><td>
-  <a href="related_comparisons/nguyen/cec2014/d30/budget_300000/README.md">
-  D=30</a>
+<a href="related_comparisons/nguyen/cec2014/d30/budget_300000/README.md">
+D=30 · 300K</a>
 </td></tr>
 
 <tr><td>CEC2017</td><td>
-  <a href="related_comparisons/nguyen/cec2017/d30/budget_300000/README.md">
-  D=30</a>
+<a href="related_comparisons/nguyen/cec2017/d30/budget_300000/README.md">
+D=30 · 300K</a>
 </td></tr>
 
 <tr>
@@ -183,6 +184,13 @@ DOI: 10.1007/978-3-030-79553-5_1.
 <strong>CMAES-NBC-qN overview</strong></a>
 </td>
 </tr>
+
+</table>
+
+</td>
+</tr>
+
+
 <tr>
 <td width="67%" valign="top">
 
@@ -223,50 +231,28 @@ CEC2017 functions. DSC is not used for the ablation study.
 
 <table>
 <tr>
-<th colspan="2" align="left">
-Ablations — CEC2017, D=10, 100K
-</th>
+<th colspan="2" align="left">Ablations — CEC2017, D=10, 100K</th>
 </tr>
 
-<tr>
-<td>NO-NBC</td>
-<td>
-<a href="ablations/cec2017/d10/budget_100000/NO-NBC/README.md">
-Data + MWU</a>
-</td>
-</tr>
+<tr><td>NO-NBC</td><td>
+<a href="ablations/cec2017/d10/budget_100000/NO-NBC/README.md">Data + MWU</a>
+</td></tr>
 
-<tr>
-<td>FIXED-PHI</td>
-<td>
-<a href="ablations/cec2017/d10/budget_100000/FIXED-PHI/README.md">
-Data + MWU</a>
-</td>
-</tr>
+<tr><td>FIXED-PHI</td><td>
+<a href="ablations/cec2017/d10/budget_100000/FIXED-PHI/README.md">Data + MWU</a>
+</td></tr>
 
-<tr>
-<td>NO-EXCLUSION</td>
-<td>
-<a href="ablations/cec2017/d10/budget_100000/NO-EXCLUSION/README.md">
-Data + MWU</a>
-</td>
-</tr>
+<tr><td>NO-EXCLUSION</td><td>
+<a href="ablations/cec2017/d10/budget_100000/NO-EXCLUSION/README.md">Data + MWU</a>
+</td></tr>
 
-<tr>
-<td>C-ONLY</td>
-<td>
-<a href="ablations/cec2017/d10/budget_100000/C-ONLY/README.md">
-Data + MWU</a>
-</td>
-</tr>
+<tr><td>C-ONLY</td><td>
+<a href="ablations/cec2017/d10/budget_100000/C-ONLY/README.md">Data + MWU</a>
+</td></tr>
 
-<tr>
-<td>Final refinement</td>
-<td>
-<a href="ablations/cec2017/d10/budget_100000/REFINEMENT/README.md">
-Contribution</a>
-</td>
-</tr>
+<tr><td>Final refinement</td><td>
+<a href="ablations/cec2017/d10/budget_100000/REFINEMENT/README.md">Contribution</a>
+</td></tr>
 
 <tr>
 <td colspan="2" align="center">
@@ -279,10 +265,7 @@ Contribution</a>
 
 </td>
 </tr>
-</table>
 
-</td>
-</tr>
 </table>
 
 ## Overview
