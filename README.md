@@ -183,6 +183,102 @@ DOI: 10.1007/978-3-030-79553-5_1.
 <strong>CMAES-NBC-qN overview</strong></a>
 </td>
 </tr>
+<tr>
+<td width="67%" valign="top">
+
+<strong>Ablation studies</strong>
+
+<p>
+We evaluate the following MSC-CMA-ES ablations:
+<b>NO-NBC</b>, removing nearest-better clustering and the basin-based
+structure layer;
+<b>FIXED-PHI</b>, replacing the automatic staircase threshold selection
+with a fixed <code>phi = 2</code>;
+<b>NO-EXCLUSION</b>, disabling the suppression of repeatedly resolved basins;
+<b>C-ONLY</b>, using only the C configuration without C/B alternation and
+cross-cycle Phase-0 reuse; and a
+<b>final-refinement contribution</b> analysis comparing the incumbent
+immediately before and after the final refinement stage.
+</p>
+
+<p>
+The two MSC-CMA-ES configurations were tuned with Optuna only once, on
+CEC2017 at D=10 under the official 100K evaluation budget. The resulting
+parameterization is reused across suites, dimensions, and budgets; only the
+predefined dimension scaling of the CMA initial step-size parameter is applied.
+For this reason, the ablation study is performed on the same CEC2017 D=10
+tuning cell.
+</p>
+
+<p>
+For the algorithmic ablations, the linked pages report fixed-budget
+descriptive results and independent two-sided Mann–Whitney U comparisons
+against the full MSC-CMA-ES, with Bonferroni correction across the 29
+CEC2017 functions. DSC is not used for the ablation study.
+</p>
+
+</td>
+
+<td width="33%" valign="top">
+
+<table>
+<tr>
+<th colspan="2" align="left">
+Ablations — CEC2017, D=10, 100K
+</th>
+</tr>
+
+<tr>
+<td>NO-NBC</td>
+<td>
+<a href="ablations/cec2017/d10/budget_100000/NO-NBC/README.md">
+Data + MWU</a>
+</td>
+</tr>
+
+<tr>
+<td>FIXED-PHI</td>
+<td>
+<a href="ablations/cec2017/d10/budget_100000/FIXED-PHI/README.md">
+Data + MWU</a>
+</td>
+</tr>
+
+<tr>
+<td>NO-EXCLUSION</td>
+<td>
+<a href="ablations/cec2017/d10/budget_100000/NO-EXCLUSION/README.md">
+Data + MWU</a>
+</td>
+</tr>
+
+<tr>
+<td>C-ONLY</td>
+<td>
+<a href="ablations/cec2017/d10/budget_100000/C-ONLY/README.md">
+Data + MWU</a>
+</td>
+</tr>
+
+<tr>
+<td>Final refinement</td>
+<td>
+<a href="ablations/cec2017/d10/budget_100000/REFINEMENT/README.md">
+Contribution</a>
+</td>
+</tr>
+
+<tr>
+<td colspan="2" align="center">
+<a href="ablations/README.md">
+<strong>Ablation overview</strong></a>
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
 </table>
 
 </td>
