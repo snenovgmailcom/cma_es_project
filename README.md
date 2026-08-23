@@ -154,9 +154,9 @@ and BIPOP-CMA-ES.
 
 <tr><td>CEC2022</td><td>
   <a href="related_comparisons/nea2plus/cec2022/d10/budget_200000/README.md">
-  D=10 · 200K</a><br>
+  D=10</a> · 
   <a href="related_comparisons/nea2plus/cec2022/d20/budget_1000000/README.md">
-  D=20 · 1M</a>
+  D=20</a>
 </td></tr>
 
 <tr>
