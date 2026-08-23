@@ -1,0 +1,1 @@
+suite,dimension,budget,scope,position_average,position_min,position_max,position_label,position_interval,tie_size,dense_group,algorithm,rank_sum2,mean_dsc_rank,k,n_functions,omnibus_method,omnibus_statistic,omnibus_p_value,omnibus_message,dsc_status,posthoc_control,posthoc_holm_p

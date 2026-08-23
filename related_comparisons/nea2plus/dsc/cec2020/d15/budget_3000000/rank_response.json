@@ -1,0 +1,129 @@
+{
+  "result" : {
+    "valid_methods" : [ "friedman", "friedman-aligned-rank", "iman-davenport" ],
+    "ranked_matrix" : [ {
+      "problem" : "F1_15D",
+      "result" : [ {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "NEA2PLUS-PY",
+        "rank" : 3.0
+      } ]
+    }, {
+      "problem" : "F2_15D",
+      "result" : [ {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "NEA2PLUS-PY",
+        "rank" : 3.0
+      } ]
+    }, {
+      "problem" : "F3_15D",
+      "result" : [ {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "NEA2PLUS-PY",
+        "rank" : 3.0
+      } ]
+    }, {
+      "problem" : "F4_15D",
+      "result" : [ {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "NEA2PLUS-PY",
+        "rank" : 1.0
+      } ]
+    }, {
+      "problem" : "F5_15D",
+      "result" : [ {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "NEA2PLUS-PY",
+        "rank" : 3.0
+      } ]
+    }, {
+      "problem" : "F6_15D",
+      "result" : [ {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "NEA2PLUS-PY",
+        "rank" : 2.0
+      } ]
+    }, {
+      "problem" : "F7_15D",
+      "result" : [ {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 2.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "NEA2PLUS-PY",
+        "rank" : 3.0
+      } ]
+    }, {
+      "problem" : "F8_15D",
+      "result" : [ {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "NEA2PLUS-PY",
+        "rank" : 2.0
+      } ]
+    }, {
+      "problem" : "F9_15D",
+      "result" : [ {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "NEA2PLUS-PY",
+        "rank" : 2.0
+      } ]
+    }, {
+      "problem" : "F10_15D",
+      "result" : [ {
+        "algorithm" : "BIPOP-CMA",
+        "rank" : 3.0
+      }, {
+        "algorithm" : "MSC-CMA",
+        "rank" : 1.0
+      }, {
+        "algorithm" : "NEA2PLUS-PY",
+        "rank" : 2.0
+      } ]
+    } ],
+    "number_algorithms" : 3,
+    "parametric_tests" : false
+  },
+  "success" : true
+}

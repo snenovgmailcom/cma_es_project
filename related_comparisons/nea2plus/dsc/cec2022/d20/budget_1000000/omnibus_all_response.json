@@ -1,0 +1,22 @@
+{
+  "result" : {
+    "message" : "The null hypothesis is rejected.",
+    "p_value" : 0.03351261535312977,
+    "t" : 6.7916666666666785,
+    "method" : {
+      "name" : "friedman",
+      "alpha" : 0.05
+    },
+    "algorithm_means" : [ {
+      "algorithm" : "BIPOP-CMA",
+      "mean" : 1.875
+    }, {
+      "algorithm" : "MSC-CMA",
+      "mean" : 1.5416666666666667
+    }, {
+      "algorithm" : "NEA2PLUS-PY",
+      "mean" : 2.5833333333333335
+    } ]
+  },
+  "success" : true
+}
