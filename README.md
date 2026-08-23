@@ -100,6 +100,76 @@ References:
 
 </td>
 </tr>
+<tr>
+<td width="67%" valign="top">
+
+<strong>Comparison with NEA2+</strong>
+
+<p>
+NEA2+ is a nearest-better-clustering CMA-ES niching method developed
+by Mike Preuss. Our <code>benchmark/nea2plus_preuss.py</code> wrapper
+uses the public Python implementation distributed/recommended by Preuss
+and runs it on the CEC suites under the same fixed-budget, 51-run
+experimental protocol used for MSC-CMA-ES.
+</p>
+
+<p>
+The algorithmic lineage is documented in:
+Preuss (2010), <em>Niching the CMA-ES via Nearest-Better Clustering</em>,
+DOI: 10.1145/1830761.1830793;
+Preuss (2012), <em>Improved Topological Niching for Real-Valued Global Optimization</em>,
+DOI: 10.1007/978-3-642-29178-4_39; and
+Preuss, Epitropakis, Li and Fieldsend (2021),
+<em>Multimodal Optimization: Formulation, Heuristics, and a Decade of Advances</em>,
+DOI: 10.1007/978-3-030-79553-5_1.
+</p>
+
+<p>
+For each complete setting, the linked page reports
+fixed-budget benchmark results, Mann–Whitney U tests, and
+Deep Statistical Comparison. DSC compares MSC-CMA-ES, NEA2+,
+and BIPOP-CMA-ES.
+</p>
+
+</td>
+
+<td width="33%" valign="top">
+
+<table>
+<tr><th colspan="2" align="left">MSC-CMA-ES vs NEA2+</th></tr>
+
+<tr><td>CEC2017</td><td>
+  <a href="related_comparisons/nea2plus/cec2017/d10/budget_100000/README.md">
+  D=10 · 100K</a>
+</td></tr>
+
+<tr><td>CEC2020</td><td>
+  <a href="related_comparisons/nea2plus/cec2020/d5/budget_50000/README.md">
+  D=5 · 50K</a><br>
+  <a href="related_comparisons/nea2plus/cec2020/d10/budget_1000000/README.md">
+  D=10 · 1M</a><br>
+  <a href="related_comparisons/nea2plus/cec2020/d15/budget_3000000/README.md">
+  D=15 · 3M</a>
+</td></tr>
+
+<tr><td>CEC2022</td><td>
+  <a href="related_comparisons/nea2plus/cec2022/d10/budget_200000/README.md">
+  D=10 · 200K</a><br>
+  <a href="related_comparisons/nea2plus/cec2022/d20/budget_1000000/README.md">
+  D=20 · 1M</a>
+</td></tr>
+
+<tr>
+<td colspan="2" align="center">
+<a href="related_comparisons/nea2plus/README.md">
+<strong>Overview — 6 settings</strong></a>
+</td>
+</tr>
+
+</table>
+
+</td>
+</tr>
 </table>
 
 ## Overview
