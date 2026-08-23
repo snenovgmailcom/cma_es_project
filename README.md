@@ -103,10 +103,10 @@ References:
 <tr>
 <td width="67%" valign="top">
 
-<strong>Comparison with NEA2+</strong>
+<strong>Comparison with NEA2+ and CMAES-NBC-qN</strong>
 
 <p>
-NEA2+ is a nearest-better-clustering CMA-ES niching method developed
+<b>NEA2+</b> is a nearest-better-clustering CMA-ES niching method developed
 by Mike Preuss. Our <code>benchmark/nea2plus_preuss.py</code> wrapper
 uses the public Python implementation distributed/recommended by Preuss
 and runs it on the CEC suites under the same fixed-budget, 51-run
@@ -125,10 +125,7 @@ DOI: 10.1007/978-3-030-79553-5_1.
 </p>
 
 <p>
-For each complete setting, the linked page reports
-fixed-budget benchmark results, Mann–Whitney U tests, and
-Deep Statistical Comparison. DSC compares MSC-CMA-ES, NEA2+,
-and BIPOP-CMA-ES.
+<b>CMAES-NBC-qN</b> is the nearest-better-clustering CMA-ES variant proposed by Nguyen, combining NBC-based population adaptation with a quasi-Newton local-search mechanism. Since run-wise data and an executable implementation were not available to us, this comparison uses only the numerical results reported in Nguyen (2024), <em>Adapting the population size in CMA-ES using nearest-better clustering method for multimodal optimization</em>, DOI: 10.1016/j.asoc.2024.112361; no Mann–Whitney U or DSC analysis is applied to CMAES-NBC-qN.
 </p>
 
 </td>
@@ -140,7 +137,7 @@ and BIPOP-CMA-ES.
 
 <tr><td>CEC2017</td><td>
   <a href="related_comparisons/nea2plus/cec2017/d10/budget_100000/README.md">
-  D=10 · 100K</a>
+  D=10</a>
 </td></tr>
 
 <tr><td>CEC2020</td><td>
@@ -165,7 +162,26 @@ and BIPOP-CMA-ES.
 <strong>Overview — 6 settings</strong></a>
 </td>
 </tr>
+<tr>
+<th colspan="2" align="left">MSC-CMA-ES vs CMAES-NBC-qN</th>
+</tr>
 
+<tr><td>CEC2014</td><td>
+  <a href="related_comparisons/nguyen/cec2014/d30/budget_300000/README.md">
+  D=30 · 300K</a>
+</td></tr>
+
+<tr><td>CEC2017</td><td>
+  <a href="related_comparisons/nguyen/cec2017/d30/budget_300000/README.md">
+  D=30 · 300K</a>
+</td></tr>
+
+<tr>
+<td colspan="2" align="center">
+<a href="related_comparisons/nguyen/README.md">
+<strong>CMAES-NBC-qN overview — published values</strong></a>
+</td>
+</tr>
 </table>
 
 </td>
