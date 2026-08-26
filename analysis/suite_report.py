@@ -42,6 +42,12 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from summary_grid_clean import (  # noqa: E402
     FUNC_CLASSES, _floor, _fbtc_from_final_errs, _std_from_final_errs,
 )
+from report_style import (  # noqa: E402
+    DESCRIPTIVE_BOLD_NOTE,
+    class_label,
+    display_name,
+    format_budget,
+)
 from cell_report import _tie_groups  # noqa: E402 -- single source of truth,
                                        # shared with cell_report.py's own
                                        # fig_ranking() so the tie-merge rule
@@ -57,14 +63,8 @@ except Exception:                                # pragma: no cover
 # --- shared presentation constants (identical to cell_report) --------------
 ALGO_ORDER = ['MSC-CMA', 'BIPOP-CMA', 'ARRDE', 'LSRTDE',
               'NLSHADE-RSP', 'j2020', 'jSO']
-TABLE_COLS = ['MSC-CMA', 'BIPOP-CMA', None,
+TABLE_COLS = ['MSC-CMA', 'BIPOP-CMA',
               'ARRDE', 'LSRTDE', 'NLSHADE-RSP', 'j2020', 'jSO']
-DISPLAY = {
-    'MSC-CMA':     'MSC-CMA-ES',
-    'BIPOP-CMA':   'BIPOP-CMA-ES',
-    'LSRTDE':      'L-SRTDE',
-    'NLSHADE-RSP': 'NL-SHADE-RSP',
-}
 STYLE = {
     'MSC-CMA':     dict(color='#d62728', lw=3.2, marker='o', ms=8, ls='-',  zorder=5),
     'BIPOP-CMA':   dict(color='#7b2d8e', lw=2.4, marker='s', ms=7, ls='--', zorder=4),
@@ -75,11 +75,6 @@ STYLE = {
     'jSO':         dict(color='#b0b0b0', lw=1.6, marker='s', ms=5, ls='-',  zorder=3),
 }
 CLASSES = ['basic', 'hybrid', 'composition']
-CLASS_LABEL = {'basic': 'unimodal and simple multimodal',
-               'hybrid': 'Hybrid', 'composition': 'Composition'}
-# Lower-case form used inside figure titles (second title line).
-CLASS_TITLE = {'basic': 'unimodal and simple multimodal',
-               'hybrid': 'hybrid', 'composition': 'composition'}
 METRICS = ['mean', 'median', 'best', 'worst', 'std', 'FBTC']
 DEPRECATED = {'cec2017': {'f2'}}
 
@@ -148,9 +143,9 @@ def fig_ranking(data, algos, suite, dim, cls, out):
     # decide coverage axis: FBTC unless all algos have FBTC==0
     fbtc_sum = {a: sum(data[a][f]['FBTC'] for f in common) for a in algos}
     use_fbtc = any(v > 1e-12 for v in fbtc_sum.values())
-    cov_label, cov_key = ('FBTC(B)', 'FBTC') if use_fbtc else ('mean-SUM', 'mean')
-    axes = [('worst-SUM', 'worst', False), ('median-SUM', 'median', False),
-            (cov_label, cov_key, use_fbtc), ('best-SUM', 'best', False)]
+    cov_label, cov_key = ('FBTC(B)', 'FBTC') if use_fbtc else ('Mean-SUM', 'mean')
+    axes = [('Maximum-SUM', 'worst', False), ('Median-SUM', 'median', False),
+            (cov_label, cov_key, use_fbtc), ('Minimum-SUM', 'best', False)]
 
     nax = len(axes)
     ypos = {}
@@ -225,11 +220,11 @@ def fig_ranking(data, algos, suite, dim, cls, out):
                     yk = y0 - k * step
                     fs = 11 if m == 1 else 9
                     if ai == 0:
-                        ax.text(-0.06, yk, f'{DISPLAY.get(a, a)} {_fmt(v)}', ha='right',
+                        ax.text(-0.06, yk, f'{display_name(a)} {_fmt(v)}', ha='right',
                                 va='center', color=STYLE[a]['color'],
                                 fontweight=bold, fontsize=fs)
                     else:
-                        ax.text(nax - 1 + 0.06, yk, f'{_fmt(v)} {DISPLAY.get(a, a)}',
+                        ax.text(nax - 1 + 0.06, yk, f'{_fmt(v)} {display_name(a)}',
                                 ha='left', va='center',
                                 color=STYLE[a]['color'], fontweight=bold,
                                 fontsize=fs)
@@ -250,8 +245,8 @@ def fig_ranking(data, algos, suite, dim, cls, out):
     for sp in ('top', 'right', 'left'):
         ax.spines[sp].set_visible(False)
     ax.spines['bottom'].set_position(('data', -0.6))
-    ax.set_title(f'{suite.upper()}  D={dim}  —  {CLASS_LABEL[cls]} '
-                 f'({len(common)} funcs)', fontsize=14, pad=15)
+    ax.set_title(f'{suite.upper()}  D={dim}  —  {class_label(cls)} '
+                 f'({len(common)} functions)', fontsize=14, pad=15)
     fig.tight_layout()
     fig.savefig(out, dpi=150, bbox_inches='tight')
     plt.close(fig)
@@ -308,7 +303,7 @@ def fig_budget(base, algos, suite, dim, cls, out):
     fig, ax = plt.subplots(figsize=(7, 5.0))
     for a in algos:
         raw = [series[b][a][metric] for b in budgets]
-        ax.plot(x, raw, label=DISPLAY.get(a, a), **STYLE[a])
+        ax.plot(x, raw, label=display_name(a), **STYLE[a])
     if cls != 'composition':
         ax.axhline(nmax, ls=':', color='gray', lw=1)
         ax.text(x[-1], nmax, f' max={nmax}', va='center', ha='left',
@@ -317,9 +312,9 @@ def fig_budget(base, algos, suite, dim, cls, out):
     else:
         ax.set_ylim(0, None)
     ylab = f'SUM(FBTC(B)) over {nmax} functions'
-    title = f'{suite.upper()}  D={dim}\n{CLASS_TITLE[cls]} class'
+    title = f'{suite.upper()}  D={dim}\n{class_label(cls)}'
     ax.set_xticks(x)
-    ax.set_xticklabels([_bl(b) for b in budgets])
+    ax.set_xticklabels([format_budget(b) for b in budgets])
     ax.set_xlabel('Fixed evaluation budget B (NFE)', fontsize=11)
     ax.set_ylabel(ylab, fontsize=10.5)
     ax.set_title(title, fontsize=12)
@@ -352,11 +347,10 @@ def fmt_cell(v, metric):
 def metric_table(per_dim, suite, dims, metric):
     higher = metric == 'FBTC'
     rows = []
-    header = [DISPLAY.get(a, a) if a else '' for a in TABLE_COLS]
+    header = [display_name(a) for a in TABLE_COLS]
     rows.append('| Category | Dim | ' + ' | '.join(header) + ' |')
-    rows.append('|:--|:--:|' + '|'.join(['--:' if a else ':-:'
-                                         for a in TABLE_COLS]) + '|')
-    algos = [a for a in TABLE_COLS if a]
+    rows.append('|:--|:--:|' + '|'.join('--:' for _ in TABLE_COLS) + '|')
+    algos = list(TABLE_COLS)
     for cls in CLASSES:
         for dim in dims:
             data = per_dim[dim]
@@ -368,14 +362,11 @@ def metric_table(per_dim, suite, dims, metric):
             best = max(vals.values()) if higher else min(vals.values())
             cells = []
             for a in TABLE_COLS:
-                if a is None:
-                    cells.append('  ')
-                    continue
                 s = fmt_cell(vals[a], metric)
                 if abs(vals[a] - best) < 1e-9:
                     s = f'**{s}**'
                 cells.append(s)
-            rows.append(f'| {CLASS_LABEL[cls]} | {dim} | '
+            rows.append(f'| {class_label(cls)} | {dim} | '
                         + ' | '.join(cells) + ' |')
     return '\n'.join(rows)
 
@@ -393,8 +384,8 @@ def fig_row(prefix, dim, made, suffix=''):
         if made.get((dim, c)):
             cells.append(f'<td><img src="{prefix}_d{dim}_{c}{suffix}.png" '
                          f'width="300" '
-                         f'alt="{CLASS_LABEL[c]}"></td>')
-            labels.append(f'<td align="center">{CLASS_LABEL[c]}</td>')
+                         f'alt="{class_label(c)}"></td>')
+            labels.append(f'<td align="center">{class_label(c)}</td>')
         else:
             cells.append(f'<td><img src="{SPACER}" width="300" height="1" alt=""></td>')
             labels.append('<td></td>')
@@ -408,19 +399,20 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
                  budget_metric, officials, ext_sections=None):
     o = [f'# {suite.upper()} — cross-dimension summary', '']
     o.append('Aggregated sums by function category, across dimensions. '
-             '**Bold** = best in row. For simplicity the suite is presented '
-             'per dimension.')
+             'For simplicity the suite is presented per dimension. '
+             f'{DESCRIPTIVE_BOLD_NOTE}')
     o.append('')
-    bud = ', '.join(f'{d}D: {officials[d]:,}' for d in dims)
+    bud = ', '.join(f'D={d}: {format_budget(officials[d])}' for d in dims)
     o.append(f'Official budgets — {bud}.')
     o.append('')
     for dim in dims:
         o.append(f'## Ranking — D={dim}')
         o.append('')
         o.append(f'Parallel-coordinate rank on four aggregate metrics '
-                 f'(worst-SUM, median-SUM, FBTC(B), best-SUM). Best value at '
-                 f'the top of each axis; MSC-CMA in red. '
-                 f'Budget: {officials[dim]:,} evaluations.')
+                 f'(Maximum-SUM, Median-SUM, FBTC(B), Minimum-SUM). The axes '
+                 f'are oriented so smaller error-based sums and larger FBTC(B) '
+                 f'values appear toward the top. MSC-CMA-ES is shown in red. '
+                 f'Budget: {format_budget(officials[dim])} evaluations.')
         o.append('')
         r = fig_row('rank', dim, rank_made)
         if r:
@@ -431,8 +423,8 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
             o.append(f'## Budget scaling — D={dim}')
             o.append('')
             note = ('Raw FBTC(B) at each evaluated fixed budget; no running maximum '
-                    'is applied. Each point is a separate fixed-budget experiment; '
-                    'higher is better.')
+                    'is applied. Each point is a separate fixed-budget experiment. '
+                    'Larger FBTC(B) values indicate greater fixed-budget target coverage.')
             o.append(note)
             o.append('')
             o.append(b)
@@ -442,28 +434,28 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
             e = fig_row('rank', dim, made, suffix=f'_{elabel}')
             if not e:
                 continue
-            o.append(f'## Ranking — D={dim} (budget {elabel.upper()})')
+            o.append(f'## Ranking — D={dim} (budget {format_budget(eb)})')
             o.append('')
-            o.append(f'Same rank, recomputed at {eb:,} evaluations. Only '
-                     f'classes with full {len(per_dim[dim])}-algorithm '
-                     f'coverage at {elabel.upper()} are shown.')
+            o.append(f'Same rank, recomputed at {format_budget(eb)} evaluations. '
+                     f'Only classes with full {len(per_dim[dim])}-algorithm '
+                     f'coverage at {format_budget(eb)} are shown.')
             o.append('')
             o.append(e)
             o.append('')
 
-    o.append('## Median error (lower is better)')
+    o.append('## Median error')
     o.append('')
     o.append(metric_table(per_dim, suite, dims, 'median'))
     o.append('')
-    o.append('## Best error (lower is better)')
+    o.append('## Minimum error')
     o.append('')
     o.append(metric_table(per_dim, suite, dims, 'best'))
     o.append('')
-    o.append('## Worst error (lower is better)')
+    o.append('## Maximum error')
     o.append('')
     o.append(metric_table(per_dim, suite, dims, 'worst'))
     o.append('')
-    o.append('## FBTC(B) — Fixed-Budget Target Coverage (higher is better)')
+    o.append('## FBTC(B) — Fixed-Budget Target Coverage')
     o.append('')
     o.append(metric_table(per_dim, suite, dims, 'FBTC'))
     o.append('')
@@ -472,7 +464,7 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
              'in [10²…10⁻⁸] and 51 runs, computed from the terminal best-so-far errors '
              'at that budget. The tables sum per-function FBTC(B) within each class. '
              'Each budget is evaluated separately; FBTC(B) is not an anytime measure. '
-             'Higher is better.*')
+             'Larger FBTC(B) values indicate greater fixed-budget target coverage.*')
     o.append('')
     o.append('## Environment')
     o.append('Python 3.13.5 (anaconda3 env `intelpython`) · NumPy 2.3.1 · '
