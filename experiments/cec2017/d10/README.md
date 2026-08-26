@@ -34,6 +34,23 @@ Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each 
 </tr>
 </table>
 
+## Ranking — D=10 (B = 10^6)
+
+Same parallel-coordinate rank, recomputed at B = 10^6 evaluations. Only classes with full 7-algorithm coverage at B = 10^6 are shown. MSC-CMA-ES is shown in red.
+
+<table>
+<tr>
+<td><img src="rank_basic_1M.png" width="320" alt="Unimodal and simple multimodal"></td>
+<td><img src="rank_hybrid_1M.png" width="320" alt="Hybrid"></td>
+<td><img src="rank_composition_1M.png" width="320" alt="Composition"></td>
+</tr>
+<tr>
+<td align="center">Unimodal and simple multimodal</td>
+<td align="center">Hybrid</td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
 ## Ranking — D=10 (B = 10^7)
 
 Same parallel-coordinate rank, recomputed at B = 10^7 evaluations. Only classes with full 7-algorithm coverage at B = 10^7 are shown. MSC-CMA-ES is shown in red.

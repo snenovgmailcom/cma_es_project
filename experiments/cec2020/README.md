@@ -38,6 +38,23 @@ Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each 
 </tr>
 </table>
 
+## Ranking — D=5 (B = 10^6)
+
+Same rank, recomputed at B = 10^6 evaluations. Only classes with full 7-algorithm coverage at B = 10^6 are shown.
+
+<table>
+<tr>
+<td><img src="d5/rank_d5_basic_1M.png" width="300" alt="Unimodal and simple multimodal"></td>
+<td><img src="d5/rank_d5_hybrid_1M.png" width="300" alt="Hybrid"></td>
+<td><img src="d5/rank_d5_composition_1M.png" width="300" alt="Composition"></td>
+</tr>
+<tr>
+<td align="center">Unimodal and simple multimodal</td>
+<td align="center">Hybrid</td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
 ## Ranking — D=10 (B = 10^6)
 
 Parallel-coordinate rank on four aggregate metrics (Maximum-SUM, Median-SUM, FBTC(B), Minimum-SUM). The axes are oriented so smaller error-based sums and larger FBTC(B) values appear toward the top. MSC-CMA-ES is shown in red. Budget: B = 10^6 evaluations.
@@ -64,6 +81,23 @@ Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each 
 <td><img src="d10/budget_d10_basic.png" width="300" alt="Unimodal and simple multimodal"></td>
 <td><img src="d10/budget_d10_hybrid.png" width="300" alt="Hybrid"></td>
 <td><img src="d10/budget_d10_composition.png" width="300" alt="Composition"></td>
+</tr>
+<tr>
+<td align="center">Unimodal and simple multimodal</td>
+<td align="center">Hybrid</td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
+## Ranking — D=10 (B = 2×10^7)
+
+Same rank, recomputed at B = 2×10^7 evaluations. Only classes with full 7-algorithm coverage at B = 2×10^7 are shown.
+
+<table>
+<tr>
+<td><img src="d10/rank_d10_basic_20M.png" width="300" alt="Unimodal and simple multimodal"></td>
+<td><img src="d10/rank_d10_hybrid_20M.png" width="300" alt="Hybrid"></td>
+<td><img src="d10/rank_d10_composition_20M.png" width="300" alt="Composition"></td>
 </tr>
 <tr>
 <td align="center">Unimodal and simple multimodal</td>
@@ -106,6 +140,23 @@ Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each 
 </tr>
 </table>
 
+## Ranking — D=15 (B = 10^7)
+
+Same rank, recomputed at B = 10^7 evaluations. Only classes with full 7-algorithm coverage at B = 10^7 are shown.
+
+<table>
+<tr>
+<td><img src="../spacer.png" width="300" height="1" alt=""></td>
+<td><img src="../spacer.png" width="300" height="1" alt=""></td>
+<td><img src="d15/rank_d15_composition_10M.png" width="300" alt="Composition"></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
 ## Ranking — D=20 (B = 10^7)
 
 Parallel-coordinate rank on four aggregate metrics (Maximum-SUM, Median-SUM, FBTC(B), Minimum-SUM). The axes are oriented so smaller error-based sums and larger FBTC(B) values appear toward the top. MSC-CMA-ES is shown in red. Budget: B = 10^7 evaluations.
@@ -132,6 +183,23 @@ Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each 
 <td><img src="../spacer.png" width="300" height="1" alt=""></td>
 <td><img src="../spacer.png" width="300" height="1" alt=""></td>
 <td><img src="d20/budget_d20_composition.png" width="300" alt="Composition"></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td align="center">Composition</td>
+</tr>
+</table>
+
+## Ranking — D=20 (B = 4×10^7)
+
+Same rank, recomputed at B = 4×10^7 evaluations. Only classes with full 7-algorithm coverage at B = 4×10^7 are shown.
+
+<table>
+<tr>
+<td><img src="../spacer.png" width="300" height="1" alt=""></td>
+<td><img src="../spacer.png" width="300" height="1" alt=""></td>
+<td><img src="d20/rank_d20_composition_40M.png" width="300" alt="Composition"></td>
 </tr>
 <tr>
 <td></td>
