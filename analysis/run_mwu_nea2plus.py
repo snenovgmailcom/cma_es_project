@@ -122,8 +122,8 @@ for suite, dim, budget in SETTINGS:
     print(f"=== {suite} D={dim} B={budget}  m={m} ===")
 
     counts = {
-        "NEA2+ better": 0,
-        "MSC-CMA-ES better": 0,
+        "lower": 0,
+        "higher": 0,
         "not significant": 0,
     }
 
@@ -172,9 +172,9 @@ for suite, dim, budget in SETTINGS:
         ):
             decision = "not significant"
         elif p_nea_lower > 0.5:
-            decision = "NEA2+ better"
+            decision = "lower"
         else:
-            decision = "MSC-CMA-ES better"
+            decision = "higher"
 
         counts[decision] += 1
 
@@ -200,8 +200,8 @@ for suite, dim, budget in SETTINGS:
         })
 
     print(
-        f"NEA2+ better={counts['NEA2+ better']}  "
-        f"MSC-CMA-ES better={counts['MSC-CMA-ES better']}  "
+        f"NEA2+ lower={counts['lower']}  "
+        f"NEA2+ higher={counts['higher']}  "
         f"not significant={counts['not significant']}"
     )
 
@@ -233,7 +233,11 @@ fields = [
 with (outdir / "details.csv").open(
     "w", newline="", encoding="utf-8"
 ) as f:
-    w = csv.DictWriter(f, fieldnames=fields)
+    w = csv.DictWriter(
+        f,
+        fieldnames=fields,
+        lineterminator="\n",
+    )
     w.writeheader()
     w.writerows(rows)
 
@@ -254,11 +258,11 @@ for suite, dim, budget in SETTINGS:
         "dimension": dim,
         "budget": budget,
         "n_functions": len(rr),
-        "nea2plus_better": sum(
-            r["decision"] == "NEA2+ better" for r in rr
+        "nea2plus_lower": sum(
+            r["decision"] == "lower" for r in rr
         ),
-        "msc_better": sum(
-            r["decision"] == "MSC-CMA-ES better" for r in rr
+        "nea2plus_higher": sum(
+            r["decision"] == "higher" for r in rr
         ),
         "not_significant": sum(
             r["decision"] == "not significant" for r in rr
@@ -273,11 +277,15 @@ with (outdir / "summary.csv").open(
         "dimension",
         "budget",
         "n_functions",
-        "nea2plus_better",
-        "msc_better",
+        "nea2plus_lower",
+        "nea2plus_higher",
         "not_significant",
     ]
-    w = csv.DictWriter(f, fieldnames=fields2)
+    w = csv.DictWriter(
+        f,
+        fieldnames=fields2,
+        lineterminator="\n",
+    )
     w.writeheader()
     w.writerows(summary)
 

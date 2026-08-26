@@ -12,14 +12,14 @@ Each setting page combines three views:
 
 CEC2020 D=20 is not included because a complete 51-run NEA2+ result set was not available.
 
-| Suite | D | Budget | Benchmark results | MWU | DSC | MWU summary (NEA2+ / MSC / NS) |
+| Suite | D | Budget | Benchmark results | MWU | DSC | MWU summary (↓ / ↑ / —) |
 |:--|--:|--:|:--|:--|:--|:--:|
-| CEC2017 | 10 | 100K | [Benchmark](cec2017/d10/budget_100000/README.md#benchmark-results) | [MWU](cec2017/d10/budget_100000/README.md#mannwhitney-u) | [DSC](cec2017/d10/budget_100000/README.md#deep-statistical-comparison) | 2 / 21 / 6 |
-| CEC2020 | 5 | 50K | [Benchmark](cec2020/d5/budget_50000/README.md#benchmark-results) | [MWU](cec2020/d5/budget_50000/README.md#mannwhitney-u) | [DSC](cec2020/d5/budget_50000/README.md#deep-statistical-comparison) | 2 / 4 / 4 |
-| CEC2020 | 10 | 1M | [Benchmark](cec2020/d10/budget_1000000/README.md#benchmark-results) | [MWU](cec2020/d10/budget_1000000/README.md#mannwhitney-u) | [DSC](cec2020/d10/budget_1000000/README.md#deep-statistical-comparison) | 1 / 6 / 3 |
-| CEC2020 | 15 | 3M | [Benchmark](cec2020/d15/budget_3000000/README.md#benchmark-results) | [MWU](cec2020/d15/budget_3000000/README.md#mannwhitney-u) | [DSC](cec2020/d15/budget_3000000/README.md#deep-statistical-comparison) | 2 / 8 / 0 |
-| CEC2022 | 10 | 200K | [Benchmark](cec2022/d10/budget_200000/README.md#benchmark-results) | [MWU](cec2022/d10/budget_200000/README.md#mannwhitney-u) | [DSC](cec2022/d10/budget_200000/README.md#deep-statistical-comparison) | 1 / 9 / 2 |
-| CEC2022 | 20 | 1M | [Benchmark](cec2022/d20/budget_1000000/README.md#benchmark-results) | [MWU](cec2022/d20/budget_1000000/README.md#mannwhitney-u) | [DSC](cec2022/d20/budget_1000000/README.md#deep-statistical-comparison) | 1 / 8 / 3 |
+| CEC2017 | 10 | 10^5 | [Benchmark](cec2017/d10/budget_100000/README.md#benchmark-results) | [MWU](cec2017/d10/budget_100000/README.md#mannwhitney-u) | [DSC](cec2017/d10/budget_100000/README.md#deep-statistical-comparison) | 2 / 21 / 6 |
+| CEC2020 | 5 | 5×10^4 | [Benchmark](cec2020/d5/budget_50000/README.md#benchmark-results) | [MWU](cec2020/d5/budget_50000/README.md#mannwhitney-u) | [DSC](cec2020/d5/budget_50000/README.md#deep-statistical-comparison) | 2 / 4 / 4 |
+| CEC2020 | 10 | 10^6 | [Benchmark](cec2020/d10/budget_1000000/README.md#benchmark-results) | [MWU](cec2020/d10/budget_1000000/README.md#mannwhitney-u) | [DSC](cec2020/d10/budget_1000000/README.md#deep-statistical-comparison) | 1 / 6 / 3 |
+| CEC2020 | 15 | 3×10^6 | [Benchmark](cec2020/d15/budget_3000000/README.md#benchmark-results) | [MWU](cec2020/d15/budget_3000000/README.md#mannwhitney-u) | [DSC](cec2020/d15/budget_3000000/README.md#deep-statistical-comparison) | 2 / 8 / 0 |
+| CEC2022 | 10 | 2×10^5 | [Benchmark](cec2022/d10/budget_200000/README.md#benchmark-results) | [MWU](cec2022/d10/budget_200000/README.md#mannwhitney-u) | [DSC](cec2022/d10/budget_200000/README.md#deep-statistical-comparison) | 1 / 9 / 2 |
+| CEC2022 | 20 | 10^6 | [Benchmark](cec2022/d20/budget_1000000/README.md#benchmark-results) | [MWU](cec2022/d20/budget_1000000/README.md#mannwhitney-u) | [DSC](cec2022/d20/budget_1000000/README.md#deep-statistical-comparison) | 1 / 8 / 3 |
 
 Across the six complete settings there are **83 functions**, i.e. **4233 NEA2+ runs** and the corresponding MSC-CMA-ES runs.
 

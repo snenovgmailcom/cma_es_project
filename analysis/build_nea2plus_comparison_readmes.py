@@ -42,6 +42,19 @@ if str(HERE) not in sys.path:
 
 import summary_grid_clean as sg
 
+from report_style import (
+    ARROW_HIGHER,
+    ARROW_LOWER,
+    ARROW_NS,
+    DESCRIPTIVE_BOLD_NOTE,
+    class_label,
+    display_name,
+    format_budget,
+    format_p as style_format_p,
+    format_value,
+    metric_label,
+)
+
 
 REFERENCE = "MSC-CMA"
 COMPETITOR = "NEA2PLUS-PY"
@@ -62,19 +75,6 @@ FUNCTIONS = {
     "cec2017": (1, *range(3, 31)),
     "cec2020": tuple(range(1, 11)),
     "cec2022": tuple(range(1, 13)),
-}
-
-DISPLAY = {
-    "MSC-CMA": "MSC-CMA-ES",
-    "NEA2PLUS-PY": "NEA2+",
-    "BIPOP-CMA": "BIPOP-CMA-ES",
-}
-
-CLASS_DISPLAY = {
-    "basic": "unimodal and simple multimodal",
-    "hybrid": "Hybrid",
-    "composition": "Composition",
-    "all": "ALL",
 }
 
 METRICS = ("mean", "median", "best", "worst", "std", "fbtc")
@@ -136,31 +136,19 @@ def read_csv(path: Path) -> list[dict[str, str]]:
 
 
 def budget_label(b: int) -> str:
-    if b % 1_000_000 == 0:
-        return f"{b // 1_000_000}M"
-    if b % 1_000 == 0:
-        return f"{b // 1_000}K"
-    return f"{b:,}"
+    return format_budget(b)
 
 
 def fmt_number(x: float, digits: int = 6) -> str:
     if not math.isfinite(x):
         return "—"
-    if x == 0:
-        return "0"
-    ax = abs(x)
-    if ax >= 1e4 or ax < 1e-4:
-        return f"{x:.6e}"
-    return f"{x:.{digits}g}"
+    return format_value(float(x), sig=digits)
 
 
 def fmt_p(x: str | float | None) -> str:
     if x is None or x == "":
         return "—"
-    v = float(x)
-    if v < 1e-4:
-        return f"{v:.6e}"
-    return f"{v:.6g}"
+    return style_format_p(float(x))
 
 
 def markdown_bold(value: str, yes: bool) -> str:
@@ -250,27 +238,18 @@ def render_benchmark(
     lines = [
         "## Benchmark results",
         "",
-        f"Fixed-budget terminal results at **B={budget:,} NFE**, using 51 runs per "
+        f"Fixed-budget terminal results at **B={format_budget(budget)} NFE**, using 51 runs per "
         "function for MSC-CMA-ES and NEA2+.",
         "",
         "The descriptive metrics use the same definitions as the main benchmark "
         "reports. Errors with absolute value at most `1e-8` are treated as zero for the descriptive benchmark metrics; "
         "the standard deviation is the sample standard deviation (`ddof=1`). "
         "FBTC(B) is the Fixed-Budget Target Coverage over the same 51 log-uniform "
-        "targets in `[10², 10⁻⁸]`. Class and ALL values are sums over functions.",
+        "targets in `[10², 10⁻⁸]`. Class and All values are sums over functions.",
         "",
         "| Category | Metric | MSC-CMA-ES | NEA2+ |",
         "|:--|:--|--:|--:|",
     ]
-
-    metric_label = {
-        "mean": "mean",
-        "median": "median",
-        "best": "best",
-        "worst": "worst",
-        "std": "std",
-        "fbtc": "FBTC(B)",
-    }
 
     for cls in ("basic", "hybrid", "composition", "all"):
         fids = class_functions(suite, cls)
@@ -288,18 +267,16 @@ def render_benchmark(
             sa = markdown_bold(sa, tie or math.isclose(a, best, rel_tol=1e-12, abs_tol=1e-15))
             sb = markdown_bold(sb, tie or math.isclose(b, best, rel_tol=1e-12, abs_tol=1e-15))
             category = (
-                f"**{CLASS_DISPLAY[cls]}** (n={len(fids)})" if first else ""
+                f"**{class_label(cls)}** (n={len(fids)})" if first else ""
             )
             lines.append(
-                f"| {category} | {metric_label[metric]} | {sa} | {sb} |"
+                f"| {category} | {metric_label(metric)} | {sa} | {sb} |"
             )
             first = False
 
     lines += [
         "",
-        "*Bold indicates the better descriptive value in that row "
-        "(lower for error metrics and std; higher for FBTC(B)). "
-        "These descriptive values are not significance tests.*",
+        f"*{DESCRIPTIVE_BOLD_NOTE}*",
         "",
     ]
     return "\n".join(lines)
@@ -337,9 +314,9 @@ def load_mwu_rows(
 
 def decision_symbol(decision: str) -> str:
     return {
-        "NEA2+ better": "+",
-        "MSC-CMA-ES better": "−",
-        "not significant": "≈",
+        "lower": ARROW_LOWER,
+        "higher": ARROW_HIGHER,
+        "not significant": ARROW_NS,
     }[decision]
 
 
@@ -364,18 +341,18 @@ def render_mwu(rows: list[dict[str, str]], suite: str) -> str:
         "For minimization, `probability_nea2plus_lower` is "
         r"$P(X_{NEA2+}<X_{MSC})+\frac12P(X_{NEA2+}=X_{MSC})$.",
         "",
-        f"Setting summary: NEA2+ significant on **{counts['NEA2+ better']}** "
-        f"functions; MSC-CMA-ES significant on **{counts['MSC-CMA-ES better']}**; "
-        f"not significant on **{counts['not significant']}**.",
+        f"Setting summary from the NEA2+ perspective: **{counts['lower']} ↓**, "
+        f"**{counts['higher']} ↑**, and **{counts['not significant']} —**.",
         "",
-        f"Composition subset: NEA2+ significant on **{comp_counts['NEA2+ better']}** "
-        f"of {len(comp_rows)} functions; MSC-CMA-ES significant on "
-        f"**{comp_counts['MSC-CMA-ES better']}**; not significant on "
-        f"**{comp_counts['not significant']}**.",
+        f"Composition subset: **{comp_counts['lower']} ↓**, "
+        f"**{comp_counts['higher']} ↑**, and "
+        f"**{comp_counts['not significant']} —** across "
+        f"{len(comp_rows)} functions.",
         "",
-        "`+` means NEA2+ has significantly lower terminal errors; `−` means "
-        "MSC-CMA-ES has significantly lower terminal errors; `≈` means the "
-        "difference is not significant at `alpha=0.05` after Bonferroni adjustment.",
+        "Direction is stated from the NEA2+ perspective: `↓` denotes a "
+        "statistically significant shift toward lower terminal errors, `↑` a "
+        "statistically significant shift toward higher terminal errors, and `—` "
+        "no statistically significant difference after Bonferroni correction.",
         "",
         "### Mann–Whitney U statistic",
         "",
@@ -385,14 +362,14 @@ def render_mwu(rows: list[dict[str, str]], suite: str) -> str:
 
     for r in rows:
         lines.append(
-            f"| f{int(r['function'])} | {r['function_class']} | "
+            f"| f{int(r['function'])} | {class_label(r['function_class'])} | "
             f"{fmt_number(float(r['u_competitor']))} | "
             f"{fmt_number(float(r['probability_nea2plus_lower']))} |"
         )
 
     lines += [
         "",
-        "### Raw two-sided p-value",
+        "### p_raw",
         "",
         "| Function | p_raw |",
         "|:--|--:|",
@@ -402,9 +379,9 @@ def render_mwu(rows: list[dict[str, str]], suite: str) -> str:
 
     lines += [
         "",
-        "### Bonferroni-adjusted p-value and decision",
+        "### p_Bonferroni and Direction",
         "",
-        "| Function | p_Bonferroni | Decision |",
+        "| Function | p_Bonferroni | Direction |",
         "|:--|--:|:--:|",
     ]
     for r in rows:
@@ -487,19 +464,21 @@ def render_dsc(
         "Friedman omnibus test separately for all functions and for the "
         "composition-function subset. When the omnibus null hypothesis is rejected, "
         "Holm-adjusted post-hoc comparisons are performed against the algorithm "
-        "with the best mean DSC rank.",
+        "with the lowest mean DSC rank.",
         "",
-        "`★` means MSC-CMA-ES has the best mean DSC rank and Friedman rejects; "
-        "`≈` means Friedman rejects but the Holm-adjusted comparison between "
-        "MSC-CMA-ES and the best-ranked method is not significant; `↓` means "
-        "the best-ranked method differs significantly from MSC-CMA-ES after Holm "
-        "adjustment; `O` means Friedman does not reject and no post-hoc "
-        "interpretation is made.",
+        "`★` means MSC-CMA-ES has the lowest mean DSC rank and the Friedman "
+        "test rejects the null hypothesis; `≈` means the Friedman test rejects "
+        "the null hypothesis but the Holm-adjusted comparison between MSC-CMA-ES "
+        "and the lowest-mean-rank algorithm is not significant; `↓` means the "
+        "lowest-mean-rank algorithm has a smaller mean DSC rank than MSC-CMA-ES "
+        "and the Holm-adjusted comparison is significant; `O` means the Friedman "
+        "test does not reject the null hypothesis and no post-hoc interpretation "
+        "is made.",
         "",
         "### DSC ranks by function",
         "",
-        "Lower DSC rank indicates better performance; tied distributions receive "
-        "fractional ranks.",
+        "DSC ranks are ordered from 1 upward; tied distributions receive "
+        "fractional ranks. Smaller numerical ranks are lower in this ordering.",
         "",
         "| Function | MSC-CMA-ES | NEA2+ | BIPOP-CMA-ES |",
         "|:--|--:|--:|--:|",
@@ -520,8 +499,8 @@ def render_dsc(
         "",
         "### Statistical comparison",
         "",
-        "| Scope | n | Best-ranked algorithm | MSC mean rank | NEA2+ mean rank | "
-        "BIPOP mean rank | Friedman p | Post-hoc control | p_Holm(MSC) | "
+        "| Scope | n | Lowest-mean-rank algorithm | MSC mean rank | NEA2+ mean rank | "
+        "BIPOP-CMA-ES mean rank | Friedman p | Post-hoc control | p_Holm(MSC) | "
         "p_Holm(NEA2+) | Result |",
         "|:--|--:|:--|--:|--:|--:|--:|:--|--:|--:|:--:|",
     ]
@@ -537,12 +516,12 @@ def render_dsc(
         status = by_alg["MSC-CMA"]["dsc_status"]
         n = int(by_alg["MSC-CMA"]["n_functions"])
         lines.append(
-            f"| {scope} | {n} | {DISPLAY[best]} | "
+            f"| {class_label(scope)} | {n} | {display_name(best)} | "
             f"{fmt_number(float(by_alg['MSC-CMA']['mean_dsc_rank']))} | "
             f"{fmt_number(float(by_alg['NEA2PLUS-PY']['mean_dsc_rank']))} | "
             f"{fmt_number(float(by_alg['BIPOP-CMA']['mean_dsc_rank']))} | "
             f"{fmt_p(by_alg['MSC-CMA']['omnibus_p_value'])} | "
-            f"{DISPLAY.get(control, control)} | {fmt_p(p_msc)} | "
+            f"{display_name(control)} | {fmt_p(p_msc)} | "
             f"{fmt_p(p_nea)} | **{status}** |"
         )
 
@@ -581,7 +560,7 @@ def render_setting_page(
         "This page combines the fixed-budget benchmark results and the two "
         "statistical analyses used for the related-method comparison with NEA2+.",
         "",
-        f"- **Benchmark:** MSC-CMA-ES vs NEA2+, 51 runs per function at B={budget:,} NFE.",
+        f"- **Benchmark:** MSC-CMA-ES vs NEA2+, 51 runs per function at B={format_budget(budget)} NFE.",
         "- **MWU:** NEA2+ vs MSC-CMA-ES, independent two-sided Mann–Whitney U "
         "with Bonferroni adjustment over the functions in this setting.",
         "- **DSC:** MSC-CMA-ES, NEA2+, and BIPOP-CMA-ES; all functions and "
@@ -636,7 +615,7 @@ def render_index(
         "set was not available.",
         "",
         "| Suite | D | Budget | Benchmark results | MWU | DSC | MWU summary "
-        "(NEA2+ / MSC / NS) |",
+        "(↓ / ↑ / —) |",
         "|:--|--:|--:|:--|:--|:--|:--:|",
     ]
 
@@ -649,7 +628,7 @@ def render_index(
         n = int(m["n_functions"])
         total_functions += n
         counts = (
-            f"{m['nea2plus_better']} / {m['msc_better']} / "
+            f"{m['nea2plus_lower']} / {m['nea2plus_higher']} / "
             f"{m['not_significant']}"
         )
         lines.append(

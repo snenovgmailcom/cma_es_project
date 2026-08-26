@@ -1,46 +1,46 @@
-# CEC2022, D=20, B=1M — MSC-CMA-ES vs NEA2+
+# CEC2022, D=20, B=10^6 — MSC-CMA-ES vs NEA2+
 
 This page combines the fixed-budget benchmark results and the two statistical analyses used for the related-method comparison with NEA2+.
 
-- **Benchmark:** MSC-CMA-ES vs NEA2+, 51 runs per function at B=1,000,000 NFE.
+- **Benchmark:** MSC-CMA-ES vs NEA2+, 51 runs per function at B=10^6 NFE.
 - **MWU:** NEA2+ vs MSC-CMA-ES, independent two-sided Mann–Whitney U with Bonferroni adjustment over the functions in this setting.
 - **DSC:** MSC-CMA-ES, NEA2+, and BIPOP-CMA-ES; all functions and composition functions are analyzed separately.
 
 Contents: [Benchmark results](#benchmark-results) · [Mann–Whitney U](#mannwhitney-u) · [Deep Statistical Comparison](#deep-statistical-comparison)
 ## Benchmark results
 
-Fixed-budget terminal results at **B=1,000,000 NFE**, using 51 runs per function for MSC-CMA-ES and NEA2+.
+Fixed-budget terminal results at **B=10^6 NFE**, using 51 runs per function for MSC-CMA-ES and NEA2+.
 
-The descriptive metrics use the same definitions as the main benchmark reports. Errors with absolute value at most `1e-8` are treated as zero for the descriptive benchmark metrics; the standard deviation is the sample standard deviation (`ddof=1`). FBTC(B) is the Fixed-Budget Target Coverage over the same 51 log-uniform targets in `[10², 10⁻⁸]`. Class and ALL values are sums over functions.
+The descriptive metrics use the same definitions as the main benchmark reports. Errors with absolute value at most `1e-8` are treated as zero for the descriptive benchmark metrics; the standard deviation is the sample standard deviation (`ddof=1`). FBTC(B) is the Fixed-Budget Target Coverage over the same 51 log-uniform targets in `[10², 10⁻⁸]`. Class and All values are sums over functions.
 
 | Category | Metric | MSC-CMA-ES | NEA2+ |
 |:--|:--|--:|--:|
-| **unimodal and simple multimodal** (n=5) | mean | **2.42056** | 11.9054 |
-|  | median | **1.11164** | 11.9403 |
-|  | best | **0.000339707** | 6.96474 |
-|  | worst | 33.1114 | **15.9246** |
-|  | std | 5.43605 | **2.02193** |
+| **Unimodal and simple multimodal** (n=5) | Mean | **2.42056** | 11.9054 |
+|  | Median | **1.11164** | 11.9403 |
+|  | Minimum | **0.000339707** | 6.96474 |
+|  | Maximum | 33.1114 | **15.9246** |
+|  | Std. | 5.43605 | **2.02193** |
 |  | FBTC(B) | 3.26413 | **3.6113** |
-| **Hybrid** (n=3) | mean | **29.3505** | 79.0861 |
-|  | median | **41.3614** | 72.9828 |
-|  | best | **0.841482** | 37.463 |
-|  | worst | **72.7505** | 130.324 |
-|  | std | 22.1657 | **21.1051** |
+| **Hybrid** (n=3) | Mean | **29.3505** | 79.0861 |
+|  | Median | **41.3614** | 72.9828 |
+|  | Minimum | **0.841482** | 37.463 |
+|  | Maximum | **72.7505** | 130.324 |
+|  | Std. | 22.1657 | **21.1051** |
 |  | FBTC(B) | **0.461361** | 0.20915 |
-| **Composition** (n=4) | mean | **434.705** | 516.751 |
-|  | median | **435.034** | 516.701 |
-|  | best | **422.005** | 512.659 |
-|  | worst | **451.984** | 523.528 |
-|  | std | 6.89616 | **2.06369** |
+| **Composition** (n=4) | Mean | **434.705** | 516.751 |
+|  | Median | **435.034** | 516.701 |
+|  | Minimum | **422.005** | 512.659 |
+|  | Maximum | **451.984** | 523.528 |
+|  | Std. | 6.89616 | **2.06369** |
 |  | FBTC(B) | **1.08228** | 0.881584 |
-| **ALL** (n=12) | mean | **466.476** | 607.742 |
-|  | median | **477.507** | 601.624 |
-|  | best | **422.847** | 557.087 |
-|  | worst | **557.846** | 669.777 |
-|  | std | 34.4979 | **25.1907** |
+| **All** (n=12) | Mean | **466.476** | 607.742 |
+|  | Median | **477.507** | 601.624 |
+|  | Minimum | **422.847** | 557.087 |
+|  | Maximum | **557.846** | 669.777 |
+|  | Std. | 34.4979 | **25.1907** |
 |  | FBTC(B) | **4.80777** | 4.70204 |
 
-*Bold indicates the better descriptive value in that row (lower for error metrics and std; higher for FBTC(B)). These descriptive values are not significance tests.*
+*Bold marks the minimum value for error-based metrics and standard deviation, and the maximum value for FBTC(B). These values are descriptive and are not significance tests.*
 
 <a id="mannwhitney-u"></a>
 
@@ -50,62 +50,62 @@ Independent, two-sided Mann–Whitney U tests compare NEA2+ with MSC-CMA-ES on e
 
 For minimization, `probability_nea2plus_lower` is $P(X_{NEA2+}<X_{MSC})+\frac12P(X_{NEA2+}=X_{MSC})$.
 
-Setting summary: NEA2+ significant on **1** functions; MSC-CMA-ES significant on **8**; not significant on **3**.
+Setting summary from the NEA2+ perspective: **1 ↓**, **8 ↑**, and **3 —**.
 
-Composition subset: NEA2+ significant on **0** of 4 functions; MSC-CMA-ES significant on **3**; not significant on **1**.
+Composition subset: **0 ↓**, **3 ↑**, and **1 —** across 4 functions.
 
-`+` means NEA2+ has significantly lower terminal errors; `−` means MSC-CMA-ES has significantly lower terminal errors; `≈` means the difference is not significant at `alpha=0.05` after Bonferroni adjustment.
+Direction is stated from the NEA2+ perspective: `↓` denotes a statistically significant shift toward lower terminal errors, `↑` a statistically significant shift toward higher terminal errors, and `—` no statistically significant difference after Bonferroni correction.
 
 ### Mann–Whitney U statistic
 
 | Function | Class | U (NEA2+) | P(NEA2+ lower) |
 |:--|:--|--:|--:|
-| f1 | basic | 2601 | 0 |
-| f2 | basic | 2346 | 0.0980392 |
-| f3 | basic | 123 | 0.95271 |
-| f4 | basic | 2601 | 0 |
-| f5 | basic | 1275 | 0.509804 |
-| f6 | hybrid | 2574 | 0.0103806 |
-| f7 | hybrid | 2552 | 0.0188389 |
-| f8 | hybrid | 1263 | 0.514418 |
-| f9 | composition | 2601 | 0 |
-| f10 | composition | 2601 | 0 |
-| f11 | composition | 2601 | 0 |
-| f12 | composition | 1473 | 0.433679 |
+| f1 | Unimodal and simple multimodal | 2601 | 0 |
+| f2 | Unimodal and simple multimodal | 2346 | 0.0980392 |
+| f3 | Unimodal and simple multimodal | 123 | 0.95271 |
+| f4 | Unimodal and simple multimodal | 2601 | 0 |
+| f5 | Unimodal and simple multimodal | 1275 | 0.509804 |
+| f6 | Hybrid | 2574 | 0.0103806 |
+| f7 | Hybrid | 2552 | 0.0188389 |
+| f8 | Hybrid | 1263 | 0.514418 |
+| f9 | Composition | 2601 | 0 |
+| f10 | Composition | 2601 | 0 |
+| f11 | Composition | 2601 | 0 |
+| f12 | Composition | 1473 | 0.433679 |
 
-### Raw two-sided p-value
+### p_raw
 
 | Function | p_raw |
 |:--|--:|
-| f1 | 9.262396e-19 |
-| f2 | 1.445230e-12 |
-| f3 | 3.344868e-15 |
-| f4 | 2.839952e-18 |
+| f1 | 9.2624e-19 |
+| f2 | 1.44523e-12 |
+| f3 | 3.34487e-15 |
+| f4 | 2.83995e-18 |
 | f5 | 0.866655 |
-| f6 | 1.598064e-17 |
-| f7 | 5.637172e-17 |
+| f6 | 1.59806e-17 |
+| f7 | 5.63717e-17 |
 | f8 | 0.804421 |
-| f9 | 2.786987e-20 |
-| f10 | 3.303682e-18 |
-| f11 | 3.303682e-18 |
+| f9 | 2.78699e-20 |
+| f10 | 3.30368e-18 |
+| f11 | 3.30368e-18 |
 | f12 | 0.246155 |
 
-### Bonferroni-adjusted p-value and decision
+### p_Bonferroni and Direction
 
-| Function | p_Bonferroni | Decision |
+| Function | p_Bonferroni | Direction |
 |:--|--:|:--:|
-| f1 | **1.111488e-17** | **−** |
-| f2 | **1.734276e-11** | **−** |
-| f3 | **4.013841e-14** | **+** |
-| f4 | **3.407943e-17** | **−** |
-| f5 | 1 | **≈** |
-| f6 | **1.917677e-16** | **−** |
-| f7 | **6.764607e-16** | **−** |
-| f8 | 1 | **≈** |
-| f9 | **3.344384e-19** | **−** |
-| f10 | **3.964418e-17** | **−** |
-| f11 | **3.964418e-17** | **−** |
-| f12 | 1 | **≈** |
+| f1 | **1.11149e-17** | **↑** |
+| f2 | **1.73428e-11** | **↑** |
+| f3 | **4.01384e-14** | **↓** |
+| f4 | **3.40794e-17** | **↑** |
+| f5 | 1 | **—** |
+| f6 | **1.91768e-16** | **↑** |
+| f7 | **6.76461e-16** | **↑** |
+| f8 | 1 | **—** |
+| f9 | **3.34438e-19** | **↑** |
+| f10 | **3.96442e-17** | **↑** |
+| f11 | **3.96442e-17** | **↑** |
+| f12 | 1 | **—** |
 
 Full-precision MWU statistics are available in [`../../../mwu/details.csv`](../../../mwu/details.csv) relative to the NEA2+ comparison root.
 
@@ -113,13 +113,13 @@ Full-precision MWU statistics are available in [`../../../mwu/details.csv`](../.
 
 ## Deep Statistical Comparison
 
-DSC compares **MSC-CMA-ES, NEA2+, and BIPOP-CMA-ES** using the 51 unmodified terminal errors per function. Per-function rankings use Anderson–Darling comparisons (`alpha=0.05`, `epsilon=0`, `monte_carlo_iterations=0`). The rank matrices are analyzed with the Friedman omnibus test separately for all functions and for the composition-function subset. When the omnibus null hypothesis is rejected, Holm-adjusted post-hoc comparisons are performed against the algorithm with the best mean DSC rank.
+DSC compares **MSC-CMA-ES, NEA2+, and BIPOP-CMA-ES** using the 51 unmodified terminal errors per function. Per-function rankings use Anderson–Darling comparisons (`alpha=0.05`, `epsilon=0`, `monte_carlo_iterations=0`). The rank matrices are analyzed with the Friedman omnibus test separately for all functions and for the composition-function subset. When the omnibus null hypothesis is rejected, Holm-adjusted post-hoc comparisons are performed against the algorithm with the lowest mean DSC rank.
 
-`★` means MSC-CMA-ES has the best mean DSC rank and Friedman rejects; `≈` means Friedman rejects but the Holm-adjusted comparison between MSC-CMA-ES and the best-ranked method is not significant; `↓` means the best-ranked method differs significantly from MSC-CMA-ES after Holm adjustment; `O` means Friedman does not reject and no post-hoc interpretation is made.
+`★` means MSC-CMA-ES has the lowest mean DSC rank and the Friedman test rejects the null hypothesis; `≈` means the Friedman test rejects the null hypothesis but the Holm-adjusted comparison between MSC-CMA-ES and the lowest-mean-rank algorithm is not significant; `↓` means the lowest-mean-rank algorithm has a smaller mean DSC rank than MSC-CMA-ES and the Holm-adjusted comparison is significant; `O` means the Friedman test does not reject the null hypothesis and no post-hoc interpretation is made.
 
 ### DSC ranks by function
 
-Lower DSC rank indicates better performance; tied distributions receive fractional ranks.
+DSC ranks are ordered from 1 upward; tied distributions receive fractional ranks. Smaller numerical ranks are lower in this ordering.
 
 | Function | MSC-CMA-ES | NEA2+ | BIPOP-CMA-ES |
 |:--|--:|--:|--:|
@@ -138,9 +138,9 @@ Lower DSC rank indicates better performance; tied distributions receive fraction
 
 ### Statistical comparison
 
-| Scope | n | Best-ranked algorithm | MSC mean rank | NEA2+ mean rank | BIPOP mean rank | Friedman p | Post-hoc control | p_Holm(MSC) | p_Holm(NEA2+) | Result |
+| Scope | n | Lowest-mean-rank algorithm | MSC mean rank | NEA2+ mean rank | BIPOP-CMA-ES mean rank | Friedman p | Post-hoc control | p_Holm(MSC) | p_Holm(NEA2+) | Result |
 |:--|--:|:--|--:|--:|--:|--:|:--|--:|--:|:--:|
-| all | 12 | MSC-CMA-ES | 1.54167 | 2.58333 | 1.875 | 0.0335126 | MSC-CMA-ES | — | 0.0107244 | **★** |
-| composition | 4 | MSC-CMA-ES | 1.125 | 2.75 | 2.125 | 0.0680509 | — | — | — | **O** |
+| All | 12 | MSC-CMA-ES | 1.54167 | 2.58333 | 1.875 | 0.0335126 | MSC-CMA-ES | — | 0.0107244 | **★** |
+| Composition | 4 | MSC-CMA-ES | 1.125 | 2.75 | 2.125 | 0.0680509 | — | — | — | **O** |
 
 Complete DSCTool request/response files and exact orderings are stored under `related_comparisons/nea2plus/dsc/`.

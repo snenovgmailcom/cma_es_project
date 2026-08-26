@@ -1,4 +1,4 @@
-suite,dimension,budget,n_functions,nea2plus_better,msc_better,not_significant
+suite,dimension,budget,n_functions,nea2plus_lower,nea2plus_higher,not_significant
 cec2017,10,100000,29,2,21,6
 cec2020,5,50000,10,2,4,4
 cec2020,10,1000000,10,1,6,3
