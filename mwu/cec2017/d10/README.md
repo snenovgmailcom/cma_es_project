@@ -1,27 +1,6 @@
-<table align="right">
-<tr><th align="left">Contents</th></tr>
-<tr><td align="left">
-<a href="#mannwhitney-u-tests-on-terminal-errors">Mann–Whitney U tests on terminal errors</a><br>
-&nbsp;&nbsp;<a href="#budget-100k">Budget 100K</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-100k-u">Mann–Whitney U statistic</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-100k-raw-p">Raw two-sided p-value</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-100k-bonferroni">Bonferroni-adjusted p-value and decision</a><br>
-&nbsp;&nbsp;<a href="#budget-1m">Budget 1M</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-1m-u">Mann–Whitney U statistic</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-1m-raw-p">Raw two-sided p-value</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-1m-bonferroni">Bonferroni-adjusted p-value and decision</a><br>
-<a href="#deep-statistical-comparison">Deep Statistical Comparison</a><br>
-&nbsp;&nbsp;<a href="#dsc-budget-100k">Budget 100K</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#dsc-budget-100k-ranks">DSC ranks by function</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#dsc-budget-100k-comparison">Statistical comparison</a><br>
-&nbsp;&nbsp;<a href="#dsc-budget-1m">Budget 1M</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#dsc-budget-1m-ranks">DSC ranks by function</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#dsc-budget-1m-comparison">Statistical comparison</a><br>
-&nbsp;&nbsp;<a href="#dsc-cell-summary">Cell summary</a>
-</td></tr>
-</table>
-
 # CEC2017, D=10
+
+Contents: [Mann–Whitney U tests on terminal errors](#mannwhitney-u-tests-on-terminal-errors) · [Deep Statistical Comparison](#deep-statistical-comparison)
 
 ## Mann–Whitney U tests on terminal errors
 
@@ -29,22 +8,23 @@ Independent, two-sided Mann–Whitney U tests compare each competitor
 with MSC-CMA-ES on every function. Each sample contains 51 unmodified
 run-wise terminal errors. Bonferroni adjustment is applied over all
 functions separately for each budget and competitor.
-The test is evaluated with SciPy's asymptotic Mann–Whitney U method (`method="asymptotic"`) with continuity correction (`use_continuity=True`).
+The test is evaluated with SciPy's asymptotic Mann–Whitney U method
+(`method="asymptotic"`) with continuity correction (`use_continuity=True`).
 
 The U statistic in [`details.csv`](details.csv) is for the competitor
 sample. For minimization, `probability_competitor_lower` is
 $P(X_{competitor}<X_{MSC})+\frac12P(X_{competitor}=X_{MSC})$.
 
-Each function is reported with the U statistic, the raw two-sided
-p-value, and the Bonferroni-adjusted p-value. In the adjusted-p rows,
-`+` means that the competitor has significantly lower terminal errors,
-`−` means that MSC-CMA-ES has significantly lower terminal errors, and
-`≈` means that the difference is not significant at alpha=0.05.
-Significant adjusted p-values are shown in bold.
+Each function is reported with the U statistic, p_raw, and
+p_Bonferroni. Direction is stated from the competitor perspective:
+`↓` denotes a statistically significant shift toward lower terminal
+errors, `↑` a statistically significant shift toward higher terminal
+errors, and `—` no statistically significant difference after
+Bonferroni correction. Significant adjusted p-values are shown in bold.
 
 <a id="budget-100k"></a>
 
-### Budget 100K
+### Budget 10^5
 
 Bonferroni family size: `29` functions.
 
@@ -86,7 +66,7 @@ Bonferroni family size: `29` functions.
 
 <a id="budget-100k-raw-p"></a>
 
-#### Raw two-sided p-value
+#### p_raw
 
 | Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|
@@ -122,43 +102,43 @@ Bonferroni family size: `29` functions.
 
 <a id="budget-100k-bonferroni"></a>
 
-#### Bonferroni-adjusted p-value and decision
+#### p_Bonferroni and Direction
 
 | Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|
-| **f1** | **1.53415e-18 (+)** | **7.17414e-16 (+)** | **1.53415e-18 (+)** | **8.46777e-14 (+)** | **4.24218e-15 (+)** | **1.53415e-18 (+)** |
-| **f3** | **0.000207269 (+)** | **0.000244419 (−)** | **0.000207269 (+)** | 1 (≈) | **1.72727e-17 (−)** | **0.000207269 (+)** |
-| **f4** | **3.14845e-08 (+)** | **0.000434602 (−)** | **5.12494e-17 (−)** | **1.63211e-09 (−)** | **5.12494e-17 (−)** | **3.14845e-08 (+)** |
-| **f5** | 0.550648 (≈) | 1 (≈) | **4.61643e-06 (+)** | **1.86933e-09 (−)** | **2.22247e-06 (−)** | 0.606481 (≈) |
-| **f6** | **5.23153e-17 (+)** | **9.49176e-17 (+)** | **3.27554e-17 (+)** | **4.21713e-18 (+)** | **7.87472e-17 (+)** | **1.44096e-17 (+)** |
-| **f7** | 1 (≈) | **4.7815e-07 (−)** | **0.0491811 (−)** | **6.66082e-14 (−)** | **3.65753e-10 (−)** | **6.64556e-07 (−)** |
-| **f8** | 0.910582 (≈) | **1.46217e-06 (−)** | 0.349455 (≈) | **5.57369e-15 (−)** | **2.67768e-14 (−)** | **2.939e-11 (−)** |
-| **f9** | **1.99014e-07 (+)** | 1 (≈) | **1.99014e-07 (+)** | **1.99014e-07 (+)** | 1 (≈) | **1.99014e-07 (+)** |
-| **f10** | 1 (≈) | 1 (≈) | **3.05632e-08 (+)** | 0.512231 (≈) | 0.240181 (≈) | 1 (≈) |
-| **f11** | **0.00503477 (+)** | **0.0241472 (+)** | **1.381e-05 (−)** | 1 (≈) | **2.33895e-15 (−)** | **8.32549e-14 (+)** |
-| **f12** | 1 (≈) | **1.88955e-08 (+)** | **2.14143e-12 (+)** | 1 (≈) | 1 (≈) | **6.08746e-13 (+)** |
-| **f13** | **2.01744e-08 (+)** | **1.8061e-08 (+)** | **1.54776e-09 (+)** | 0.555574 (≈) | 1 (≈) | **3.72755e-16 (+)** |
-| **f14** | 1 (≈) | **5.81618e-12 (+)** | **1.66691e-18 (+)** | **3.80011e-06 (+)** | **1.4271e-05 (+)** | **1.20254e-16 (+)** |
-| **f15** | 0.0859215 (≈) | **1.62611e-16 (+)** | **2.05478e-16 (+)** | **5.96866e-15 (+)** | **0.000620297 (+)** | **3.08922e-16 (+)** |
-| **f16** | **0.00181963 (+)** | **9.7863e-16 (+)** | **1.62611e-16 (+)** | **9.58068e-17 (+)** | **2.80753e-09 (+)** | **1.36376e-16 (+)** |
-| **f17** | 1 (≈) | **2.15232e-13 (+)** | **2.6962e-12 (+)** | **2.28096e-16 (+)** | **1.70478e-16 (+)** | **2.5946e-16 (+)** |
-| **f18** | 1 (≈) | **6.67272e-15 (+)** | **1.16164e-15 (+)** | **5.0477e-15 (+)** | **5.666e-14 (+)** | **2.17064e-15 (+)** |
-| **f19** | **0.00108589 (+)** | **8.84269e-17 (+)** | **1.18406e-17 (+)** | **8.46187e-17 (+)** | **1.50749e-16 (+)** | **6.61714e-17 (+)** |
-| **f20** | **0.0118816 (−)** | **1.15525e-13 (+)** | **7.50341e-15 (+)** | **4.03271e-19 (+)** | **4.35988e-17 (+)** | **7.37134e-17 (+)** |
-| **f21** | 1 (≈) | 1 (≈) | 1 (≈) | **6.52234e-10 (+)** | 1 (≈) | **1.74965e-06 (+)** |
-| **f22** | **1.79519e-09 (−)** | **1.62403e-13 (−)** | **1.54574e-13 (−)** | **2.16762e-08 (−)** | **4.66193e-14 (−)** | **1.6149e-17 (−)** |
-| **f23** | 1 (≈) | **0.0202441 (+)** | **0.000356818 (+)** | 0.407004 (≈) | **3.40602e-08 (−)** | **0.00135031 (+)** |
-| **f24** | **2.92234e-07 (−)** | **0.0308614 (−)** | **6.44206e-15 (−)** | **0.0428596 (+)** | 1 (≈) | **0.000198763 (−)** |
-| **f25** | **8.42753e-13 (−)** | **2.56581e-09 (−)** | **8.85339e-15 (−)** | **1.13133e-13 (−)** | **9.79168e-12 (−)** | **2.21948e-14 (−)** |
-| **f26** | **5.31473e-07 (−)** | **0.0291076 (+)** | **4.02299e-16 (−)** | **1.50364e-11 (+)** | 1 (≈) | **1.15573e-15 (−)** |
-| **f27** | **0.000137726 (+)** | **8.89307e-12 (+)** | **8.43962e-12 (−)** | **3.40561e-08 (−)** | 1 (≈) | **2.26636e-12 (−)** |
-| **f28** | 1 (≈) | 1 (≈) | 1 (≈) | **0.000303507 (+)** | 1 (≈) | 1 (≈) |
-| **f29** | **4.20144e-10 (−)** | 1 (≈) | **0.000116031 (+)** | **2.00286e-11 (−)** | **8.53019e-11 (−)** | **0.0190763 (−)** |
-| **f30** | 1 (≈) | **1.91049e-12 (+)** | **6.0214e-13 (+)** | **1.73031e-15 (−)** | **5.51054e-16 (−)** | **7.67203e-17 (+)** |
+| **f1** | **1.53415e-18 (↓)** | **7.17414e-16 (↓)** | **1.53415e-18 (↓)** | **8.46777e-14 (↓)** | **4.24218e-15 (↓)** | **1.53415e-18 (↓)** |
+| **f3** | **0.000207269 (↓)** | **0.000244419 (↑)** | **0.000207269 (↓)** | 1 (—) | **1.72727e-17 (↑)** | **0.000207269 (↓)** |
+| **f4** | **3.14845e-08 (↓)** | **0.000434602 (↑)** | **5.12494e-17 (↑)** | **1.63211e-09 (↑)** | **5.12494e-17 (↑)** | **3.14845e-08 (↓)** |
+| **f5** | 0.550648 (—) | 1 (—) | **4.61643e-06 (↓)** | **1.86933e-09 (↑)** | **2.22247e-06 (↑)** | 0.606481 (—) |
+| **f6** | **5.23153e-17 (↓)** | **9.49176e-17 (↓)** | **3.27554e-17 (↓)** | **4.21713e-18 (↓)** | **7.87472e-17 (↓)** | **1.44096e-17 (↓)** |
+| **f7** | 1 (—) | **4.7815e-07 (↑)** | **0.0491811 (↑)** | **6.66082e-14 (↑)** | **3.65753e-10 (↑)** | **6.64556e-07 (↑)** |
+| **f8** | 0.910582 (—) | **1.46217e-06 (↑)** | 0.349455 (—) | **5.57369e-15 (↑)** | **2.67768e-14 (↑)** | **2.939e-11 (↑)** |
+| **f9** | **1.99014e-07 (↓)** | 1 (—) | **1.99014e-07 (↓)** | **1.99014e-07 (↓)** | 1 (—) | **1.99014e-07 (↓)** |
+| **f10** | 1 (—) | 1 (—) | **3.05632e-08 (↓)** | 0.512231 (—) | 0.240181 (—) | 1 (—) |
+| **f11** | **0.00503477 (↓)** | **0.0241472 (↓)** | **1.381e-05 (↑)** | 1 (—) | **2.33895e-15 (↑)** | **8.32549e-14 (↓)** |
+| **f12** | 1 (—) | **1.88955e-08 (↓)** | **2.14143e-12 (↓)** | 1 (—) | 1 (—) | **6.08746e-13 (↓)** |
+| **f13** | **2.01744e-08 (↓)** | **1.8061e-08 (↓)** | **1.54776e-09 (↓)** | 0.555574 (—) | 1 (—) | **3.72755e-16 (↓)** |
+| **f14** | 1 (—) | **5.81618e-12 (↓)** | **1.66691e-18 (↓)** | **3.80011e-06 (↓)** | **1.4271e-05 (↓)** | **1.20254e-16 (↓)** |
+| **f15** | 0.0859215 (—) | **1.62611e-16 (↓)** | **2.05478e-16 (↓)** | **5.96866e-15 (↓)** | **0.000620297 (↓)** | **3.08922e-16 (↓)** |
+| **f16** | **0.00181963 (↓)** | **9.7863e-16 (↓)** | **1.62611e-16 (↓)** | **9.58068e-17 (↓)** | **2.80753e-09 (↓)** | **1.36376e-16 (↓)** |
+| **f17** | 1 (—) | **2.15232e-13 (↓)** | **2.6962e-12 (↓)** | **2.28096e-16 (↓)** | **1.70478e-16 (↓)** | **2.5946e-16 (↓)** |
+| **f18** | 1 (—) | **6.67272e-15 (↓)** | **1.16164e-15 (↓)** | **5.0477e-15 (↓)** | **5.666e-14 (↓)** | **2.17064e-15 (↓)** |
+| **f19** | **0.00108589 (↓)** | **8.84269e-17 (↓)** | **1.18406e-17 (↓)** | **8.46187e-17 (↓)** | **1.50749e-16 (↓)** | **6.61714e-17 (↓)** |
+| **f20** | **0.0118816 (↑)** | **1.15525e-13 (↓)** | **7.50341e-15 (↓)** | **4.03271e-19 (↓)** | **4.35988e-17 (↓)** | **7.37134e-17 (↓)** |
+| **f21** | 1 (—) | 1 (—) | 1 (—) | **6.52234e-10 (↓)** | 1 (—) | **1.74965e-06 (↓)** |
+| **f22** | **1.79519e-09 (↑)** | **1.62403e-13 (↑)** | **1.54574e-13 (↑)** | **2.16762e-08 (↑)** | **4.66193e-14 (↑)** | **1.6149e-17 (↑)** |
+| **f23** | 1 (—) | **0.0202441 (↓)** | **0.000356818 (↓)** | 0.407004 (—) | **3.40602e-08 (↑)** | **0.00135031 (↓)** |
+| **f24** | **2.92234e-07 (↑)** | **0.0308614 (↑)** | **6.44206e-15 (↑)** | **0.0428596 (↓)** | 1 (—) | **0.000198763 (↑)** |
+| **f25** | **8.42753e-13 (↑)** | **2.56581e-09 (↑)** | **8.85339e-15 (↑)** | **1.13133e-13 (↑)** | **9.79168e-12 (↑)** | **2.21948e-14 (↑)** |
+| **f26** | **5.31473e-07 (↑)** | **0.0291076 (↓)** | **4.02299e-16 (↑)** | **1.50364e-11 (↓)** | 1 (—) | **1.15573e-15 (↑)** |
+| **f27** | **0.000137726 (↓)** | **8.89307e-12 (↓)** | **8.43962e-12 (↑)** | **3.40561e-08 (↑)** | 1 (—) | **2.26636e-12 (↑)** |
+| **f28** | 1 (—) | 1 (—) | 1 (—) | **0.000303507 (↓)** | 1 (—) | 1 (—) |
+| **f29** | **4.20144e-10 (↑)** | 1 (—) | **0.000116031 (↓)** | **2.00286e-11 (↑)** | **8.53019e-11 (↑)** | **0.0190763 (↑)** |
+| **f30** | 1 (—) | **1.91049e-12 (↓)** | **6.0214e-13 (↓)** | **1.73031e-15 (↑)** | **5.51054e-16 (↑)** | **7.67203e-17 (↓)** |
 
 <a id="budget-1m"></a>
 
-### Budget 1M
+### Budget 10^6
 
 Bonferroni family size: `29` functions.
 
@@ -200,7 +180,7 @@ Bonferroni family size: `29` functions.
 
 <a id="budget-1m-raw-p"></a>
 
-#### Raw two-sided p-value
+#### p_raw
 
 | Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|
@@ -236,39 +216,39 @@ Bonferroni family size: `29` functions.
 
 <a id="budget-1m-bonferroni"></a>
 
-#### Bonferroni-adjusted p-value and decision
+#### p_Bonferroni and Direction
 
 | Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|
-| **f1** | **9.76141e-05 (+)** | **9.76141e-05 (+)** | **9.76141e-05 (+)** | **0.0209286 (+)** | 1 (≈) | **9.76141e-05 (+)** |
-| **f3** | **4.5235e-05 (+)** | **4.5235e-05 (+)** | **4.5235e-05 (+)** | **4.5235e-05 (+)** | 0.195971 (≈) | **4.5235e-05 (+)** |
-| **f4** | **0.000433377 (+)** | **0.000433377 (+)** | **1.08517e-16 (−)** | 1 (≈) | **0.00011869 (−)** | **0.000433377 (+)** |
-| **f5** | 1 (≈) | **0.00380619 (+)** | 1 (≈) | **0.000217315 (+)** | 1 (≈) | **3.70865e-07 (−)** |
-| **f6** | **1.08707e-17 (+)** | **1.62682e-17 (+)** | **5.76564e-19 (+)** | **4.03271e-19 (+)** | **4.03271e-19 (+)** | **1.99612e-17 (+)** |
-| **f7** | 1 (≈) | **8.82157e-13 (−)** | **8.18537e-14 (−)** | **0.000458492 (−)** | 0.0701561 (≈) | **1.93775e-16 (−)** |
-| **f8** | **0.000207269 (+)** | 1 (≈) | 1 (≈) | **0.00154973 (+)** | **0.00540472 (−)** | **1.65612e-14 (−)** |
-| **f9** | **1.44945e-08 (+)** | **1.44945e-08 (+)** | **1.44945e-08 (+)** | **1.44945e-08 (+)** | **4.67704e-05 (+)** | **1.44945e-08 (+)** |
-| **f10** | **4.21191e-07 (−)** | 1 (≈) | 1 (≈) | 1 (≈) | **1.01856e-06 (+)** | **9.32834e-05 (−)** |
-| **f11** | 1 (≈) | 1 (≈) | **1.42989e-06 (−)** | 1 (≈) | **4.17077e-06 (−)** | 1 (≈) |
-| **f12** | 1 (≈) | **1.6916e-06 (+)** | **0.0205155 (−)** | **0.00269243 (−)** | **2.52777e-07 (−)** | 1 (≈) |
-| **f13** | 0.0502161 (≈) | **5.41679e-16 (+)** | 0.0559461 (≈) | **2.43758e-08 (+)** | **0.00195842 (+)** | **6.72374e-12 (+)** |
-| **f14** | **1.3133e-07 (+)** | **8.27173e-16 (+)** | **8.27173e-16 (+)** | **8.27173e-16 (+)** | **2.26252e-11 (+)** | **8.27173e-16 (+)** |
-| **f15** | **2.9343e-09 (+)** | **6.18347e-16 (+)** | **2.29745e-10 (+)** | **1.14328e-16 (+)** | **6.18347e-16 (+)** | **1.83134e-15 (+)** |
-| **f16** | **6.66082e-14 (+)** | **1.21256e-16 (+)** | **1.09717e-15 (+)** | **9.58068e-17 (+)** | **3.87869e-14 (+)** | **2.30917e-16 (+)** |
-| **f17** | 1 (≈) | **6.31704e-17 (+)** | **6.52077e-08 (+)** | **4.03271e-19 (+)** | **3.06475e-17 (+)** | **9.44357e-17 (+)** |
-| **f18** | 1 (≈) | **9.58068e-17 (+)** | **8.71425e-14 (+)** | **9.58068e-17 (+)** | **9.58068e-17 (+)** | **1.72418e-16 (+)** |
-| **f19** | **6.10356e-13 (+)** | **4.03271e-19 (+)** | **1.18121e-17 (+)** | **2.62325e-18 (+)** | **6.43124e-18 (+)** | **4.03271e-19 (+)** |
-| **f20** | 1 (≈) | **4.03271e-19 (+)** | **1.35623e-05 (+)** | **4.03271e-19 (+)** | **5.76564e-19 (+)** | **4.03271e-19 (+)** |
-| **f21** | **0.0218627 (+)** | **0.00241233 (+)** | 1 (≈) | **9.0645e-08 (+)** | 0.839942 (≈) | 1 (≈) |
-| **f22** | 0.100214 (≈) | **0.00250448 (−)** | **9.50067e-13 (−)** | 1 (≈) | 1 (≈) | **3.98059e-19 (−)** |
-| **f23** | **1.98082e-13 (−)** | **0.0257451 (+)** | **1.08997e-15 (−)** | **0.0458341 (−)** | **7.65924e-15 (−)** | **1.37257e-15 (−)** |
-| **f24** | **1.74326e-06 (−)** | **0.049449 (−)** | **4.47045e-16 (−)** | 1 (≈) | **0.000102821 (−)** | **6.72732e-12 (−)** |
-| **f25** | **2.3757e-14 (−)** | **2.60186e-07 (+)** | **7.78894e-17 (−)** | **2.53913e-16 (−)** | **2.2924e-15 (−)** | **2.06906e-17 (−)** |
-| **f26** | **1.8884e-10 (−)** | **1.02831e-16 (+)** | **4.03043e-19 (−)** | **4.03043e-19 (+)** | **2.6535e-10 (+)** | **4.03043e-19 (−)** |
-| **f27** | **7.11201e-08 (+)** | **1.16963e-11 (+)** | **2.19908e-13 (−)** | **0.000583089 (+)** | **4.29841e-09 (+)** | **2.82115e-09 (−)** |
-| **f28** | **4.54582e-17 (−)** | 1 (≈) | **5.76564e-19 (−)** | 1 (≈) | 1 (≈) | **8.08226e-19 (−)** |
-| **f29** | **0.000741517 (−)** | 1 (≈) | 1 (≈) | 0.0503177 (≈) | **2.3193e-11 (−)** | **4.33818e-07 (−)** |
-| **f30** | **2.19614e-05 (+)** | **2.25869e-17 (+)** | **3.20762e-14 (+)** | **1.56709e-11 (−)** | **0.00639243 (+)** | **1.71546e-17 (+)** |
+| **f1** | **9.76141e-05 (↓)** | **9.76141e-05 (↓)** | **9.76141e-05 (↓)** | **0.0209286 (↓)** | 1 (—) | **9.76141e-05 (↓)** |
+| **f3** | **4.5235e-05 (↓)** | **4.5235e-05 (↓)** | **4.5235e-05 (↓)** | **4.5235e-05 (↓)** | 0.195971 (—) | **4.5235e-05 (↓)** |
+| **f4** | **0.000433377 (↓)** | **0.000433377 (↓)** | **1.08517e-16 (↑)** | 1 (—) | **0.00011869 (↑)** | **0.000433377 (↓)** |
+| **f5** | 1 (—) | **0.00380619 (↓)** | 1 (—) | **0.000217315 (↓)** | 1 (—) | **3.70865e-07 (↑)** |
+| **f6** | **1.08707e-17 (↓)** | **1.62682e-17 (↓)** | **5.76564e-19 (↓)** | **4.03271e-19 (↓)** | **4.03271e-19 (↓)** | **1.99612e-17 (↓)** |
+| **f7** | 1 (—) | **8.82157e-13 (↑)** | **8.18537e-14 (↑)** | **0.000458492 (↑)** | 0.0701561 (—) | **1.93775e-16 (↑)** |
+| **f8** | **0.000207269 (↓)** | 1 (—) | 1 (—) | **0.00154973 (↓)** | **0.00540472 (↑)** | **1.65612e-14 (↑)** |
+| **f9** | **1.44945e-08 (↓)** | **1.44945e-08 (↓)** | **1.44945e-08 (↓)** | **1.44945e-08 (↓)** | **4.67704e-05 (↓)** | **1.44945e-08 (↓)** |
+| **f10** | **4.21191e-07 (↑)** | 1 (—) | 1 (—) | 1 (—) | **1.01856e-06 (↓)** | **9.32834e-05 (↑)** |
+| **f11** | 1 (—) | 1 (—) | **1.42989e-06 (↑)** | 1 (—) | **4.17077e-06 (↑)** | 1 (—) |
+| **f12** | 1 (—) | **1.6916e-06 (↓)** | **0.0205155 (↑)** | **0.00269243 (↑)** | **2.52777e-07 (↑)** | 1 (—) |
+| **f13** | 0.0502161 (—) | **5.41679e-16 (↓)** | 0.0559461 (—) | **2.43758e-08 (↓)** | **0.00195842 (↓)** | **6.72374e-12 (↓)** |
+| **f14** | **1.3133e-07 (↓)** | **8.27173e-16 (↓)** | **8.27173e-16 (↓)** | **8.27173e-16 (↓)** | **2.26252e-11 (↓)** | **8.27173e-16 (↓)** |
+| **f15** | **2.9343e-09 (↓)** | **6.18347e-16 (↓)** | **2.29745e-10 (↓)** | **1.14328e-16 (↓)** | **6.18347e-16 (↓)** | **1.83134e-15 (↓)** |
+| **f16** | **6.66082e-14 (↓)** | **1.21256e-16 (↓)** | **1.09717e-15 (↓)** | **9.58068e-17 (↓)** | **3.87869e-14 (↓)** | **2.30917e-16 (↓)** |
+| **f17** | 1 (—) | **6.31704e-17 (↓)** | **6.52077e-08 (↓)** | **4.03271e-19 (↓)** | **3.06475e-17 (↓)** | **9.44357e-17 (↓)** |
+| **f18** | 1 (—) | **9.58068e-17 (↓)** | **8.71425e-14 (↓)** | **9.58068e-17 (↓)** | **9.58068e-17 (↓)** | **1.72418e-16 (↓)** |
+| **f19** | **6.10356e-13 (↓)** | **4.03271e-19 (↓)** | **1.18121e-17 (↓)** | **2.62325e-18 (↓)** | **6.43124e-18 (↓)** | **4.03271e-19 (↓)** |
+| **f20** | 1 (—) | **4.03271e-19 (↓)** | **1.35623e-05 (↓)** | **4.03271e-19 (↓)** | **5.76564e-19 (↓)** | **4.03271e-19 (↓)** |
+| **f21** | **0.0218627 (↓)** | **0.00241233 (↓)** | 1 (—) | **9.0645e-08 (↓)** | 0.839942 (—) | 1 (—) |
+| **f22** | 0.100214 (—) | **0.00250448 (↑)** | **9.50067e-13 (↑)** | 1 (—) | 1 (—) | **3.98059e-19 (↑)** |
+| **f23** | **1.98082e-13 (↑)** | **0.0257451 (↓)** | **1.08997e-15 (↑)** | **0.0458341 (↑)** | **7.65924e-15 (↑)** | **1.37257e-15 (↑)** |
+| **f24** | **1.74326e-06 (↑)** | **0.049449 (↑)** | **4.47045e-16 (↑)** | 1 (—) | **0.000102821 (↑)** | **6.72732e-12 (↑)** |
+| **f25** | **2.3757e-14 (↑)** | **2.60186e-07 (↓)** | **7.78894e-17 (↑)** | **2.53913e-16 (↑)** | **2.2924e-15 (↑)** | **2.06906e-17 (↑)** |
+| **f26** | **1.8884e-10 (↑)** | **1.02831e-16 (↓)** | **4.03043e-19 (↑)** | **4.03043e-19 (↓)** | **2.6535e-10 (↓)** | **4.03043e-19 (↑)** |
+| **f27** | **7.11201e-08 (↓)** | **1.16963e-11 (↓)** | **2.19908e-13 (↑)** | **0.000583089 (↓)** | **4.29841e-09 (↓)** | **2.82115e-09 (↑)** |
+| **f28** | **4.54582e-17 (↑)** | 1 (—) | **5.76564e-19 (↑)** | 1 (—) | 1 (—) | **8.08226e-19 (↑)** |
+| **f29** | **0.000741517 (↑)** | 1 (—) | 1 (—) | 0.0503177 (—) | **2.3193e-11 (↑)** | **4.33818e-07 (↑)** |
+| **f30** | **2.19614e-05 (↓)** | **2.25869e-17 (↓)** | **3.20762e-14 (↓)** | **1.56709e-11 (↑)** | **0.00639243 (↓)** | **1.71546e-17 (↓)** |
 
 Full-precision U statistics, raw and Bonferroni-adjusted p-values,
 effect directions, sample medians, and family sizes are available in
@@ -288,26 +268,27 @@ the analysis: <https://ws.ijs.si/dsc/>.
 Settings: Anderson–Darling comparisons at `alpha=0.05`, `epsilon=0`,
 and `monte_carlo_iterations=0`; Friedman omnibus tests over functions;
 and, after rejection of the omnibus null hypothesis, Holm-adjusted
-post-hoc comparisons against the method with the best mean DSC rank.
+post-hoc comparisons against the method with the lowest mean DSC rank.
 
-`★` means that MSC-CMA-ES has the best mean DSC rank and the Friedman
+`★` means that MSC-CMA-ES has the lowest mean DSC rank and the Friedman
 test rejects the null hypothesis; `≈` means that the Friedman test
-rejects the null hypothesis but MSC-CMA-ES is not significantly different
-from the best-ranked method after Holm adjustment; `↓` means that the
-best-ranked method is significantly better than MSC-CMA-ES after Holm
-adjustment; and `O` means that the Friedman test does not reject the null
-hypothesis and no post-hoc interpretation is made.
+rejects the null hypothesis but the Holm-adjusted comparison between
+MSC-CMA-ES and the lowest-mean-rank method is not significant; `↓` means
+that the lowest-mean-rank method has a smaller mean DSC rank than
+MSC-CMA-ES and the Holm-adjusted comparison is significant; `O` means
+that the Friedman test does not reject the null hypothesis and no
+post-hoc interpretation is made.
 
 <a id="dsc-budget-100k"></a>
 
-### Budget 100K
+### Budget 10^5
 
 <a id="dsc-budget-100k-ranks"></a>
 
 #### DSC ranks by function
 
-Lower DSC ranks indicate better performance. Tied distributions
-receive fractional ranks.
+DSC ranks are ordered from 1 upward; tied distributions receive
+fractional ranks. Smaller numerical ranks are lower in this ordering.
 
 | Function | MSC-CMA-ES | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|--:|
@@ -347,21 +328,21 @@ Composition-function set: `f21–f30`.
 
 #### Statistical comparison
 
-| Function set | n | Best-ranked method | Best mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p-value | Holm p-value | Result |
+| Function set | n | Lowest-mean-rank method | Lowest mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p | p_Holm | Result |
 |:--|--:|:--|--:|--:|:--:|--:|--:|--:|:--:|
 | All functions | 29 | ARRDE | 3.5 | 4.2069 | 5/7 | 5.9335 | 0.430681 | — | O |
 | Composition functions | 10 | MSC-CMA-ES | 1.95 | 1.95 | 1/7 | 28.9714 | 6.1599e-05 | — | ★ |
 
 <a id="dsc-budget-1m"></a>
 
-### Budget 1M
+### Budget 10^6
 
 <a id="dsc-budget-1m-ranks"></a>
 
 #### DSC ranks by function
 
-Lower DSC ranks indicate better performance. Tied distributions
-receive fractional ranks.
+DSC ranks are ordered from 1 upward; tied distributions receive
+fractional ranks. Smaller numerical ranks are lower in this ordering.
 
 | Function | MSC-CMA-ES | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|--:|
@@ -401,7 +382,7 @@ Composition-function set: `f21–f30`.
 
 #### Statistical comparison
 
-| Function set | n | Best-ranked method | Best mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p-value | Holm p-value | Result |
+| Function set | n | Lowest-mean-rank method | Lowest mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p | p_Holm | Result |
 |:--|--:|:--|--:|--:|:--:|--:|--:|--:|:--:|
 | All functions | 29 | NL-SHADE-RSP | 2.89655 | 4.32759 | 4.5/7 | 27.7537 | 0.000104547 | 0.023305 | ↓ |
 | Composition functions | 10 | MSC-CMA-ES | 2.3 | 2.3 | 1/7 | 27.2357 | 0.000130799 | — | ★ |
@@ -412,5 +393,5 @@ Composition-function set: `f21–f30`.
 
 | Budget | All functions | Composition functions |
 |--:|:--|:--|
-| 100K | ARRDE · 5/7 · O | MSC-CMA-ES · 1/7 · ★ |
-| 1M | NL-SHADE-RSP · 4.5/7 · ↓ | MSC-CMA-ES · 1/7 · ★ |
+| 10^5 | ARRDE · 5/7 · O | MSC-CMA-ES · 1/7 · ★ |
+| 10^6 | NL-SHADE-RSP · 4.5/7 · ↓ | MSC-CMA-ES · 1/7 · ★ |

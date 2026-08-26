@@ -1,20 +1,6 @@
-<table align="right">
-<tr><th align="left">Contents</th></tr>
-<tr><td align="left">
-<a href="#mannwhitney-u-tests-on-terminal-errors">Mann–Whitney U tests on terminal errors</a><br>
-&nbsp;&nbsp;<a href="#budget-3m">Budget 3M</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-3m-u">Mann–Whitney U statistic</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-3m-raw-p">Raw two-sided p-value</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#budget-3m-bonferroni">Bonferroni-adjusted p-value and decision</a><br>
-<a href="#deep-statistical-comparison">Deep Statistical Comparison</a><br>
-&nbsp;&nbsp;<a href="#dsc-budget-3m">Budget 3M</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#dsc-budget-3m-ranks">DSC ranks by function</a><br>
-&nbsp;&nbsp;&nbsp;&nbsp;<a href="#dsc-budget-3m-comparison">Statistical comparison</a><br>
-&nbsp;&nbsp;<a href="#dsc-cell-summary">Cell summary</a>
-</td></tr>
-</table>
-
 # CEC2020, D=15
+
+Contents: [Mann–Whitney U tests on terminal errors](#mannwhitney-u-tests-on-terminal-errors) · [Deep Statistical Comparison](#deep-statistical-comparison)
 
 ## Mann–Whitney U tests on terminal errors
 
@@ -22,22 +8,23 @@ Independent, two-sided Mann–Whitney U tests compare each competitor
 with MSC-CMA-ES on every function. Each sample contains 51 unmodified
 run-wise terminal errors. Bonferroni adjustment is applied over all
 functions separately for each budget and competitor.
-The test is evaluated with SciPy's asymptotic Mann–Whitney U method (`method="asymptotic"`) with continuity correction (`use_continuity=True`).
+The test is evaluated with SciPy's asymptotic Mann–Whitney U method
+(`method="asymptotic"`) with continuity correction (`use_continuity=True`).
 
 The U statistic in [`details.csv`](details.csv) is for the competitor
 sample. For minimization, `probability_competitor_lower` is
 $P(X_{competitor}<X_{MSC})+\frac12P(X_{competitor}=X_{MSC})$.
 
-Each function is reported with the U statistic, the raw two-sided
-p-value, and the Bonferroni-adjusted p-value. In the adjusted-p rows,
-`+` means that the competitor has significantly lower terminal errors,
-`−` means that MSC-CMA-ES has significantly lower terminal errors, and
-`≈` means that the difference is not significant at alpha=0.05.
-Significant adjusted p-values are shown in bold.
+Each function is reported with the U statistic, p_raw, and
+p_Bonferroni. Direction is stated from the competitor perspective:
+`↓` denotes a statistically significant shift toward lower terminal
+errors, `↑` a statistically significant shift toward higher terminal
+errors, and `—` no statistically significant difference after
+Bonferroni correction. Significant adjusted p-values are shown in bold.
 
 <a id="budget-3m"></a>
 
-### Budget 3M
+### Budget 3×10^6
 
 Bonferroni family size: `10` functions.
 
@@ -60,7 +47,7 @@ Bonferroni family size: `10` functions.
 
 <a id="budget-3m-raw-p"></a>
 
-#### Raw two-sided p-value
+#### p_raw
 
 | Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|
@@ -77,20 +64,20 @@ Bonferroni family size: `10` functions.
 
 <a id="budget-3m-bonferroni"></a>
 
-#### Bonferroni-adjusted p-value and decision
+#### p_Bonferroni and Direction
 
 | Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|
-| **f1** | 0.433389 (≈) | 0.433389 (≈) | 0.433389 (≈) | 1 (≈) | 1 (≈) | 0.433389 (≈) |
-| **f2** | **2.13328e-06 (−)** | **4.02859e-09 (+)** | 1 (≈) | **7.22964e-13 (+)** | **3.63294e-17 (+)** | 1 (≈) |
-| **f3** | **1.39059e-19 (+)** | **1.1644e-17 (−)** | **3.28725e-17 (−)** | **5.18597e-19 (−)** | 1 (≈) | **3.29867e-17 (−)** |
-| **f4** | **7.7892e-16 (+)** | **3.30368e-17 (+)** | **7.69047e-07 (+)** | **1.82566e-18 (+)** | **3.30368e-17 (+)** | **3.30297e-17 (+)** |
-| **f5** | **0.000609086 (+)** | **0.00731162 (+)** | 1 (≈) | **1.3467e-16 (−)** | **1.6496e-16 (−)** | **8.34603e-14 (−)** |
-| **f6** | **4.84862e-14 (+)** | **1.0051e-16 (+)** | **7.19734e-11 (+)** | **3.50432e-17 (+)** | 0.276723 (≈) | **8.94691e-17 (+)** |
-| **f7** | **3.41252e-08 (+)** | **3.4367e-10 (+)** | **0.00277058 (+)** | **5.44405e-11 (+)** | **8.30097e-11 (+)** | **7.57887e-06 (+)** |
-| **f8** | **2.15299e-09 (−)** | **1.20766e-12 (−)** | **8.91523e-18 (−)** | 1 (≈) | **0.00057285 (+)** | **5.59245e-18 (−)** |
-| **f9** | **0.0367286 (+)** | **6.35374e-15 (+)** | **2.97118e-17 (−)** | **4.08597e-14 (+)** | **2.89092e-06 (+)** | **4.74772e-16 (−)** |
-| **f10** | **3.37708e-08 (−)** | 0.274953 (≈) | **1.74842e-09 (−)** | **1.74842e-09 (−)** | **5.36718e-09 (−)** | **2.8347e-09 (−)** |
+| **f1** | 0.433389 (—) | 0.433389 (—) | 0.433389 (—) | 1 (—) | 1 (—) | 0.433389 (—) |
+| **f2** | **2.13328e-06 (↑)** | **4.02859e-09 (↓)** | 1 (—) | **7.22964e-13 (↓)** | **3.63294e-17 (↓)** | 1 (—) |
+| **f3** | **1.39059e-19 (↓)** | **1.1644e-17 (↑)** | **3.28725e-17 (↑)** | **5.18597e-19 (↑)** | 1 (—) | **3.29867e-17 (↑)** |
+| **f4** | **7.7892e-16 (↓)** | **3.30368e-17 (↓)** | **7.69047e-07 (↓)** | **1.82566e-18 (↓)** | **3.30368e-17 (↓)** | **3.30297e-17 (↓)** |
+| **f5** | **0.000609086 (↓)** | **0.00731162 (↓)** | 1 (—) | **1.3467e-16 (↑)** | **1.6496e-16 (↑)** | **8.34603e-14 (↑)** |
+| **f6** | **4.84862e-14 (↓)** | **1.0051e-16 (↓)** | **7.19734e-11 (↓)** | **3.50432e-17 (↓)** | 0.276723 (—) | **8.94691e-17 (↓)** |
+| **f7** | **3.41252e-08 (↓)** | **3.4367e-10 (↓)** | **0.00277058 (↓)** | **5.44405e-11 (↓)** | **8.30097e-11 (↓)** | **7.57887e-06 (↓)** |
+| **f8** | **2.15299e-09 (↑)** | **1.20766e-12 (↑)** | **8.91523e-18 (↑)** | 1 (—) | **0.00057285 (↓)** | **5.59245e-18 (↑)** |
+| **f9** | **0.0367286 (↓)** | **6.35374e-15 (↓)** | **2.97118e-17 (↑)** | **4.08597e-14 (↓)** | **2.89092e-06 (↓)** | **4.74772e-16 (↑)** |
+| **f10** | **3.37708e-08 (↑)** | 0.274953 (—) | **1.74842e-09 (↑)** | **1.74842e-09 (↑)** | **5.36718e-09 (↑)** | **2.8347e-09 (↑)** |
 
 Full-precision U statistics, raw and Bonferroni-adjusted p-values,
 effect directions, sample medians, and family sizes are available in
@@ -110,26 +97,27 @@ the analysis: <https://ws.ijs.si/dsc/>.
 Settings: Anderson–Darling comparisons at `alpha=0.05`, `epsilon=0`,
 and `monte_carlo_iterations=0`; Friedman omnibus tests over functions;
 and, after rejection of the omnibus null hypothesis, Holm-adjusted
-post-hoc comparisons against the method with the best mean DSC rank.
+post-hoc comparisons against the method with the lowest mean DSC rank.
 
-`★` means that MSC-CMA-ES has the best mean DSC rank and the Friedman
+`★` means that MSC-CMA-ES has the lowest mean DSC rank and the Friedman
 test rejects the null hypothesis; `≈` means that the Friedman test
-rejects the null hypothesis but MSC-CMA-ES is not significantly different
-from the best-ranked method after Holm adjustment; `↓` means that the
-best-ranked method is significantly better than MSC-CMA-ES after Holm
-adjustment; and `O` means that the Friedman test does not reject the null
-hypothesis and no post-hoc interpretation is made.
+rejects the null hypothesis but the Holm-adjusted comparison between
+MSC-CMA-ES and the lowest-mean-rank method is not significant; `↓` means
+that the lowest-mean-rank method has a smaller mean DSC rank than
+MSC-CMA-ES and the Holm-adjusted comparison is significant; `O` means
+that the Friedman test does not reject the null hypothesis and no
+post-hoc interpretation is made.
 
 <a id="dsc-budget-3m"></a>
 
-### Budget 3M
+### Budget 3×10^6
 
 <a id="dsc-budget-3m-ranks"></a>
 
 #### DSC ranks by function
 
-Lower DSC ranks indicate better performance. Tied distributions
-receive fractional ranks.
+DSC ranks are ordered from 1 upward; tied distributions receive
+fractional ranks. Smaller numerical ranks are lower in this ordering.
 
 | Function | MSC-CMA-ES | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|--:|
@@ -150,7 +138,7 @@ Composition-function set: `f8–f10`.
 
 #### Statistical comparison
 
-| Function set | n | Best-ranked method | Best mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p-value | Holm p-value | Result |
+| Function set | n | Lowest-mean-rank method | Lowest mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p | p_Holm | Result |
 |:--|--:|:--|--:|--:|:--:|--:|--:|--:|:--:|
 | All functions | 10 | ARRDE | 3 | 3.45 | 3/7 | 11.1964 | 0.082492 | — | O |
 | Composition functions | 3 | MSC-CMA-ES | 1 | 1 | 1/7 | 14.0357 | 0.0292397 | — | ★ |
@@ -161,4 +149,4 @@ Composition-function set: `f8–f10`.
 
 | Budget | All functions | Composition functions |
 |--:|:--|:--|
-| 3M | ARRDE · 3/7 · O | MSC-CMA-ES · 1/7 · ★ |
+| 3×10^6 | ARRDE · 3/7 · O | MSC-CMA-ES · 1/7 · ★ |

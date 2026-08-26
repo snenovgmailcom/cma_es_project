@@ -39,6 +39,15 @@ from typing import Any, Iterable, Mapping, Sequence
 import numpy as np
 from scipy import stats
 
+from report_style import (
+    ARROW_HIGHER,
+    ARROW_LOWER,
+    ARROW_NS,
+    display_name,
+    format_budget,
+    format_p,
+)
+
 
 REFERENCE = "MSC-CMA"
 EXPECTED_RUNS = 51
@@ -146,14 +155,6 @@ FIELDS = (
     "alpha",
     "decision",
 )
-
-DISPLAY_NAMES = {
-    "MSC-CMA": "MSC-CMA-ES",
-    "BIPOP-CMA": "BIPOP-CMA-ES",
-    "LSRTDE": "L-SRTDE",
-    "NLSHADE-RSP": "NL-SHADE-RSP",
-}
-
 
 class MwuError(RuntimeError):
     pass
@@ -279,9 +280,9 @@ def calculate_setting(experiments: Path, setting: Setting) -> list[dict[str, Any
             ):
                 decision = "not significant"
             elif probability_lower > 0.5:
-                decision = "competitor better"
+                decision = "lower"
             else:
-                decision = "MSC-CMA-ES better"
+                decision = "higher"
 
             rows.append(
                 {
@@ -443,15 +444,12 @@ def load_dsc_results(dsc_root: Path) -> dict[tuple[str, int, int], dict[str, Any
     return loaded
 
 
-def display_name(algorithm: str) -> str:
-    return DISPLAY_NAMES.get(algorithm, algorithm)
-
-
-def format_budget(budget: int) -> str:
+def budget_slug(budget: int) -> str:
+    """Stable URL-anchor slug; not a reader-facing budget label."""
     if budget >= 1_000_000 and budget % 1_000_000 == 0:
-        return f"{budget // 1_000_000}M"
+        return f"{budget // 1_000_000}m"
     if budget >= 1_000 and budget % 1_000 == 0:
-        return f"{budget // 1_000}K"
+        return f"{budget // 1_000}k"
     return str(budget)
 
 
@@ -462,26 +460,22 @@ def format_u(value: Any) -> str:
     return format(number, ".6g")
 
 
-def format_p(value: Any) -> str:
-    return format(float(value), ".6g")
-
-
 def decision_symbol(decision: str) -> str:
-    if decision == "competitor better":
-        return "+"
-    if decision == "MSC-CMA-ES better":
-        return "−"
+    if decision == "lower":
+        return ARROW_LOWER
+    if decision == "higher":
+        return ARROW_HIGHER
     if decision == "not significant":
-        return "≈"
+        return ARROW_NS
     raise MwuError(f"Unknown decision: {decision}")
 
 
 def budget_anchor(budget: int) -> str:
-    return f"budget-{format_budget(budget).lower()}"
+    return f"budget-{budget_slug(budget)}"
 
 
 def dsc_budget_anchor(budget: int) -> str:
-    return f"dsc-budget-{format_budget(budget).lower()}"
+    return f"dsc-budget-{budget_slug(budget)}"
 
 
 def format_optional_p(value: str) -> str:
@@ -508,15 +502,16 @@ def render_dsc_section(
         "Settings: Anderson–Darling comparisons at `alpha=0.05`, `epsilon=0`,",
         "and `monte_carlo_iterations=0`; Friedman omnibus tests over functions;",
         "and, after rejection of the omnibus null hypothesis, Holm-adjusted",
-        "post-hoc comparisons against the method with the best mean DSC rank.",
+        "post-hoc comparisons against the method with the lowest mean DSC rank.",
         "",
-        "`★` means that MSC-CMA-ES has the best mean DSC rank and the Friedman",
+        "`★` means that MSC-CMA-ES has the lowest mean DSC rank and the Friedman",
         "test rejects the null hypothesis; `≈` means that the Friedman test",
-        "rejects the null hypothesis but MSC-CMA-ES is not significantly different",
-        "from the best-ranked method after Holm adjustment; `↓` means that the",
-        "best-ranked method is significantly better than MSC-CMA-ES after Holm",
-        "adjustment; and `O` means that the Friedman test does not reject the null",
-        "hypothesis and no post-hoc interpretation is made.",
+        "rejects the null hypothesis but the Holm-adjusted comparison between",
+        "MSC-CMA-ES and the lowest-mean-rank method is not significant; `↓` means",
+        "that the lowest-mean-rank method has a smaller mean DSC rank than",
+        "MSC-CMA-ES and the Holm-adjusted comparison is significant; `O` means",
+        "that the Friedman test does not reject the null hypothesis and no",
+        "post-hoc interpretation is made.",
         "",
     ]
 
@@ -541,8 +536,8 @@ def render_dsc_section(
                 "",
                 "#### DSC ranks by function",
                 "",
-                "Lower DSC ranks indicate better performance. Tied distributions",
-                "receive fractional ranks.",
+                "DSC ranks are ordered from 1 upward; tied distributions receive",
+                "fractional ranks. Smaller numerical ranks are lower in this ordering.",
                 "",
                 "| Function | "
                 + " | ".join(display_name(algorithm) for algorithm in algorithms)
@@ -569,7 +564,7 @@ def render_dsc_section(
                 "",
                 "#### Statistical comparison",
                 "",
-                "| Function set | n | Best-ranked method | Best mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p-value | Holm p-value | Result |",
+                "| Function set | n | Lowest-mean-rank method | Lowest mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p | p_Holm | Result |",
                 "|:--|--:|:--|--:|--:|:--:|--:|--:|--:|:--:|",
             ]
         )
@@ -632,43 +627,18 @@ def render_readme(
         by_budget[int(row["budget"])].append(row)
 
     lines = [
-        '<table align="right">',
-        '<tr><th align="left">Contents</th></tr>',
-        '<tr><td align="left">',
-        '<a href="#mannwhitney-u-tests-on-terminal-errors">Mann–Whitney U tests on terminal errors</a><br>',
+        f"# {suite.upper()}, D={dimension}",
+        "",
+        "Contents: [Mann–Whitney U tests on terminal errors]"
+        "(#mannwhitney-u-tests-on-terminal-errors) · "
+        "[Deep Statistical Comparison](#deep-statistical-comparison)",
+        "",
+        "## Mann–Whitney U tests on terminal errors",
+        "",
     ]
-    for budget in sorted(by_budget):
-        anchor = budget_anchor(budget)
-        lines.extend(
-            [
-                f'&nbsp;&nbsp;<a href="#{anchor}">Budget {format_budget(budget)}</a><br>',
-                f'&nbsp;&nbsp;&nbsp;&nbsp;<a href="#{anchor}-u">Mann–Whitney U statistic</a><br>',
-                f'&nbsp;&nbsp;&nbsp;&nbsp;<a href="#{anchor}-raw-p">Raw two-sided p-value</a><br>',
-                f'&nbsp;&nbsp;&nbsp;&nbsp;<a href="#{anchor}-bonferroni">Bonferroni-adjusted p-value and decision</a><br>',
-            ]
-        )
-    lines.append(
-        '<a href="#deep-statistical-comparison">Deep Statistical Comparison</a><br>'
-    )
-    for budget in sorted(dsc_by_budget):
-        anchor = dsc_budget_anchor(budget)
-        lines.extend(
-            [
-                f'&nbsp;&nbsp;<a href="#{anchor}">Budget {format_budget(budget)}</a><br>',
-                f'&nbsp;&nbsp;&nbsp;&nbsp;<a href="#{anchor}-ranks">DSC ranks by function</a><br>',
-                f'&nbsp;&nbsp;&nbsp;&nbsp;<a href="#{anchor}-comparison">Statistical comparison</a><br>',
-            ]
-        )
+
     lines.extend(
         [
-            '&nbsp;&nbsp;<a href="#dsc-cell-summary">Cell summary</a>',
-            '</td></tr>',
-            '</table>',
-            "",
-            f"# {suite.upper()}, D={dimension}",
-            "",
-            "## Mann–Whitney U tests on terminal errors",
-            "",
             "Independent, two-sided Mann–Whitney U tests compare each competitor",
             "with MSC-CMA-ES on every function. Each sample contains 51 unmodified",
             "run-wise terminal errors. Bonferroni adjustment is applied over all",
@@ -680,12 +650,12 @@ def render_readme(
             "sample. For minimization, `probability_competitor_lower` is",
             r"$P(X_{competitor}<X_{MSC})+\frac12P(X_{competitor}=X_{MSC})$.",
             "",
-            "Each function is reported with the U statistic, the raw two-sided",
-            "p-value, and the Bonferroni-adjusted p-value. In the adjusted-p rows,",
-            "`+` means that the competitor has significantly lower terminal errors,",
-            "`−` means that MSC-CMA-ES has significantly lower terminal errors, and",
-            "`≈` means that the difference is not significant at alpha=0.05.",
-            "Significant adjusted p-values are shown in bold.",
+            "Each function is reported with the U statistic, p_raw, and",
+            "p_Bonferroni. Direction is stated from the competitor perspective:",
+            "`↓` denotes a statistically significant shift toward lower terminal",
+            "errors, `↑` a statistically significant shift toward higher terminal",
+            "errors, and `—` no statistically significant difference after",
+            "Bonferroni correction. Significant adjusted p-values are shown in bold.",
             "",
         ]
     )
@@ -759,7 +729,7 @@ def render_readme(
                 "",
                 f'<a id="{anchor}-raw-p"></a>',
                 "",
-                "#### Raw two-sided p-value",
+                "#### p_raw",
                 "",
                 header,
                 alignment,
@@ -779,7 +749,7 @@ def render_readme(
                 "",
                 f'<a id="{anchor}-bonferroni"></a>',
                 "",
-                "#### Bonferroni-adjusted p-value and decision",
+                "#### p_Bonferroni and Direction",
                 "",
                 header,
                 alignment,
@@ -792,7 +762,7 @@ def render_readme(
                 p_adjusted = format_p(row["p_bonferroni"])
                 symbol = decision_symbol(str(row["decision"]))
                 cell = f"{p_adjusted} ({symbol})"
-                if symbol != "≈":
+                if symbol != ARROW_NS:
                     cell = f"**{cell}**"
                 adjusted_cells.append(cell)
             lines.append(
