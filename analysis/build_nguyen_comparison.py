@@ -25,6 +25,12 @@ import math
 import pickle
 import numpy as np
 
+from report_style import (
+    class_label,
+    format_budget,
+    format_value,
+)
+
 DOI = "10.1016/j.asoc.2024.112361"
 DOI_URL = "https://doi.org/10.1016/j.asoc.2024.112361"
 BUDGET = 300_000
@@ -74,25 +80,14 @@ CLASSES = {
     },
 }
 
-CLASS_NAME = {
-    "basic": "unimodal and simple multimodal",
-    "hybrid": "Hybrid",
-    "composition": "Composition",
-}
-
 def cls(suite, fid):
     for name, funcs in CLASSES[suite].items():
         if fid in funcs:
-            return CLASS_NAME[name]
+            return class_label(name)
     raise ValueError((suite, fid))
 
 def fmt(x):
-    if x == 0:
-        return "0"
-    ax = abs(x)
-    if ax >= 1e4 or ax < 1e-3:
-        return f"{x:.3e}"
-    return f"{x:.6g}"
+    return format_value(float(x), sig=6)
 
 def load_msc(suite, functions):
     base = Path("experiments") / suite / "d30" / "MSC-CMA" / "maxevals_300000"
@@ -123,7 +118,7 @@ def page(suite, table_no, nguyen, functions):
     msc = load_msc(suite, functions)
 
     lines = [
-        f"# {suite.upper()}, D=30, B=300K — MSC-CMA-ES vs CMAES-NBC-qN",
+        f"# {suite.upper()}, D=30, B={format_budget(BUDGET)} — MSC-CMA-ES vs CMAES-NBC-qN",
         "",
         "This page compares MSC-CMA-ES with the numerical values reported by "
         "Nguyen for CMAES-NBC-qN:",
@@ -134,7 +129,7 @@ def page(suite, table_no, nguyen, functions):
         f"DOI [{DOI}]({DOI_URL}).",
         "",
         f"Nguyen reports 51 runs per function and `maxFEs = 10,000 × D`; "
-        f"therefore D=30 corresponds to **300,000 NFE**. "
+        f"therefore D=30 corresponds to **{format_budget(BUDGET)} NFE**. "
         f"CMAES-NBC-qN mean/std values below are taken from **Table {table_no}**.",
         "",
         "MSC-CMA-ES mean/std values are computed from the repository's 51 "
@@ -155,7 +150,7 @@ def page(suite, table_no, nguyen, functions):
         ]
 
     lines += [
-        "| Function | Class | MSC mean | CMAES-NBC-qN mean | MSC std | CMAES-NBC-qN std |",
+        "| Function | Class | MSC-CMA-ES Mean | CMAES-NBC-qN Mean | MSC-CMA-ES Std. | CMAES-NBC-qN Std. |",
         "|:--|:--|--:|--:|--:|--:|",
     ]
 
@@ -177,7 +172,7 @@ def page(suite, table_no, nguyen, functions):
 
     lines += [
         "",
-        "*Bold marks the lower mean only; it is not a statistical-significance statement.*",
+        "*Bold marks the minimum of the two mean values. This is descriptive and is not a significance test.*",
         "",
         f"Source for CMAES-NBC-qN: Nguyen (2024), Table {table_no}.",
         "",
@@ -189,7 +184,7 @@ def index_page():
 
 Nguyen reports CEC2014 and CEC2017 results for CMAES-NBC-qN in D=30 and D=50.
 The two D=30 cells correspond directly to MSC-CMA-ES experiments at the same
-budget, **300,000 NFE**.
+budget, **{format_budget(BUDGET)} NFE**.
 
 Reference:
 
@@ -199,8 +194,8 @@ Reference:
 
 | Suite | D | Budget | Published source | Comparison |
 |:--|--:|--:|:--|:--|
-| CEC2014 | 30 | 300K | Nguyen Table 10 | [MSC-CMA-ES vs CMAES-NBC-qN](cec2014/d30/budget_300000/README.md) |
-| CEC2017 | 30 | 300K | Nguyen Table 12 | [MSC-CMA-ES vs CMAES-NBC-qN](cec2017/d30/budget_300000/README.md) |
+| CEC2014 | 30 | {format_budget(BUDGET)} | Nguyen Table 10 | [MSC-CMA-ES vs CMAES-NBC-qN](cec2014/d30/budget_300000/README.md) |
+| CEC2017 | 30 | {format_budget(BUDGET)} | Nguyen Table 12 | [MSC-CMA-ES vs CMAES-NBC-qN](cec2017/d30/budget_300000/README.md) |
 
 Only published **mean and standard deviation** values are used for
 CMAES-NBC-qN. No MWU or DSC is reported because the run-wise CMAES-NBC-qN
