@@ -1,8 +1,8 @@
 # CEC2017 / D=30 — by-category summary
 
-## Ranking across metrics (budget 3×10^5)
+## Ranking — D=30 (B = 3×10^5)
 
-Parallel-coordinate rank of all 7 algorithms on four aggregate metrics (Maximum-SUM, Median-SUM, FBTC(B), Minimum-SUM), per function class. Each line is one algorithm. The axes are oriented so smaller error-based sums and larger FBTC(B) values appear toward the top. MSC-CMA-ES is shown in red.
+Parallel-coordinate rank of all 7 algorithms on four aggregate metrics (Maximum-SUM, Median-SUM, FBTC(B), Minimum-SUM), per function class. Each line is one algorithm. The axes are oriented so smaller error-based sums and larger FBTC(B) values appear toward the top. MSC-CMA-ES is shown in red. Budget: B = 3×10^5 evaluations.
 
 <table>
 <tr>
@@ -17,9 +17,9 @@ Parallel-coordinate rank of all 7 algorithms on four aggregate metrics (Maximum-
 </tr>
 </table>
 
-## Budget scaling
+## Budget scaling — D=30
 
-Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each point is a separate fixed-budget experiment. Larger FBTC(B) values indicate greater fixed-budget target coverage. The budget axis is per class: a budget is shown only where all 7 algorithms cover the whole class. MSC-CMA-ES is shown in red.
+Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each point is a separate fixed-budget experiment. Larger FBTC(B) values indicate greater fixed-budget target coverage. The budget axis is per class: a budget is shown only where all 7 algorithms cover the whole class. MSC-CMA-ES is shown in red. Official budget for this cell: B = 3×10^5 evaluations.
 
 <table>
 <tr>
@@ -34,9 +34,9 @@ Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each 
 </tr>
 </table>
 
-## Ranking across metrics (budget 10^6)
+## Ranking — D=30 (B = 10^6)
 
-Same parallel-coordinate rank, recomputed at 10^6 evaluations. Only classes with full 7-algorithm coverage at 10^6 are shown. MSC-CMA-ES is shown in red.
+Same parallel-coordinate rank, recomputed at B = 10^6 evaluations. Only classes with full 7-algorithm coverage at B = 10^6 are shown. MSC-CMA-ES is shown in red.
 
 <table>
 <tr>

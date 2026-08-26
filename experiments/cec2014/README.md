@@ -4,9 +4,9 @@ Aggregated sums by function category, across dimensions. For simplicity the suit
 
 Official budgets — D=10: 10^5, D=30: 3×10^5.
 
-## Ranking — D=10
+## Ranking — D=10 (B = 10^5)
 
-Parallel-coordinate rank on four aggregate metrics (Maximum-SUM, Median-SUM, FBTC(B), Minimum-SUM). The axes are oriented so smaller error-based sums and larger FBTC(B) values appear toward the top. MSC-CMA-ES is shown in red. Budget: 10^5 evaluations.
+Parallel-coordinate rank on four aggregate metrics (Maximum-SUM, Median-SUM, FBTC(B), Minimum-SUM). The axes are oriented so smaller error-based sums and larger FBTC(B) values appear toward the top. MSC-CMA-ES is shown in red. Budget: B = 10^5 evaluations.
 
 <table>
 <tr>
@@ -23,7 +23,7 @@ Parallel-coordinate rank on four aggregate metrics (Maximum-SUM, Median-SUM, FBT
 
 ## Budget scaling — D=10
 
-Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each point is a separate fixed-budget experiment. Larger FBTC(B) values indicate greater fixed-budget target coverage.
+Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each point is a separate fixed-budget experiment. Larger FBTC(B) values indicate greater fixed-budget target coverage. Official budget for D=10: B = 10^5 evaluations.
 
 <table>
 <tr>
@@ -38,43 +38,9 @@ Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each 
 </tr>
 </table>
 
-## Ranking — D=10 (budget 10^6)
+## Ranking — D=30 (B = 3×10^5)
 
-Same rank, recomputed at 10^6 evaluations. Only classes with full 7-algorithm coverage at 10^6 are shown.
-
-<table>
-<tr>
-<td><img src="d10/rank_d10_basic_1M.png" width="300" alt="Unimodal and simple multimodal"></td>
-<td><img src="d10/rank_d10_hybrid_1M.png" width="300" alt="Hybrid"></td>
-<td><img src="d10/rank_d10_composition_1M.png" width="300" alt="Composition"></td>
-</tr>
-<tr>
-<td align="center">Unimodal and simple multimodal</td>
-<td align="center">Hybrid</td>
-<td align="center">Composition</td>
-</tr>
-</table>
-
-## Ranking — D=10 (budget 10^7)
-
-Same rank, recomputed at 10^7 evaluations. Only classes with full 7-algorithm coverage at 10^7 are shown.
-
-<table>
-<tr>
-<td><img src="../spacer.png" width="300" height="1" alt=""></td>
-<td><img src="../spacer.png" width="300" height="1" alt=""></td>
-<td><img src="d10/rank_d10_composition_10M.png" width="300" alt="Composition"></td>
-</tr>
-<tr>
-<td></td>
-<td></td>
-<td align="center">Composition</td>
-</tr>
-</table>
-
-## Ranking — D=30
-
-Parallel-coordinate rank on four aggregate metrics (Maximum-SUM, Median-SUM, FBTC(B), Minimum-SUM). The axes are oriented so smaller error-based sums and larger FBTC(B) values appear toward the top. MSC-CMA-ES is shown in red. Budget: 3×10^5 evaluations.
+Parallel-coordinate rank on four aggregate metrics (Maximum-SUM, Median-SUM, FBTC(B), Minimum-SUM). The axes are oriented so smaller error-based sums and larger FBTC(B) values appear toward the top. MSC-CMA-ES is shown in red. Budget: B = 3×10^5 evaluations.
 
 <table>
 <tr>
@@ -91,30 +57,13 @@ Parallel-coordinate rank on four aggregate metrics (Maximum-SUM, Median-SUM, FBT
 
 ## Budget scaling — D=30
 
-Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each point is a separate fixed-budget experiment. Larger FBTC(B) values indicate greater fixed-budget target coverage.
+Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. Each point is a separate fixed-budget experiment. Larger FBTC(B) values indicate greater fixed-budget target coverage. Official budget for D=30: B = 3×10^5 evaluations.
 
 <table>
 <tr>
 <td><img src="d30/budget_d30_basic.png" width="300" alt="Unimodal and simple multimodal"></td>
 <td><img src="d30/budget_d30_hybrid.png" width="300" alt="Hybrid"></td>
 <td><img src="d30/budget_d30_composition.png" width="300" alt="Composition"></td>
-</tr>
-<tr>
-<td align="center">Unimodal and simple multimodal</td>
-<td align="center">Hybrid</td>
-<td align="center">Composition</td>
-</tr>
-</table>
-
-## Ranking — D=30 (budget 10^6)
-
-Same rank, recomputed at 10^6 evaluations. Only classes with full 7-algorithm coverage at 10^6 are shown.
-
-<table>
-<tr>
-<td><img src="d30/rank_d30_basic_1M.png" width="300" alt="Unimodal and simple multimodal"></td>
-<td><img src="d30/rank_d30_hybrid_1M.png" width="300" alt="Hybrid"></td>
-<td><img src="d30/rank_d30_composition_1M.png" width="300" alt="Composition"></td>
 </tr>
 <tr>
 <td align="center">Unimodal and simple multimodal</td>

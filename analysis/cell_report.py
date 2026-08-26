@@ -81,8 +81,8 @@ TABLE_COLS = ['MSC-CMA', 'BIPOP-CMA',
               'ARRDE', 'LSRTDE', 'NLSHADE-RSP', 'j2020', 'jSO']
 
 STYLE = {
-    'MSC-CMA':     dict(color='#d62728', lw=3.2, marker='o', ms=8, ls='-',  zorder=5),
-    'BIPOP-CMA':   dict(color='#7b2d8e', lw=2.4, marker='s', ms=7, ls='--', zorder=4),
+    'MSC-CMA':     dict(color='#d62728', lw=3.6, marker='o', ms=8, ls='-',  zorder=5),
+    'BIPOP-CMA':   dict(color='#7b2d8e', lw=3.0, marker='s', ms=7, ls='-',  zorder=4),
     'ARRDE':       dict(color='#7fb3d5', lw=1.6, marker='^', ms=6, ls='-',  zorder=3),
     'LSRTDE':      dict(color='#90ee90', lw=1.6, marker='v', ms=6, ls='-',  zorder=3),
     'NLSHADE-RSP': dict(color='#f4a460', lw=1.6, marker='D', ms=5, ls='-',  zorder=3),
@@ -193,14 +193,12 @@ def _tie_groups(ranked, s, rtol=1e-9, atol=1e-9):
 
 def fig_ranking(data, algos, suite, cls, out_path, tie_rtol=1e-9, tie_atol=1e-9):
     members = class_members(suite, cls)
-    # Coverage axis: FBTC unless every algorithm's class-FBTC is ~0
-    # (same rule as suite_report), in which case mean-SUM is shown instead.
+    # Coverage axis is always fixed-budget target coverage.
     fbtc_s, common = class_sums(data, algos, members, 'FBTC')
     if not common:
         return False
-    use_fbtc = any(v > 1e-12 for v in fbtc_s.values())
-    cov = ('FBTC(B)', 'FBTC', True) if use_fbtc else ('mean-SUM', 'mean', False)
-    rank_axes = [RANK_AXES[0], RANK_AXES[1], cov, RANK_AXES[3]]
+    rank_axes = [RANK_AXES[0], RANK_AXES[1],
+                 ('FBTC(B)', 'FBTC', True), RANK_AXES[3]]
     sums = {}
     for label, key, hb in rank_axes:
         s, common = class_sums(data, algos, members, key)
@@ -505,13 +503,13 @@ def build_readme(suite, dimlbl, official, data, rank_made, budget_made,
     o.append(f'# {suite.upper()} / {dimlbl} — by-category summary')
     o.append('')
 
-    o.append(f'## Ranking across metrics (budget {format_budget(official)})')
+    o.append(f'## Ranking — {dimlbl} (B = {format_budget(official)})')
     o.append('')
     o.append(f'Parallel-coordinate rank of all {len(data)} algorithms on four '
              'aggregate metrics (Maximum-SUM, Median-SUM, FBTC(B), Minimum-SUM), '
              'per function class. Each line is one algorithm. The axes are oriented '
              'so smaller error-based sums and larger FBTC(B) values appear toward '
-             'the top. MSC-CMA-ES is shown in red.')
+             f'the top. MSC-CMA-ES is shown in red. Budget: B = {format_budget(official)} evaluations.')
     o.append('')
     rt = fig_table('rank', rank_made)
     if rt:
@@ -520,13 +518,14 @@ def build_readme(suite, dimlbl, official, data, rank_made, budget_made,
 
     bt = fig_table('budget', budget_made)
     if bt:
-        o.append('## Budget scaling')
+        o.append(f'## Budget scaling — {dimlbl}')
         o.append('')
         o.append(f'Raw FBTC(B) at each evaluated fixed budget; no running maximum is applied. '
                  f'Each point is a separate fixed-budget experiment. Larger FBTC(B) '
                  f'values indicate greater fixed-budget target coverage. The budget '
                  f'axis is per class: a budget is shown only where all {len(data)} '
-                 f'algorithms cover the whole class. MSC-CMA-ES is shown in red.')
+                 f'algorithms cover the whole class. MSC-CMA-ES is shown in red. '
+                 f'Official budget for this cell: B = {format_budget(official)} evaluations.')
         o.append('')
         o.append(bt)
         o.append('')
@@ -535,11 +534,11 @@ def build_readme(suite, dimlbl, official, data, rank_made, budget_made,
         et = fig_table('rank', made, suffix=f'_{elabel}')
         if not et:
             continue
-        o.append(f'## Ranking across metrics (budget {format_budget(eb)})')
+        o.append(f'## Ranking — {dimlbl} (B = {format_budget(eb)})')
         o.append('')
         o.append(f'Same parallel-coordinate rank, recomputed at '
-                 f'{format_budget(eb)} evaluations. Only classes with full '
-                 f'{len(data)}-algorithm coverage at {format_budget(eb)} are shown. '
+                 f'B = {format_budget(eb)} evaluations. Only classes with full '
+                 f'{len(data)}-algorithm coverage at B = {format_budget(eb)} are shown. '
                  f'MSC-CMA-ES is shown in red.')
         o.append('')
         o.append(et)

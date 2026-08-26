@@ -66,8 +66,8 @@ ALGO_ORDER = ['MSC-CMA', 'BIPOP-CMA', 'ARRDE', 'LSRTDE',
 TABLE_COLS = ['MSC-CMA', 'BIPOP-CMA',
               'ARRDE', 'LSRTDE', 'NLSHADE-RSP', 'j2020', 'jSO']
 STYLE = {
-    'MSC-CMA':     dict(color='#d62728', lw=3.2, marker='o', ms=8, ls='-',  zorder=5),
-    'BIPOP-CMA':   dict(color='#7b2d8e', lw=2.4, marker='s', ms=7, ls='--', zorder=4),
+    'MSC-CMA':     dict(color='#d62728', lw=3.6, marker='o', ms=8, ls='-',  zorder=5),
+    'BIPOP-CMA':   dict(color='#7b2d8e', lw=3.0, marker='s', ms=7, ls='-',  zorder=4),
     'ARRDE':       dict(color='#7fb3d5', lw=1.6, marker='^', ms=6, ls='-',  zorder=3),
     'LSRTDE':      dict(color='#90ee90', lw=1.6, marker='v', ms=6, ls='-',  zorder=3),
     'NLSHADE-RSP': dict(color='#f4a460', lw=1.6, marker='D', ms=5, ls='-',  zorder=3),
@@ -140,12 +140,9 @@ def fig_ranking(data, algos, suite, dim, cls, out):
     common = class_common(data, algos, mem)
     if not common:
         return False
-    # decide coverage axis: FBTC unless all algos have FBTC==0
-    fbtc_sum = {a: sum(data[a][f]['FBTC'] for f in common) for a in algos}
-    use_fbtc = any(v > 1e-12 for v in fbtc_sum.values())
-    cov_label, cov_key = ('FBTC(B)', 'FBTC') if use_fbtc else ('Mean-SUM', 'mean')
+    # Coverage axis is always fixed-budget target coverage.
     axes = [('Maximum-SUM', 'worst', False), ('Median-SUM', 'median', False),
-            (cov_label, cov_key, use_fbtc), ('Minimum-SUM', 'best', False)]
+            ('FBTC(B)', 'FBTC', True), ('Minimum-SUM', 'best', False)]
 
     nax = len(axes)
     ypos = {}
@@ -406,13 +403,13 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
     o.append(f'Official budgets — {bud}.')
     o.append('')
     for dim in dims:
-        o.append(f'## Ranking — D={dim}')
+        o.append(f'## Ranking — D={dim} (B = {format_budget(officials[dim])})')
         o.append('')
         o.append(f'Parallel-coordinate rank on four aggregate metrics '
                  f'(Maximum-SUM, Median-SUM, FBTC(B), Minimum-SUM). The axes '
                  f'are oriented so smaller error-based sums and larger FBTC(B) '
                  f'values appear toward the top. MSC-CMA-ES is shown in red. '
-                 f'Budget: {format_budget(officials[dim])} evaluations.')
+                 f'Budget: B = {format_budget(officials[dim])} evaluations.')
         o.append('')
         r = fig_row('rank', dim, rank_made)
         if r:
@@ -424,7 +421,9 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
             o.append('')
             note = ('Raw FBTC(B) at each evaluated fixed budget; no running maximum '
                     'is applied. Each point is a separate fixed-budget experiment. '
-                    'Larger FBTC(B) values indicate greater fixed-budget target coverage.')
+                    'Larger FBTC(B) values indicate greater fixed-budget target coverage. '
+                    f'Official budget for D={dim}: B = '
+                    f'{format_budget(officials[dim])} evaluations.')
             o.append(note)
             o.append('')
             o.append(b)
@@ -434,11 +433,11 @@ def build_readme(suite, dims, per_dim, rank_made, budget_made,
             e = fig_row('rank', dim, made, suffix=f'_{elabel}')
             if not e:
                 continue
-            o.append(f'## Ranking — D={dim} (budget {format_budget(eb)})')
+            o.append(f'## Ranking — D={dim} (B = {format_budget(eb)})')
             o.append('')
-            o.append(f'Same rank, recomputed at {format_budget(eb)} evaluations. '
+            o.append(f'Same rank, recomputed at B = {format_budget(eb)} evaluations. '
                      f'Only classes with full {len(per_dim[dim])}-algorithm '
-                     f'coverage at {format_budget(eb)} are shown.')
+                     f'coverage at B = {format_budget(eb)} are shown.')
             o.append('')
             o.append(e)
             o.append('')
