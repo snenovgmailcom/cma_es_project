@@ -145,7 +145,7 @@ for suite, dim, budget in SETTINGS:
     }
 
     for opp in opponents:
-        counts = {"conly better": 0, "opponent better": 0, "not significant": 0}
+        counts = {"lower": 0, "higher": 0, "not significant": 0}
 
         for fid in funcs:
             x = ref_errors[fid]
@@ -178,9 +178,9 @@ for suite, dim, budget in SETTINGS:
             ):
                 decision = "not significant"
             elif p_conly_lower > 0.5:
-                decision = "conly better"
+                decision = "lower"
             else:
-                decision = "opponent better"
+                decision = "higher"
 
             counts[decision] += 1
 
@@ -211,16 +211,16 @@ for suite, dim, budget in SETTINGS:
             "budget": budget,
             "opponent": opp,
             "n_functions": m,
-            "conly_better": counts["conly better"],
-            "opponent_better": counts["opponent better"],
+            "conly_lower": counts["lower"],
+            "conly_higher": counts["higher"],
             "not_significant": counts["not significant"],
         })
 
         print(
             f"  vs {opp:14s}  "
-            f"conly better={counts['conly better']}  "
-            f"opponent better={counts['opponent better']}  "
-            f"n.s.={counts['not significant']}"
+            f"↓={counts['lower']}  "
+            f"↑={counts['higher']}  "
+            f"—={counts['not significant']}"
         )
 
 
@@ -237,17 +237,17 @@ fields = [
 ]
 
 with (outdir / "details.csv").open("w", newline="", encoding="utf-8") as f:
-    w = csv.DictWriter(f, fieldnames=fields)
+    w = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
     w.writeheader()
     w.writerows(rows)
 
 fields2 = [
     "suite", "dimension", "budget", "opponent", "n_functions",
-    "conly_better", "opponent_better", "not_significant",
+    "conly_lower", "conly_higher", "not_significant",
 ]
 
 with (outdir / "summary.csv").open("w", newline="", encoding="utf-8") as f:
-    w = csv.DictWriter(f, fieldnames=fields2)
+    w = csv.DictWriter(f, fieldnames=fields2, lineterminator="\n")
     w.writeheader()
     w.writerows(summary)
 

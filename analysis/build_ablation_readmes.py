@@ -11,6 +11,19 @@ from scipy import stats
 
 import summary_grid_clean as sg
 
+from report_style import (
+    ARROW_HIGHER,
+    ARROW_LOWER,
+    ARROW_NS,
+    DESCRIPTIVE_BOLD_NOTE,
+    FBTC_NOTE,
+    class_label,
+    format_budget,
+    format_p,
+    format_value,
+    metric_label,
+)
+
 
 SUITE = "cec2017"
 DIM = 10
@@ -24,12 +37,6 @@ CLASSES = {
     "basic": {1, *range(3, 11)},
     "hybrid": set(range(11, 21)),
     "composition": set(range(21, 31)),
-}
-
-CLASS_DISPLAY = {
-    "basic": "unimodal and simple multimodal",
-    "hybrid": "Hybrid",
-    "composition": "Composition",
 }
 
 FULL_DIR = Path(
@@ -110,17 +117,6 @@ def func_class(fid):
     raise ValueError(f"no class for f{fid}")
 
 
-def fmt(x):
-    x = float(x)
-    if not np.isfinite(x):
-        return "—"
-    if x == 0:
-        return "0"
-    if abs(x) >= 1e4 or abs(x) < 1e-3:
-        return f"{x:.6e}"
-    return f"{x:.6g}"
-
-
 def load_payload(path):
     if not path.is_file():
         raise RuntimeError(f"Missing file: {path}")
@@ -194,14 +190,14 @@ def aggregated_descriptive(payloads, ids):
 
 def bold_pair(a, b, higher=False):
     if math.isclose(a, b, rel_tol=1e-12, abs_tol=1e-15):
-        return f"**{fmt(a)}**", f"**{fmt(b)}**"
+        return f"**{format_value(a)}**", f"**{format_value(b)}**"
 
     a_better = a > b if higher else a < b
 
     if a_better:
-        return f"**{fmt(a)}**", fmt(b)
+        return f"**{format_value(a)}**", format_value(b)
 
-    return fmt(a), f"**{fmt(b)}**"
+    return format_value(a), f"**{format_value(b)}**"
 
 
 def calculate_mwu(full, variant):
@@ -231,13 +227,13 @@ def calculate_mwu(full, variant):
             probability_lower, 0.5, abs_tol=1e-15
         ):
             decision = "not significant"
-            symbol = "≈"
+            symbol = ARROW_NS
         elif probability_lower > 0.5:
-            decision = "variant better"
-            symbol = "+"
+            decision = "lower"
+            symbol = ARROW_LOWER
         else:
-            decision = "MSC-CMA-ES better"
-            symbol = "−"
+            decision = "higher"
+            symbol = ARROW_HIGHER
 
         rows.append({
             "function": fid,
@@ -258,11 +254,11 @@ def count_decisions(rows, ids=None):
         ids = set(ids)
         rows = [r for r in rows if r["function"] in ids]
 
-    vb = sum(r["decision"] == "variant better" for r in rows)
-    fb = sum(r["decision"] == "MSC-CMA-ES better" for r in rows)
+    lower = sum(r["decision"] == "lower" for r in rows)
+    higher = sum(r["decision"] == "higher" for r in rows)
     ns = sum(r["decision"] == "not significant" for r in rows)
 
-    return vb, fb, ns
+    return lower, higher, ns
 
 
 def write_mwu_csv(path, rows):
@@ -277,7 +273,7 @@ def write_mwu_csv(path, rows):
     ]
 
     with path.open("w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=fields)
+        w = csv.DictWriter(f, fieldnames=fields, lineterminator="\n")
         w.writeheader()
 
         for r in rows:
@@ -291,6 +287,95 @@ def write_mwu_csv(path, rows):
             })
 
 
+
+CONLY_SETTINGS = (
+    ("cec2014", 10, 100_000),
+    ("cec2017", 10, 100_000),
+    ("cec2020", 5, 50_000),
+    ("cec2020", 10, 1_000_000),
+    ("cec2020", 15, 3_000_000),
+    ("cec2020", 20, 10_000_000),
+    ("cec2022", 10, 200_000),
+    ("cec2022", 20, 1_000_000),
+)
+
+
+def render_conly_cross_suite():
+    path = Path("related_comparisons/conly/mwu/summary.csv")
+
+    with path.open(newline="", encoding="utf-8") as f:
+        rows = list(csv.DictReader(f))
+
+    by_cell = {
+        (
+            r["suite"],
+            int(r["dimension"]),
+            int(r["budget"]),
+        ): r
+        for r in rows
+        if r["opponent"] == "MSC-CMA"
+    }
+
+    if set(by_cell) != set(CONLY_SETTINGS):
+        raise RuntimeError(
+            "C-ONLY cross-suite summary does not contain exactly "
+            "the expected eight cells"
+        )
+
+    lines = [
+        "## Cross-suite C-ONLY results",
+        "",
+        "The C-ONLY extension was also evaluated on the "
+        "composition-function subsets of eight "
+        "suite–dimension–budget cells. Each linked page compares "
+        "C-ONLY directly with full MSC-CMA-ES using 51 runs per "
+        "function.",
+        "",
+        "The cross-suite Mann–Whitney U tests use independent "
+        "two-sided comparisons of raw terminal errors, with "
+        "Bonferroni correction over the composition functions "
+        "within each cell.",
+        "",
+        "| Suite | D | Budget | C-ONLY ↓ / ↑ / — | Results |",
+        "|:--|--:|--:|:--:|:--|",
+    ]
+
+    for suite, dim, budget in CONLY_SETTINGS:
+        r = by_cell[(suite, dim, budget)]
+        triple = (
+            f"{r['conly_lower']} / "
+            f"{r['conly_higher']} / "
+            f"{r['not_significant']}"
+        )
+
+        link = (
+            "../../../../../related_comparisons/conly/"
+            f"{suite}/d{dim}/budget_{budget}/README.md"
+        )
+
+        lines.append(
+            f"| {suite.upper()} | {dim} | {format_budget(budget)} | "
+            f"{triple} | [results]({link}) |"
+        )
+
+    lines += [
+        "",
+        "From the C-ONLY perspective, ↓ denotes a statistically "
+        "significant shift toward lower terminal errors, ↑ a "
+        "statistically significant shift toward higher terminal "
+        "errors, and — no statistically significant difference "
+        "after Bonferroni correction.",
+        "",
+        "For CEC2017 at D=10 and B=10^5, this cross-suite analysis "
+        "uses Bonferroni correction over the 10 composition "
+        "functions. The full ablation MWU analysis below uses "
+        "correction over all 29 CEC2017 functions; therefore the "
+        "composition-subset counts need not be identical.",
+        "",
+    ]
+
+    return lines
+
 def render_variant(name, info, full, variant, rows):
     categories = [
         ("basic", sorted(CLASSES["basic"])),
@@ -300,7 +385,7 @@ def render_variant(name, info, full, variant, rows):
     ]
 
     text = [
-        f"# {name} — CEC2017, D=10, B=100K",
+        f"# {name} — CEC2017, D=10, B={format_budget(BUDGET)}",
         "",
         "## Ablation",
         "",
@@ -316,14 +401,14 @@ def render_variant(name, info, full, variant, rows):
         "",
         "## Benchmark results",
         "",
-        "Fixed-budget terminal results at **B=100,000 NFE**, using 51 runs "
+        f"Fixed-budget terminal results at **B={format_budget(BUDGET)} NFE**, using 51 runs "
         "per function.",
         "",
         "The descriptive metrics use the same definitions as the main "
         "benchmark reports. Errors with absolute value at most `1e-8` are "
         "treated as zero for descriptive metrics; standard deviation is the "
         "sample standard deviation (`ddof=1`). FBTC(B) uses the same 51 "
-        "log-uniform targets in `[10², 10⁻⁸]`. Class and ALL values are sums "
+        "log-uniform targets in `[10², 10⁻⁸]`. Class and All values are sums "
         "over functions.",
         "",
         "| Category | Metric | MSC-CMA-ES | " + name + " |",
@@ -331,12 +416,12 @@ def render_variant(name, info, full, variant, rows):
     ]
 
     metrics = [
-        ("mean", False, "mean"),
-        ("median", False, "median"),
-        ("best", False, "best"),
-        ("worst", False, "worst"),
-        ("std", False, "std"),
-        ("fbtc", True, "FBTC(B)"),
+        ("mean", False),
+        ("median", False),
+        ("best", False),
+        ("worst", False),
+        ("std", False),
+        ("fbtc", True),
     ]
 
     for cname, ids in categories:
@@ -344,15 +429,16 @@ def render_variant(name, info, full, variant, rows):
         vm = aggregated_descriptive(variant, ids)
 
         label = (
-            "**ALL**"
+            "**All**"
             if cname == "all"
-            else f"**{CLASS_DISPLAY[cname]}**"
+            else f"**{class_label(cname)}**"
         )
 
         label += f" (n={len(ids)})"
 
         first = True
-        for key, higher, display in metrics:
+        for key, higher in metrics:
+            display = metric_label(key)
             a, b = bold_pair(fm[key], vm[key], higher=higher)
 
             if first:
@@ -367,9 +453,7 @@ def render_variant(name, info, full, variant, rows):
 
     text += [
         "",
-        "*Bold indicates the better descriptive value in that row "
-        "(lower for error metrics and std; higher for FBTC(B)). "
-        "These values are not significance tests.*",
+        f"*{DESCRIPTIVE_BOLD_NOTE}*",
         "",
         '<a id="mannwhitney-u"></a>',
         "",
@@ -390,30 +474,30 @@ def render_variant(name, info, full, variant, rows):
     )
 
     text += [
-        f"Setting summary: {name} significant on **{vb}** functions; "
-        f"MSC-CMA-ES significant on **{fb}**; not significant on **{ns}**.",
+        f"Setting summary from the {name} perspective: "
+        f"**↓ {vb}**, **↑ {fb}**, **— {ns}**.",
         "",
-        f"Composition subset: {name} significant on **{cvb}** of 10 "
-        f"functions; MSC-CMA-ES significant on **{cfb}**; "
-        f"not significant on **{cns}**.",
+        f"Composition subset from the {name} perspective: "
+        f"**↓ {cvb}**, **↑ {cfb}**, **— {cns}**.",
         "",
-        f"`+` means {name} has significantly lower terminal errors; "
-        "`−` means MSC-CMA-ES has significantly lower terminal errors; "
-        "`≈` means the difference is not significant after Bonferroni "
-        "adjustment.",
+        f"`↓` denotes a statistically significant shift toward lower "
+        f"terminal errors for {name}; `↑` denotes a statistically "
+        "significant shift toward higher terminal errors; `—` denotes "
+        "no statistically significant difference after Bonferroni "
+        "correction.",
         "",
         "| Function | Class | U (" + name + ") | "
-        "P(" + name + " lower) | p_raw | p_Bonferroni | Result |",
+        "P(" + name + " lower) | p_raw | p_Bonferroni | Direction |",
         "|:--|:--|--:|--:|--:|--:|:--:|",
     ]
 
     for r in rows:
         text.append(
-            f"| f{r['function']} | {r['class']} | "
-            f"{fmt(r['u_variant'])} | "
-            f"{fmt(r['probability_variant_lower'])} | "
-            f"{fmt(r['p_raw'])} | "
-            f"{fmt(r['p_bonferroni'])} | "
+            f"| f{r['function']} | {class_label(r['class'])} | "
+            f"{format_value(r['u_variant'])} | "
+            f"{format_value(r['probability_variant_lower'])} | "
+            f"{format_p(r['p_raw'])} | "
+            f"{format_p(r['p_bonferroni'])} | "
             f"**{r['symbol']}** |"
         )
 
@@ -423,7 +507,27 @@ def render_variant(name, info, full, variant, rows):
         "",
     ]
 
-    return "\n".join(text)
+    result = "\n".join(text)
+
+    if name == "C-ONLY":
+        result = result.replace(
+            "Contents: [Benchmark results](#benchmark-results) · "
+            "[Mann–Whitney U](#mannwhitney-u)",
+            "Contents: "
+            "[Cross-suite C-ONLY results](#cross-suite-c-only-results) · "
+            "[Benchmark results](#benchmark-results) · "
+            "[Mann–Whitney U](#mannwhitney-u)",
+            1,
+        )
+
+        section = "\n".join(render_conly_cross_suite())
+        result = result.replace(
+            "## Benchmark results",
+            section + "\n## Benchmark results",
+            1,
+        )
+
+    return result
 
 
 def render_refinement(full):
@@ -466,7 +570,7 @@ def render_refinement(full):
         })
 
     text = [
-        "# Final-refinement contribution — CEC2017, D=10, B=100K",
+        f"# Final-refinement contribution — CEC2017, D=10, B={format_budget(BUDGET)}",
         "",
         "## Analysis",
         "",
@@ -501,8 +605,8 @@ def render_refinement(full):
         total = len(rr) * 51
 
         text.append(
-            f"| **{CLASS_DISPLAY[cname]}** (n={len(rr)}) | "
-            f"{fmt(sp)} | {fmt(sf)} | {imp}/{total} |"
+            f"| **{class_label(cname)}** (n={len(rr)}) | "
+            f"{format_value(sp)} | {format_value(sf)} | {imp}/{total} |"
         )
 
     sp = sum(r["median_pre"] for r in rows)
@@ -510,7 +614,7 @@ def render_refinement(full):
     imp = sum(r["improved"] for r in rows)
 
     text.append(
-        f"| **ALL** (n=29) | {fmt(sp)} | {fmt(sf)} | "
+        f"| **All** (n=29) | {format_value(sp)} | {format_value(sf)} | "
         f"{imp}/{29 * 51} |"
     )
 
@@ -525,9 +629,9 @@ def render_refinement(full):
 
     for r in rows:
         text.append(
-            f"| f{r['fid']} | {r['class']} | "
-            f"{fmt(r['median_pre'])} | "
-            f"{fmt(r['median_final'])} | "
+            f"| f{r['fid']} | {class_label(r['class'])} | "
+            f"{format_value(r['median_pre'])} | "
+            f"{format_value(r['median_final'])} | "
             f"{r['improved']}/51 |"
         )
 
@@ -546,12 +650,12 @@ def render_overview(summaries):
     lines = [
         "# MSC-CMA-ES ablation studies",
         "",
-        "The ablation study is performed on **CEC2017, D=10, "
-        "B=100,000 NFE**, using 51 runs per function and excluding the "
+        f"The ablation study is performed on **CEC2017, D=10, "
+        f"B={format_budget(BUDGET)} NFE**, using 51 runs per function and excluding the "
         "deprecated CEC2017 `f2`.",
         "",
         "The two MSC-CMA-ES configurations were tuned with Optuna only once, "
-        "on CEC2017 at D=10 under the official 100K evaluation budget. "
+        f"on CEC2017 at D=10 under the official {format_budget(BUDGET)} evaluation budget. "
         "The resulting parameterization is reused across suites, dimensions, "
         "and budgets; only the predefined dimension scaling of the CMA "
         "initial step-size parameter is applied. For this reason, the "
@@ -559,8 +663,8 @@ def render_overview(summaries):
         "",
         "The following ablations are considered:",
         "",
-        "| Ablation | Component tested | Results | MWU summary "
-        "(variant / MSC / NS) |",
+        "| Ablation | Component tested | Results | MWU direction "
+        "(variant ↓ / ↑ / —) |",
         "|:--|:--|:--|--:|",
     ]
 
@@ -622,7 +726,7 @@ def main():
             vb, fb, ns = summaries[name]
             print(
                 f"{name}: 29 functions x 51 runs; "
-                f"MWU variant/MSC/NS = {vb}/{fb}/{ns}"
+                f"MWU variant ↓/↑/— = {vb}/{fb}/{ns}"
             )
         print("REFINEMENT: pre-refinement data available for all 29 functions")
         print("Would write 6 README files + 4 mwu_details.csv files")

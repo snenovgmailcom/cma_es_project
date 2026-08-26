@@ -37,6 +37,17 @@ if str(HERE) not in sys.path:
 
 import summary_grid_clean as sg
 
+from report_style import (
+    ARROW_HIGHER,
+    ARROW_LOWER,
+    ARROW_NS,
+    FBTC_NOTE,
+    display_name,
+    format_budget,
+    format_p,
+    format_value,
+)
+
 
 RUNS = 51
 REFERENCE = "MSC-CMA-Conly"
@@ -65,33 +76,6 @@ COMPOSITION_FUNCTIONS = {
     "cec2020": tuple(range(8, 11)),
     "cec2022": tuple(range(9, 13)),
 }
-
-DISPLAY = {
-    "MSC-CMA-Conly": "MSC-CMA-ES (C-only)",
-    "MSC-CMA": "MSC-CMA-ES",
-    "ARRDE": "ARRDE",
-    "BIPOP-CMA": "BIPOP-CMA-ES",
-    "LSRTDE": "L-SRTDE",
-    "NLSHADE-RSP": "NL-SHADE-RSP",
-    "j2020": "j2020",
-    "jSO": "jSO",
-    "NEA2PLUS-PY": "NEA2+",
-}
-
-
-def fmt_budget(n: int) -> str:
-    e = 0
-    while n % 10 == 0:
-        n //= 10
-        e += 1
-    if n == 1:
-        return f"10^{e}"
-    return f"{n}x10^{e}"
-
-
-def fmt(v: float) -> str:
-    return format(float(v), ".4g")
-
 
 def load_errors(path: Path, suite: str, dim: int, budget: int) -> np.ndarray:
     if not path.is_file():
@@ -170,7 +154,7 @@ def dsc_ordering(suite, dim, budget):
 def cell_page(suite, dim, budget, details) -> str:
     funcs, data = load_cell(suite, dim, budget)
     m = len(funcs)
-    b = fmt_budget(budget)
+    b = format_budget(budget)
 
     agg = {}
     for algo, per_func in data.items():
@@ -185,7 +169,7 @@ def cell_page(suite, dim, budget, details) -> str:
 
     lines = []
     a = lines.append
-    a(f"# C-only positioning - {suite.upper()}, D = {dim}, budget {b}")
+    a(f"# C-only comparison — {suite.upper()}, D={dim}, B={b}")
     a("")
     a(
         f"Composition class ({m} functions: "
@@ -195,23 +179,23 @@ def cell_page(suite, dim, budget, details) -> str:
     a("")
     a("## Benchmark summary (sums over the composition functions)")
     a("")
-    a("| Algorithm | SUM(mean) | SUM(median) | SUM(best) | SUM(worst) | SUM(FBTC(B)) |")
+    a("| Algorithm | SUM(mean) | SUM(median) | SUM(minimum) | SUM(maximum) | SUM(FBTC(B)) |")
     a("|:--|--:|--:|--:|--:|--:|")
     for algo in sorted(agg, key=lambda x: agg[x]["mean"]):
         v = agg[algo]
         a(
-            f"| {DISPLAY[algo]} | {fmt(v['mean'])} | {fmt(v['median'])} "
-            f"| {fmt(v['best'])} | {fmt(v['worst'])} | {fmt(v['fbtc'])} |"
+            f"| {display_name(algo)} | {format_value(v['mean'])} | {format_value(v['median'])} "
+            f"| {format_value(v['best'])} | {format_value(v['worst'])} | {format_value(v['fbtc'])} |"
         )
     a("")
 
     a("## FBTC(B) per function")
     a("")
     order = [x for x in cell_algorithms(suite, dim, budget)]
-    a("| Function | " + " | ".join(DISPLAY[x] for x in order) + " |")
+    a("| Function | " + " | ".join(display_name(x) for x in order) + " |")
     a("|:--|" + "--:|" * len(order))
     for fid in funcs:
-        vals = [fmt(fbtc(data[x][fid])) for x in order]
+        vals = [format_value(fbtc(data[x][fid])) for x in order]
         a(f"| f{fid} | " + " | ".join(vals) + " |")
     a("")
 
@@ -220,9 +204,11 @@ def cell_page(suite, dim, budget, details) -> str:
     a(
         "Two-sided Mann-Whitney U on the 51 raw terminal errors per "
         "function; p_Bonferroni corrects within this cell over the "
-        f"{m} composition functions per opponent. Arrows mark "
-        "significant results at alpha = 0.05 from the C-only "
-        "perspective: up = C-only better, down = opponent better."
+        f"{m} composition functions. Direction is stated from the "
+        "C-only perspective: ↓ denotes a statistically significant "
+        "shift toward lower terminal errors, ↑ a statistically "
+        "significant shift toward higher terminal errors, and — no "
+        "statistically significant difference after correction."
     )
     a("")
     rows = mwu_for_cell(details, suite, dim, budget)
@@ -230,7 +216,7 @@ def cell_page(suite, dim, budget, details) -> str:
         {r["opponent"] for r in rows},
         key=lambda o: order.index(o) if o in order else 99,
     )
-    a("| Function | " + " | ".join(DISPLAY[o] for o in opponents) + " |")
+    a("| Function | " + " | ".join(display_name(o) for o in opponents) + " |")
     a("|:--|" + "--:|" * len(opponents))
     for fid in funcs:
         cells = []
@@ -243,23 +229,24 @@ def cell_page(suite, dim, budget, details) -> str:
                 cells.append("-")
                 continue
             r = rr[0]
-            p = fmt(float(r["p_bonferroni"]))
-            mark = ""
-            if r["decision"] == "conly better":
-                mark = " &#8593;"
-            elif r["decision"] == "opponent better":
-                mark = " &#8595;"
+            p = format_p(float(r["p_bonferroni"]))
+            if r["decision"] == "lower":
+                mark = f" {ARROW_LOWER}"
+            elif r["decision"] == "higher":
+                mark = f" {ARROW_HIGHER}"
+            else:
+                mark = f" {ARROW_NS}"
             cells.append(p + mark)
         a(f"| f{fid} | " + " | ".join(cells) + " |")
     a("")
-    a("| Opponent | C-only better | Opponent better | Not significant |")
+    a("| Compared with | C-only ↓ | C-only ↑ | — |")
     a("|:--|--:|--:|--:|")
     for o in opponents:
         rr = [r for r in rows if r["opponent"] == o]
-        cb = sum(r["decision"] == "conly better" for r in rr)
-        ob = sum(r["decision"] == "opponent better" for r in rr)
+        lower = sum(r["decision"] == "lower" for r in rr)
+        higher = sum(r["decision"] == "higher" for r in rr)
         ns = sum(r["decision"] == "not significant" for r in rr)
-        a(f"| {DISPLAY[o]} | {cb} | {ob} | {ns} |")
+        a(f"| {display_name(o)} | {lower} | {higher} | {ns} |")
     a("")
 
     dsc = None
@@ -270,7 +257,7 @@ def cell_page(suite, dim, budget, details) -> str:
         a("| Algorithm | Mean DSC rank |")
         a("|:--|--:|")
         for algo, mr in ordering:
-            a(f"| {DISPLAY.get(algo, algo)} | {fmt(mr)} |")
+            a(f"| {display_name(algo)} | {format_value(mr)} |")
         a("")
         a(
             f"Full DSC artefacts (per-function ranks, omnibus, "
@@ -286,10 +273,7 @@ def cell_page(suite, dim, budget, details) -> str:
         "cross-cycle Phase-0 reuse; clustering, staircase, adaptive "
         "basin parameters, exclusion and refinement are unchanged."
     )
-    a(
-        "- FBTC(B) is the raw fixed-budget target coverage at this "
-        "cell's budget, on the target grid of the main benchmark pages."
-    )
+    a(f"- {FBTC_NOTE}")
     a(
         "- This page is a positioning comparison of the C-only "
         "schedule directly against the full MSC-CMA-ES method; the component ablations "
@@ -317,7 +301,7 @@ def top_page(details, summary) -> str:
         "within each cell over its composition functions."
     )
     a("")
-    a("| Cell | Budget | Composition functions | C-only / FULL / n.s. | Page |")
+    a("| Cell | Budget | Composition functions | C-only ↓ / ↑ / — | Page |")
     a("|:--|:--|:--|:--|:--|")
 
     for suite, dim, budget in SETTINGS:
@@ -334,7 +318,7 @@ def top_page(details, summary) -> str:
         if rr:
             r = rr[0]
             triple = (
-                f"{r['conly_better']} / {r['opponent_better']} / "
+                f"{r['conly_lower']} / {r['conly_higher']} / "
                 f"{r['not_significant']}"
             )
         else:
@@ -343,15 +327,17 @@ def top_page(details, summary) -> str:
         link = f"{suite}/d{dim}/budget_{budget}/README.md"
 
         a(
-            f"| {suite.upper()} D={dim} | {fmt_budget(budget)} | {m} | "
+            f"| {suite.upper()} D={dim} | {format_budget(budget)} | {m} | "
             f"{triple} | [results]({link}) |"
         )
 
     a("")
     a(
-        "Triples are: C-only significantly better / full MSC-CMA-ES "
-        "significantly better / not significant, counted over the "
-        "composition functions of the cell."
+        "From the C-only perspective, ↓ counts statistically significant "
+        "shifts toward lower terminal errors, ↑ counts statistically "
+        "significant shifts toward higher terminal errors, and — counts "
+        "comparisons that are not statistically significant after "
+        "Bonferroni correction."
     )
     a("")
 

@@ -1,4 +1,4 @@
-suite,dimension,budget,opponent,n_functions,conly_better,opponent_better,not_significant
+suite,dimension,budget,opponent,n_functions,conly_lower,conly_higher,not_significant
 cec2014,10,100000,MSC-CMA,8,2,5,1
 cec2017,10,100000,MSC-CMA,10,3,2,5
 cec2020,5,50000,MSC-CMA,3,2,1,0

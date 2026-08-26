@@ -1,12 +1,12 @@
 # MSC-CMA-ES ablation studies
 
-The ablation study is performed on **CEC2017, D=10, B=100,000 NFE**, using 51 runs per function and excluding the deprecated CEC2017 `f2`.
+The ablation study is performed on **CEC2017, D=10, B=10^5 NFE**, using 51 runs per function and excluding the deprecated CEC2017 `f2`.
 
-The two MSC-CMA-ES configurations were tuned with Optuna only once, on CEC2017 at D=10 under the official 100K evaluation budget. The resulting parameterization is reused across suites, dimensions, and budgets; only the predefined dimension scaling of the CMA initial step-size parameter is applied. For this reason, the ablation study is performed on the same CEC2017 D=10 tuning cell.
+The two MSC-CMA-ES configurations were tuned with Optuna only once, on CEC2017 at D=10 under the official 10^5 evaluation budget. The resulting parameterization is reused across suites, dimensions, and budgets; only the predefined dimension scaling of the CMA initial step-size parameter is applied. For this reason, the ablation study is performed on the same CEC2017 D=10 tuning cell.
 
 The following ablations are considered:
 
-| Ablation | Component tested | Results | MWU summary (variant / MSC / NS) |
+| Ablation | Component tested | Results | MWU direction (variant ↓ / ↑ / —) |
 |:--|:--|:--|--:|
 | NO-NBC | Removal of nearest-better clustering and the basin-based structure layer | [Data + MWU](cec2017/d10/budget_100000/NO-NBC/README.md) | 5 / 17 / 7 |
 | FIXED-PHI | Fixed NBC threshold `phi = 2` instead of automatic staircase selection | [Data + MWU](cec2017/d10/budget_100000/FIXED-PHI/README.md) | 4 / 2 / 23 |
