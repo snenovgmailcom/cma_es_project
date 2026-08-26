@@ -1,0 +1,9 @@
+suite,dimension,budget,opponent,n_functions,conly_better,opponent_better,not_significant
+cec2014,10,100000,MSC-CMA,8,2,5,1
+cec2017,10,100000,MSC-CMA,10,3,2,5
+cec2020,5,50000,MSC-CMA,3,2,1,0
+cec2020,10,1000000,MSC-CMA,3,0,0,3
+cec2020,15,3000000,MSC-CMA,3,0,1,2
+cec2020,20,10000000,MSC-CMA,3,1,0,2
+cec2022,10,200000,MSC-CMA,4,1,2,1
+cec2022,20,1000000,MSC-CMA,4,0,2,2

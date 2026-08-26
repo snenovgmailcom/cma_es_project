@@ -8,7 +8,37 @@ Reference: full MSC-CMA-ES at the same suite, dimension, budget, and 51-run prot
 
 Raw ablation data: `experiments/cec2017/d10/MSC-CMA-Conly/maxevals_100000/`
 
-Contents: [Benchmark results](#benchmark-results) · [Mann–Whitney U](#mannwhitney-u)
+Contents: [Cross-suite C-ONLY results](#cross-suite-c-only-results) · [Benchmark results](#benchmark-results) · [Mann–Whitney U](#mannwhitney-u)
+
+
+## Cross-suite C-ONLY results
+
+The C-ONLY extension was evaluated on the composition-function subsets
+of eight suite--dimension--budget cells. Each linked page compares
+C-ONLY directly with the full MSC-CMA-ES method using 51 runs per
+function. Statistical comparisons use independent two-sided
+Mann--Whitney U tests on the raw terminal errors, with Bonferroni
+correction over the composition functions within the corresponding
+cell.
+
+| Suite | D | Budget | C-ONLY / FULL / n.s. | Results |
+|:--|--:|--:|:--:|:--|
+| CEC2014 | 10 | 100K | 2 / 5 / 1 | [results](../../../../../related_comparisons/conly/cec2014/d10/budget_100000/README.md) |
+| CEC2017 | 10 | 100K | 3 / 2 / 5 | [results](../../../../../related_comparisons/conly/cec2017/d10/budget_100000/README.md) |
+| CEC2020 | 5 | 50K | 2 / 1 / 0 | [results](../../../../../related_comparisons/conly/cec2020/d5/budget_50000/README.md) |
+| CEC2020 | 10 | 1M | 0 / 0 / 3 | [results](../../../../../related_comparisons/conly/cec2020/d10/budget_1000000/README.md) |
+| CEC2020 | 15 | 3M | 0 / 1 / 2 | [results](../../../../../related_comparisons/conly/cec2020/d15/budget_3000000/README.md) |
+| CEC2020 | 20 | 10M | 1 / 0 / 2 | [results](../../../../../related_comparisons/conly/cec2020/d20/budget_10000000/README.md) |
+| CEC2022 | 10 | 200K | 1 / 2 / 1 | [results](../../../../../related_comparisons/conly/cec2022/d10/budget_200000/README.md) |
+| CEC2022 | 20 | 1M | 0 / 2 / 2 | [results](../../../../../related_comparisons/conly/cec2022/d20/budget_1000000/README.md) |
+
+The triples denote C-ONLY significantly better / full MSC-CMA-ES
+significantly better / not significant.
+
+For CEC2017 D=10, B=100K, the cross-suite comparison uses Bonferroni
+correction over the 10 composition functions. The separate full-suite
+MWU analysis below uses correction over all 29 CEC2017 functions;
+therefore its composition-subset count need not be identical.
 
 ## Benchmark results
 
