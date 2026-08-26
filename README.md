@@ -48,8 +48,8 @@ arXiv:2606.15830, 2026.<br>
 <p>
 Individual-function comparisons use independent two-sided
 <strong>Mann–Whitney U (MWU) tests</strong> on the 51 run-wise terminal errors,
-with Bonferroni adjustment over the functions of each
-suite–dimension–budget setting.
+with Bonferroni adjustment over all functions separately for each competitor
+within each suite–dimension–budget setting.
 </p>
 
 <p>
@@ -145,18 +145,18 @@ is performed against MSC-CMA-ES.
 
 <tr><td>CEC2017</td><td>
 <a href="related_comparisons/nea2plus/cec2017/d10/budget_100000/README.md">
-D=10 · 100K</a>
+D=10 · 10^5</a>
 </td></tr>
 
 <tr><td>CEC2020</td><td>
-<a href="related_comparisons/nea2plus/cec2020/d5/budget_50000/README.md">D=5 · 50K</a><br>
-<a href="related_comparisons/nea2plus/cec2020/d10/budget_1000000/README.md">D=10 · 1M</a><br>
-<a href="related_comparisons/nea2plus/cec2020/d15/budget_3000000/README.md">D=15 · 3M</a>
+<a href="related_comparisons/nea2plus/cec2020/d5/budget_50000/README.md">D=5 · 5×10^4</a><br>
+<a href="related_comparisons/nea2plus/cec2020/d10/budget_1000000/README.md">D=10 · 10^6</a><br>
+<a href="related_comparisons/nea2plus/cec2020/d15/budget_3000000/README.md">D=15 · 3×10^6</a>
 </td></tr>
 
 <tr><td>CEC2022</td><td>
-<a href="related_comparisons/nea2plus/cec2022/d10/budget_200000/README.md">D=10 · 200K</a><br>
-<a href="related_comparisons/nea2plus/cec2022/d20/budget_1000000/README.md">D=20 · 1M</a>
+<a href="related_comparisons/nea2plus/cec2022/d10/budget_200000/README.md">D=10 · 2×10^5</a><br>
+<a href="related_comparisons/nea2plus/cec2022/d20/budget_1000000/README.md">D=20 · 10^6</a>
 </td></tr>
 
 <tr>
@@ -170,12 +170,12 @@ D=10 · 100K</a>
 
 <tr><td>CEC2014</td><td>
 <a href="related_comparisons/nguyen/cec2014/d30/budget_300000/README.md">
-D=30 · 300K</a>
+D=30 · 3×10^5</a>
 </td></tr>
 
 <tr><td>CEC2017</td><td>
 <a href="related_comparisons/nguyen/cec2017/d30/budget_300000/README.md">
-D=30 · 300K</a>
+D=30 · 3×10^5</a>
 </td></tr>
 
 <tr>
@@ -211,7 +211,7 @@ immediately before and after the final refinement stage.
 
 <p>
 The two MSC-CMA-ES configurations were tuned with Optuna only once, on
-CEC2017 at D=10 under the official 100K evaluation budget. The resulting
+CEC2017 at D=10 under the official 10^5 evaluation budget. The resulting
 parameterization is reused across suites, dimensions, and budgets; only the
 predefined dimension scaling of the CMA initial step-size parameter is applied.
 For this reason, the ablation study is performed on the same CEC2017 D=10
@@ -231,7 +231,7 @@ CEC2017 functions. DSC is not used for the ablation study.
 
 <table>
 <tr>
-<th colspan="2" align="left">Ablations — CEC2017, D=10, 100K</th>
+<th colspan="2" align="left">Ablations — CEC2017, D=10, 10^5</th>
 </tr>
 
 <tr><td>NO-NBC</td><td>
@@ -284,7 +284,7 @@ refinement of the incumbent.
 ## Configuration and tuning
 
 The two configurations B and C were tuned **once**, with Optuna, on a single
-cell — CEC2017 at D=10 under the official 100k budget. The resulting parameters
+cell — CEC2017 at D=10 under the official 10^5 budget. The resulting parameters
 are then held **fixed** and reused unchanged for every function, suite, and
 dimension. The only dimension-dependent quantity is the CMA step size, which
 follows a fixed analytical law anchored at D=10,
@@ -308,8 +308,9 @@ algorithms/    Core MSC-CMA-ES
 analysis/      Aggregation, comparison, and figures
   cell_report.py    per-cell report: ranking + budget-scaling figures + README
   suite_report.py   per-suite report: per-dimension figures + cross-dim README
-  compare.py        per-function comparison vs a reference algorithm
-  summary_grid_clean.py  shared metric/class definitions (FBTC, function classes)
+  run_mwu_all_functions.py  terminal-error MWU + Bonferroni supplement
+  compare.py        legacy exploratory Wilcoxon/BH comparison utility
+  summary_grid_clean.py  shared metric/class definitions (FBTC(B), function classes)
 benchmark/     Runners and wrappers
   msc.py            run MSC-CMA-ES on a CEC suite
   run_baselines.py  run BIPOP-CMA-ES (pycma) and the DE baselines (minionpy)
@@ -376,13 +377,13 @@ python analysis/suite_report.py --suite cec2017 --dims 10,30 \
 ```
 
 Ranking figures place the seven algorithms on four aggregate axes
-(worst / median / coverage / best); budget-scaling figures show raw FBTC(B) separately at each evaluated
-fixed budget.
+(Maximum-SUM / Median-SUM / FBTC(B) / Minimum-SUM); budget-scaling figures
+show raw FBTC(B) separately at each evaluated fixed budget.
 
 ## Results
 
-Per-(suite, dimension, algorithm, budget) `summary.csv` files (mean, median,
-best, and fixed-budget target coverage per function, 51 runs) are committed
+Per-(suite, dimension, algorithm, budget) `summary.csv` files (Mean, Median,
+Minimum, and FBTC(B) per function, 51 runs) are committed
 under `experiments/`. Each leaf is at
 `experiments/<suite>/d<dim>/<algorithm>/maxevals_<N>/summary.csv`.
 
