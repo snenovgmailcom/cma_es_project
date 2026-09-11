@@ -1,87 +1,148 @@
 # CEC2020, D=20
 
-Contents: [Mann–Whitney U tests on terminal errors](#mannwhitney-u-tests-on-terminal-errors) · [Deep Statistical Comparison](#deep-statistical-comparison)
+[MWU overview](../../README.md) · [Full results CSV](details.csv)
+
+Contents: [Budget 10^7](#budget-10m) · [Deep Statistical Comparison](#deep-statistical-comparison)
 
 ## Mann–Whitney U tests on terminal errors
 
-Independent, two-sided Mann–Whitney U tests compare each competitor
-with MSC-CMA-ES on every function. Each sample contains 51 unmodified
-run-wise terminal errors. Bonferroni adjustment is applied over all
-functions separately for each budget and competitor.
-The test is evaluated with SciPy's asymptotic Mann–Whitney U method
-(`method="asymptotic"`) with continuity correction (`use_continuity=True`).
+Each competitor is compared with MSC-CMA-ES using independent, two-sided
+Mann–Whitney U tests on 51 stored run-wise terminal errors at the stated budget.
+The tests use the asymptotic method with tie and continuity corrections.
+No zero threshold or rounding is applied to the MWU inputs; zeros already
+present in the stored samples are retained.
 
-The U statistic in [`details.csv`](details.csv) is for the competitor
-sample. For minimization, `probability_competitor_lower` is
-$P(X_{competitor}<X_{MSC})+\frac12P(X_{competitor}=X_{MSC})$.
+Holm–Bonferroni correction is applied separately for each competitor, suite,
+dimension, budget, and function scope, at `alpha=0.05`.
+All-function and composition-function results use independent corrections
+of the same raw p-values. For CEC2017 the family sizes are 29 and 10,
+respectively; withdrawn function f2 is excluded.
 
-Each function is reported with the U statistic, p_raw, and
-p_Bonferroni. Direction is stated from the competitor perspective:
-`↓` denotes a statistically significant shift toward lower terminal
-errors, `↑` a statistically significant shift toward higher terminal
-errors, and `—` no statistically significant difference after
-Bonferroni correction. Significant adjusted p-values are shown in bold.
+**MWU legend — all outcomes are from the MSC-CMA-ES perspective:**
+
+- **W**: significant result in favour of MSC-CMA-ES (lower terminal errors).
+- **L**: significant result in favour of the competitor.
+- **NS**: no statistically significant difference after Holm correction.
+
+Significance uses the full-precision adjusted p-value (`p_Holm <= 0.05`).
+Direction follows U, not rounded medians. W/L/NS summary cells contain
+counts of functions; NS does not assert equality of the algorithms.
+
+CSV values retain full numerical precision. Only descriptive medians use
+a separate copy with `abs(error) <= 1e-8` set to zero.
+
+### Summary
+
+| Budget / function scope | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
+|:--|--:|--:|--:|--:|--:|--:|
+| [10^7 / All functions](#budget-10m-all) | 4/5/1 | 2/8/0 | 4/6/0 | 4/6/0 | 4/6/0 | 5/5/0 |
+| [10^7 / Composition functions](#budget-10m-composition) | 3/0/0 | 1/2/0 | 3/0/0 | 1/2/0 | 2/1/0 | 3/0/0 |
+
+All summary cells are **W/L/NS for MSC-CMA-ES**.
 
 <a id="budget-10m"></a>
 
 ### Budget 10^7
 
-Bonferroni family size: `10` functions.
+<a id="budget-10m-all"></a>
 
-<a id="budget-10m-u"></a>
+#### All functions
 
-#### Mann–Whitney U statistic
-
-| Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
-|:--|--:|--:|--:|--:|--:|--:|
-| **f1** | 688.5 | 688.5 | 688.5 | 688.5 | 739.5 | 688.5 |
-| **f2** | 2316.5 | 0 | 20 | 3 | 0 | 7 |
-| **f3** | 1 | 2601 | 2601 | 2601 | 2248 | 2601 |
-| **f4** | 48 | 0 | 607 | 0 | 0 | 0 |
-| **f5** | 841.5 | 383.5 | 568.5 | 2478.5 | 2601 | 2406.5 |
-| **f6** | 1049 | 0 | 0 | 0 | 0 | 0 |
-| **f7** | 432 | 84 | 846 | 1649 | 526 | 16 |
-| **f8** | 2475 | 2447 | 2601 | 2567 | 2515 | 2601 |
-| **f9** | 1660 | 49 | 2601 | 50 | 2351 | 2601 |
-| **f10** | 2235 | 86 | 2397 | 766 | 342 | 2397 |
-
-<a id="budget-10m-raw-p"></a>
-
-#### p_raw
+Function scope: `all`. Holm family size: **10** per competitor.
+Each cell reports **p_Holm · outcome for MSC-CMA-ES**.
 
 | Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|
-| **f1** | 2.54573e-08 | 2.54573e-08 | 2.54573e-08 | 2.54573e-08 | 6.71656e-07 | 2.54573e-08 |
-| **f2** | 1.05038e-11 | 2.92745e-18 | 1.02241e-17 | 3.09324e-18 | 2.13992e-18 | 4.73535e-18 |
-| **f3** | 2.12535e-20 | 3.83762e-20 | 3.12849e-18 | 1.98815e-20 | 1.33453e-10 | 3.30368e-18 |
-| **f4** | 5.32572e-17 | 3.30368e-18 | 3.51718e-06 | 3.83658e-20 | 3.30368e-18 | 3.30225e-18 |
-| **f5** | 0.00213689 | 8.29214e-10 | 9.69259e-07 | 3.25069e-15 | 3.29724e-18 | 1.3657e-13 |
-| **f6** | 0.0929827 | 3.30297e-18 | 2.89127e-18 | 3.30368e-18 | 3.30368e-18 | 3.30368e-18 |
-| **f7** | 6.23653e-09 | 4.00304e-16 | 0.00235625 | 0.0198558 | 2.21701e-07 | 8.44063e-18 |
-| **f8** | 1.38885e-15 | 1.49922e-14 | 6.88319e-19 | 9.02598e-18 | 4.30181e-17 | 1.39059e-20 |
-| **f9** | 0.0162708 | 1.55841e-18 | 3.22089e-18 | 7.0352e-18 | 2.10204e-12 | 3.29653e-18 |
-| **f10** | 3.90747e-10 | 4.17607e-16 | 8.44029e-14 | 0.000349447 | 1.42386e-10 | 6.6573e-14 |
+| **f1** | **1.01829e-07 · L** | **2.54573e-08 · L** | **1.01829e-07 · L** | **7.6372e-08 · L** | **6.71656e-07 · L** | **2.54573e-08 · L** |
+| **f2** | **7.35265e-11 · W** | **2.34196e-17 · L** | **6.13448e-17 · L** | **2.47459e-17 · L** | **2.13992e-17 · L** | **2.96687e-17 · L** |
+| **f3** | **2.12535e-19 · L** | **3.83762e-19 · W** | **2.60214e-17 · W** | **1.98815e-19 · W** | **5.33813e-10 · W** | **2.96687e-17 · W** |
+| **f4** | **4.79314e-16 · L** | **2.34196e-17 · L** | **7.03436e-06 · L** | **3.45293e-19 · L** | **2.96752e-17 · L** | **2.96687e-17 · L** |
+| **f5** | **0.00641066 · L** | **1.65843e-09 · L** | **2.90778e-06 · L** | **1.30027e-14 · W** | **2.96752e-17 · W** | **2.7314e-13 · W** |
+| **f6** | 0.0929827 · NS | **2.34196e-17 · L** | **2.60214e-17 · L** | **2.47459e-17 · L** | **2.96752e-17 · L** | **2.96687e-17 · L** |
+| **f7** | **3.11826e-08 · L** | **2.00152e-15 · L** | **0.00235625 · L** | **0.0198558 · W** | **4.43402e-07 · L** | **3.37625e-17 · L** |
+| **f8** | **1.11108e-14 · W** | **4.49767e-14 · W** | **6.88319e-18 · W** | **4.51299e-17 · W** | **2.58109e-16 · W** | **1.39059e-19 · W** |
+| **f9** | **0.0325416 · W** | **1.40257e-17 · L** | **2.60214e-17 · W** | **4.22112e-17 · L** | **1.05102e-11 · W** | **2.96687e-17 · W** |
+| **f10** | **2.34448e-09 · W** | **2.00152e-15 · L** | **4.22015e-13 · W** | **0.000698893 · L** | **5.33813e-10 · L** | **1.99719e-13 · W** |
+| **W/L/NS** | 4/5/1 | 2/8/0 | 4/6/0 | 4/6/0 | 4/6/0 | 5/5/0 |
 
-<a id="budget-10m-bonferroni"></a>
+<details>
+<summary>U statistics and raw p-values</summary>
 
-#### p_Bonferroni and Direction
+U is for the competitor sample; the W/L/NS outcomes above are for MSC-CMA-ES.
+
+##### U statistic
 
 | Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|
-| **f1** | **2.54573e-07 (↓)** | **2.54573e-07 (↓)** | **2.54573e-07 (↓)** | **2.54573e-07 (↓)** | **6.71656e-06 (↓)** | **2.54573e-07 (↓)** |
-| **f2** | **1.05038e-10 (↑)** | **2.92745e-17 (↓)** | **1.02241e-16 (↓)** | **3.09324e-17 (↓)** | **2.13992e-17 (↓)** | **4.73535e-17 (↓)** |
-| **f3** | **2.12535e-19 (↓)** | **3.83762e-19 (↑)** | **3.12849e-17 (↑)** | **1.98815e-19 (↑)** | **1.33453e-09 (↑)** | **3.30368e-17 (↑)** |
-| **f4** | **5.32572e-16 (↓)** | **3.30368e-17 (↓)** | **3.51718e-05 (↓)** | **3.83658e-19 (↓)** | **3.30368e-17 (↓)** | **3.30225e-17 (↓)** |
-| **f5** | **0.0213689 (↓)** | **8.29214e-09 (↓)** | **9.69259e-06 (↓)** | **3.25069e-14 (↑)** | **3.29724e-17 (↑)** | **1.3657e-12 (↑)** |
-| **f6** | 0.929827 (—) | **3.30297e-17 (↓)** | **2.89127e-17 (↓)** | **3.30368e-17 (↓)** | **3.30368e-17 (↓)** | **3.30368e-17 (↓)** |
-| **f7** | **6.23653e-08 (↓)** | **4.00304e-15 (↓)** | **0.0235625 (↓)** | 0.198558 (—) | **2.21701e-06 (↓)** | **8.44063e-17 (↓)** |
-| **f8** | **1.38885e-14 (↑)** | **1.49922e-13 (↑)** | **6.88319e-18 (↑)** | **9.02598e-17 (↑)** | **4.30181e-16 (↑)** | **1.39059e-19 (↑)** |
-| **f9** | 0.162708 (—) | **1.55841e-17 (↓)** | **3.22089e-17 (↑)** | **7.0352e-17 (↓)** | **2.10204e-11 (↑)** | **3.29653e-17 (↑)** |
-| **f10** | **3.90747e-09 (↑)** | **4.17607e-15 (↓)** | **8.44029e-13 (↑)** | **0.00349447 (↓)** | **1.42386e-09 (↓)** | **6.6573e-13 (↑)** |
+| f1 | 688.5 | 688.5 | 688.5 | 688.5 | 739.5 | 688.5 |
+| f2 | 2316.5 | 0 | 20 | 3 | 0 | 7 |
+| f3 | 1 | 2601 | 2601 | 2601 | 2248 | 2601 |
+| f4 | 48 | 0 | 607 | 0 | 0 | 0 |
+| f5 | 841.5 | 383.5 | 568.5 | 2478.5 | 2601 | 2406.5 |
+| f6 | 1049 | 0 | 0 | 0 | 0 | 0 |
+| f7 | 432 | 84 | 846 | 1649 | 526 | 16 |
+| f8 | 2475 | 2447 | 2601 | 2567 | 2515 | 2601 |
+| f9 | 1660 | 49 | 2601 | 50 | 2351 | 2601 |
+| f10 | 2235 | 86 | 2397 | 766 | 342 | 2397 |
 
-Full-precision U statistics, raw and Bonferroni-adjusted p-values,
-effect directions, sample medians, and family sizes are available in
-[`details.csv`](details.csv).
+##### p_raw
+
+| Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
+|:--|--:|--:|--:|--:|--:|--:|
+| f1 | 2.54573e-08 | 2.54573e-08 | 2.54573e-08 | 2.54573e-08 | 6.71656e-07 | 2.54573e-08 |
+| f2 | 1.05038e-11 | 2.92745e-18 | 1.02241e-17 | 3.09324e-18 | 2.13992e-18 | 4.73535e-18 |
+| f3 | 2.12535e-20 | 3.83762e-20 | 3.12849e-18 | 1.98815e-20 | 1.33453e-10 | 3.30368e-18 |
+| f4 | 5.32572e-17 | 3.30368e-18 | 3.51718e-06 | 3.83658e-20 | 3.30368e-18 | 3.30225e-18 |
+| f5 | 0.00213689 | 8.29214e-10 | 9.69259e-07 | 3.25069e-15 | 3.29724e-18 | 1.3657e-13 |
+| f6 | 0.0929827 | 3.30297e-18 | 2.89127e-18 | 3.30368e-18 | 3.30368e-18 | 3.30368e-18 |
+| f7 | 6.23653e-09 | 4.00304e-16 | 0.00235625 | 0.0198558 | 2.21701e-07 | 8.44063e-18 |
+| f8 | 1.38885e-15 | 1.49922e-14 | 6.88319e-19 | 9.02598e-18 | 4.30181e-17 | 1.39059e-20 |
+| f9 | 0.0162708 | 1.55841e-18 | 3.22089e-18 | 7.0352e-18 | 2.10204e-12 | 3.29653e-18 |
+| f10 | 3.90747e-10 | 4.17607e-16 | 8.44029e-14 | 0.000349447 | 1.42386e-10 | 6.6573e-14 |
+
+</details>
+
+<a id="budget-10m-composition"></a>
+
+#### Composition functions
+
+Function scope: `composition`. Holm family size: **3** per competitor.
+Each cell reports **p_Holm · outcome for MSC-CMA-ES**.
+
+| Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
+|:--|--:|--:|--:|--:|--:|--:|
+| **f8** | **4.16656e-15 · W** | **1.49922e-14 · W** | **2.06496e-18 · W** | **2.11056e-17 · W** | **1.29054e-16 · W** | **4.17177e-20 · W** |
+| **f9** | **0.0162708 · W** | **4.67524e-18 · L** | **6.44178e-18 · W** | **2.11056e-17 · L** | **4.20409e-12 · W** | **6.59305e-18 · W** |
+| **f10** | **7.81494e-10 · W** | **8.35213e-16 · L** | **8.44029e-14 · W** | **0.000349447 · L** | **1.42386e-10 · L** | **6.6573e-14 · W** |
+| **W/L/NS** | 3/0/0 | 1/2/0 | 3/0/0 | 1/2/0 | 2/1/0 | 3/0/0 |
+
+<details>
+<summary>U statistics and raw p-values</summary>
+
+U is for the competitor sample; the W/L/NS outcomes above are for MSC-CMA-ES.
+
+##### U statistic
+
+| Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
+|:--|--:|--:|--:|--:|--:|--:|
+| f8 | 2475 | 2447 | 2601 | 2567 | 2515 | 2601 |
+| f9 | 1660 | 49 | 2601 | 50 | 2351 | 2601 |
+| f10 | 2235 | 86 | 2397 | 766 | 342 | 2397 |
+
+##### p_raw
+
+| Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
+|:--|--:|--:|--:|--:|--:|--:|
+| f8 | 1.38885e-15 | 1.49922e-14 | 6.88319e-19 | 9.02598e-18 | 4.30181e-17 | 1.39059e-20 |
+| f9 | 0.0162708 | 1.55841e-18 | 3.22089e-18 | 7.0352e-18 | 2.10204e-12 | 3.29653e-18 |
+| f10 | 3.90747e-10 | 4.17607e-16 | 8.44029e-14 | 0.000349447 | 1.42386e-10 | 6.6573e-14 |
+
+</details>
+
+The complete U statistics, raw and adjusted p-values, sample sizes,
+descriptive medians, scopes, and family sizes are in [`details.csv`](details.csv).
+The CSV `decision` field describes the competitor: `higher` maps to W for
+MSC-CMA-ES, `lower` to L, and `not significant` to NS.
 
 ## Deep Statistical Comparison
 
@@ -107,6 +168,9 @@ that the lowest-mean-rank method has a smaller mean DSC rank than
 MSC-CMA-ES and the Holm-adjusted comparison is significant; `O` means
 that the Friedman test does not reject the null hypothesis and no
 post-hoc interpretation is made.
+
+`p_Holm` is shown only when the lowest-mean-rank algorithm is not
+MSC-CMA-ES and the Friedman test rejects the null hypothesis.
 
 <a id="dsc-budget-10m"></a>
 
