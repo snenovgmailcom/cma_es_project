@@ -4,16 +4,16 @@ Create the Nguyen (2024) comparison pages.
 
 One file only. Run from ~/cma_es_project:
 
-    python analysis/build_nguyen_comparison.py --check-only
-    python analysis/build_nguyen_comparison.py
+    python analysis/build_cmaes_nbc_qn_comparison.py --check-only
+    python analysis/build_cmaes_nbc_qn_comparison.py
 
 It reads MSC-CMA-ES PKLs locally and contains the published
 CMAES-NBC-qN mean/std values from Nguyen (2024), Tables 10 and 12.
 
 Outputs:
-  related_comparisons/nguyen/README.md
-  related_comparisons/nguyen/cec2014/d30/budget_300000/README.md
-  related_comparisons/nguyen/cec2017/d30/budget_300000/README.md
+  related_comparisons/cmaes_nbc_qn/README.md
+  related_comparisons/cmaes_nbc_qn/cec2014/d30/budget_300000/README.md
+  related_comparisons/cmaes_nbc_qn/cec2017/d30/budget_300000/README.md
 
 No MWU or DSC is computed for Nguyen because run-wise CMAES-NBC-qN
 samples are not available.
@@ -227,7 +227,7 @@ def main():
         print("Would write 3 README files.")
         return
 
-    root = Path("related_comparisons/nguyen")
+    root = Path("related_comparisons/cmaes_nbc_qn")
     p1 = root / "cec2014/d30/budget_300000/README.md"
     p2 = root / "cec2017/d30/budget_300000/README.md"
     p3 = root / "README.md"

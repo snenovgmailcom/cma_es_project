@@ -169,18 +169,18 @@ D=10 · 10^5</a>
 <tr><th colspan="2" align="left">MSC-CMA-ES vs CMAES-NBC-qN</th></tr>
 
 <tr><td>CEC2014</td><td>
-<a href="related_comparisons/nguyen/cec2014/d30/budget_300000/README.md">
+<a href="related_comparisons/cmaes_nbc_qn/cec2014/d30/budget_300000/README.md">
 D=30 · 3×10^5</a>
 </td></tr>
 
 <tr><td>CEC2017</td><td>
-<a href="related_comparisons/nguyen/cec2017/d30/budget_300000/README.md">
+<a href="related_comparisons/cmaes_nbc_qn/cec2017/d30/budget_300000/README.md">
 D=30 · 3×10^5</a>
 </td></tr>
 
 <tr>
 <td colspan="2" align="center">
-<a href="related_comparisons/nguyen/README.md">
+<a href="related_comparisons/cmaes_nbc_qn/README.md">
 <strong>CMAES-NBC-qN overview</strong></a>
 </td>
 </tr>
