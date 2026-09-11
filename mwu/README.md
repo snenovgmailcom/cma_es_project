@@ -5,8 +5,8 @@ NL-SHADE-RSP, j2020, and jSO.
 
 Contents: [All functions](#all) · [Composition functions](#composition) · [Method and symbols](#method-and-symbols)
 
-**17 suite/dimension/budget settings**. Each table cell is **W/L/NS for MSC-CMA-ES**: significant wins, significant losses,
-and comparisons without a significant difference.
+**17 suite/dimension/budget settings**. Each table cell contains $n_{<}/n_{>}/n_{=}$: counts of functions for which
+the MWU symbol is `<`, `>`, or `=`, respectively. See the definitions below.
 
 Each setting links to the per-function p_Holm table. U and raw p-values
 are available in expandable sections on those pages.
@@ -73,15 +73,24 @@ All-function and composition-function results use independent corrections
 of the same raw p-values. For CEC2017 the family sizes are 29 and 10,
 respectively; withdrawn function f2 is excluded.
 
-**MWU legend — all outcomes are from the MSC-CMA-ES perspective:**
+**MWU symbols:**
 
-- **W**: significant result in favour of MSC-CMA-ES (lower terminal errors).
-- **L**: significant result in favour of the competitor.
-- **NS**: no statistically significant difference after Holm correction.
+For each comparison, $\bar R_M$ and $\bar R_A$ are the mean ranks of
+the MSC-CMA-ES sample and the compared algorithm's sample in the pooled
+sample, using average ranks for ties. These are the observation ranks
+used by MWU, distinct from DSC ranks.
+
+- **`<`**: $p_{\mathrm{Holm}}\leq0.05$ and $\bar R_M<\bar R_A$.
+- **`>`**: $p_{\mathrm{Holm}}\leq0.05$ and $\bar R_M>\bar R_A$.
+- **`=`**: $p_{\mathrm{Holm}}>0.05$; the null hypothesis is not rejected.
+
+The symbol `=` denotes non-rejection of $H_0:F_M=F_A$; it does not
+assert equality of the sample mean ranks.
 
 Significance uses the full-precision adjusted p-value (`p_Holm <= 0.05`).
-Direction follows U, not rounded medians. W/L/NS summary cells contain
-counts of functions; NS does not assert equality of the algorithms.
+The mean-rank relation is obtained from U without rounding the input errors.
+Summary cells contain $n_{<}/n_{>}/n_{=}$: counts of functions in the
+three categories defined above.
 
 CSV values retain full numerical precision. Only descriptive medians use
 a separate copy with `abs(error) <= 1e-8` set to zero.

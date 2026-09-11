@@ -18,15 +18,24 @@ All-function and composition-function results use independent corrections
 of the same raw p-values. For CEC2017 the family sizes are 29 and 10,
 respectively; withdrawn function f2 is excluded.
 
-**MWU legend — all outcomes are from the MSC-CMA-ES perspective:**
+**MWU symbols:**
 
-- **W**: significant result in favour of MSC-CMA-ES (lower terminal errors).
-- **L**: significant result in favour of the competitor.
-- **NS**: no statistically significant difference after Holm correction.
+For each comparison, $\bar R_M$ and $\bar R_A$ are the mean ranks of
+the MSC-CMA-ES sample and the compared algorithm's sample in the pooled
+sample, using average ranks for ties. These are the observation ranks
+used by MWU, distinct from DSC ranks.
+
+- **`<`**: $p_{\mathrm{Holm}}\leq0.05$ and $\bar R_M<\bar R_A$.
+- **`>`**: $p_{\mathrm{Holm}}\leq0.05$ and $\bar R_M>\bar R_A$.
+- **`=`**: $p_{\mathrm{Holm}}>0.05$; the null hypothesis is not rejected.
+
+The symbol `=` denotes non-rejection of $H_0:F_M=F_A$; it does not
+assert equality of the sample mean ranks.
 
 Significance uses the full-precision adjusted p-value (`p_Holm <= 0.05`).
-Direction follows U, not rounded medians. W/L/NS summary cells contain
-counts of functions; NS does not assert equality of the algorithms.
+The mean-rank relation is obtained from U without rounding the input errors.
+Summary cells contain $n_{<}/n_{>}/n_{=}$: counts of functions in the
+three categories defined above.
 
 CSV values retain full numerical precision. Only descriptive medians use
 a separate copy with `abs(error) <= 1e-8` set to zero.
@@ -38,7 +47,7 @@ a separate copy with `abs(error) <= 1e-8` set to zero.
 | [3×10^6 / All functions](#budget-3m-all) | 3/7/0 | 2/6/2 | 4/3/3 | 3/5/2 | 2/5/3 | 5/3/2 |
 | [3×10^6 / Composition functions](#budget-3m-composition) | 2/1/0 | 2/1/0 | 3/0/0 | 1/1/1 | 1/2/0 | 3/0/0 |
 
-All summary cells are **W/L/NS for MSC-CMA-ES**.
+All summary cells contain $n_{<}/n_{>}/n_{=}$ as defined above.
 
 <a id="budget-3m"></a>
 
@@ -49,26 +58,27 @@ All summary cells are **W/L/NS for MSC-CMA-ES**.
 #### All functions
 
 Function scope: `all`. Holm family size: **10** per competitor.
-Each cell reports **p_Holm · outcome for MSC-CMA-ES**.
+Each cell reports **p_Holm · MWU symbol** (`<`, `>`, or `=`).
 
 | Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|
-| **f1** | **0.0433389 · L** | 0.0549905 · NS | 0.130017 · NS | 1 · NS | 0.27052 · NS | 0.0866779 · NS |
-| **f2** | **8.53312e-07 · W** | **1.61144e-09 · L** | 0.298181 · NS | **3.61482e-13 · L** | **3.30368e-17 · L** | 0.328447 · NS |
-| **f3** | **1.39059e-19 · L** | **1.1644e-17 · W** | **2.67406e-17 · W** | **5.18597e-19 · W** | 0.350386 · NS | **2.9688e-17 · W** |
-| **f4** | **7.01028e-16 · L** | **2.97331e-17 · L** | **3.84523e-07 · L** | **1.64309e-18 · L** | **3.30368e-17 · L** | **2.9688e-17 · L** |
-| **f5** | **0.000182726 · L** | **0.00219348 · L** | 0.298181 · NS | **9.42688e-17 · W** | **1.31968e-16 · W** | **4.17302e-14 · W** |
-| **f6** | **3.8789e-14 · L** | **8.04083e-17 · L** | **5.03814e-11 · L** | **2.80345e-17 · L** | 0.083017 · NS | **6.26283e-17 · L** |
-| **f7** | **2.02625e-08 · L** | **1.71835e-10 · L** | **0.00110823 · L** | **2.17762e-11 · L** | **5.81068e-11 · L** | **2.27366e-06 · L** |
-| **f8** | **1.50709e-09 · W** | **7.24596e-13 · W** | **8.91523e-18 · W** | 1 · NS | **0.00022914 · L** | **5.59245e-18 · W** |
-| **f9** | **0.00734573 · L** | **4.44762e-15 · L** | **2.67406e-17 · W** | **2.45158e-14 · L** | **1.44546e-06 · L** | **2.84863e-16 · W** |
-| **f10** | **2.02625e-08 · W** | 0.0549905 · NS | **1.04905e-09 · W** | **5.24525e-10 · W** | **3.22031e-09 · W** | **1.13388e-09 · W** |
-| **W/L/NS** | 3/7/0 | 2/6/2 | 4/3/3 | 3/5/2 | 2/5/3 | 5/3/2 |
+| **f1** | **0.0433389 · `>`** | 0.0549905 · `=` | 0.130017 · `=` | 1 · `=` | 0.27052 · `=` | 0.0866779 · `=` |
+| **f2** | **8.53312e-07 · `<`** | **1.61144e-09 · `>`** | 0.298181 · `=` | **3.61482e-13 · `>`** | **3.30368e-17 · `>`** | 0.328447 · `=` |
+| **f3** | **1.39059e-19 · `>`** | **1.1644e-17 · `<`** | **2.67406e-17 · `<`** | **5.18597e-19 · `<`** | 0.350386 · `=` | **2.9688e-17 · `<`** |
+| **f4** | **7.01028e-16 · `>`** | **2.97331e-17 · `>`** | **3.84523e-07 · `>`** | **1.64309e-18 · `>`** | **3.30368e-17 · `>`** | **2.9688e-17 · `>`** |
+| **f5** | **0.000182726 · `>`** | **0.00219348 · `>`** | 0.298181 · `=` | **9.42688e-17 · `<`** | **1.31968e-16 · `<`** | **4.17302e-14 · `<`** |
+| **f6** | **3.8789e-14 · `>`** | **8.04083e-17 · `>`** | **5.03814e-11 · `>`** | **2.80345e-17 · `>`** | 0.083017 · `=` | **6.26283e-17 · `>`** |
+| **f7** | **2.02625e-08 · `>`** | **1.71835e-10 · `>`** | **0.00110823 · `>`** | **2.17762e-11 · `>`** | **5.81068e-11 · `>`** | **2.27366e-06 · `>`** |
+| **f8** | **1.50709e-09 · `<`** | **7.24596e-13 · `<`** | **8.91523e-18 · `<`** | 1 · `=` | **0.00022914 · `>`** | **5.59245e-18 · `<`** |
+| **f9** | **0.00734573 · `>`** | **4.44762e-15 · `>`** | **2.67406e-17 · `<`** | **2.45158e-14 · `>`** | **1.44546e-06 · `>`** | **2.84863e-16 · `<`** |
+| **f10** | **2.02625e-08 · `<`** | 0.0549905 · `=` | **1.04905e-09 · `<`** | **5.24525e-10 · `<`** | **3.22031e-09 · `<`** | **1.13388e-09 · `<`** |
+| $n_{<}/n_{>}/n_{=}$ | 3/7/0 | 2/6/2 | 4/3/3 | 3/5/2 | 2/5/3 | 5/3/2 |
 
 <details>
 <summary>U statistics and raw p-values</summary>
 
-U is for the competitor sample; the W/L/NS outcomes above are for MSC-CMA-ES.
+U is for the compared algorithm's sample. The symbols above describe
+the MSC-CMA-ES sample's mean-rank relation after Holm correction.
 
 ##### U statistic
 
@@ -107,19 +117,20 @@ U is for the competitor sample; the W/L/NS outcomes above are for MSC-CMA-ES.
 #### Composition functions
 
 Function scope: `composition`. Holm family size: **3** per competitor.
-Each cell reports **p_Holm · outcome for MSC-CMA-ES**.
+Each cell reports **p_Holm · MWU symbol** (`<`, `>`, or `=`).
 
 | Function | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
 |:--|--:|--:|--:|--:|--:|--:|
-| **f8** | **6.45896e-10 · W** | **2.41532e-13 · W** | **2.67457e-18 · W** | 0.645806 · NS | **5.7285e-05 · L** | **1.67773e-18 · W** |
-| **f9** | **0.00367286 · L** | **1.90612e-15 · L** | **5.94236e-18 · W** | **1.22579e-14 · L** | **5.78184e-07 · L** | **9.49544e-17 · W** |
-| **f10** | **6.75416e-09 · W** | **0.0274953 · W** | **1.74842e-10 · W** | **3.49683e-10 · W** | **1.61015e-09 · W** | **2.8347e-10 · W** |
-| **W/L/NS** | 2/1/0 | 2/1/0 | 3/0/0 | 1/1/1 | 1/2/0 | 3/0/0 |
+| **f8** | **6.45896e-10 · `<`** | **2.41532e-13 · `<`** | **2.67457e-18 · `<`** | 0.645806 · `=` | **5.7285e-05 · `>`** | **1.67773e-18 · `<`** |
+| **f9** | **0.00367286 · `>`** | **1.90612e-15 · `>`** | **5.94236e-18 · `<`** | **1.22579e-14 · `>`** | **5.78184e-07 · `>`** | **9.49544e-17 · `<`** |
+| **f10** | **6.75416e-09 · `<`** | **0.0274953 · `<`** | **1.74842e-10 · `<`** | **3.49683e-10 · `<`** | **1.61015e-09 · `<`** | **2.8347e-10 · `<`** |
+| $n_{<}/n_{>}/n_{=}$ | 2/1/0 | 2/1/0 | 3/0/0 | 1/1/1 | 1/2/0 | 3/0/0 |
 
 <details>
 <summary>U statistics and raw p-values</summary>
 
-U is for the competitor sample; the W/L/NS outcomes above are for MSC-CMA-ES.
+U is for the compared algorithm's sample. The symbols above describe
+the MSC-CMA-ES sample's mean-rank relation after Holm correction.
 
 ##### U statistic
 
@@ -141,8 +152,9 @@ U is for the competitor sample; the W/L/NS outcomes above are for MSC-CMA-ES.
 
 The complete U statistics, raw and adjusted p-values, sample sizes,
 descriptive medians, scopes, and family sizes are in [`details.csv`](details.csv).
-The CSV `decision` field describes the competitor: `higher` maps to W for
-MSC-CMA-ES, `lower` to L, and `not significant` to NS.
+The CSV `decision` field describes the compared algorithm's pooled mean rank
+conditional on rejection after Holm correction: `higher` maps to `<` for
+MSC-CMA-ES, `lower` to `>`, and `not significant` to `=`.
 
 ## Deep Statistical Comparison
 
