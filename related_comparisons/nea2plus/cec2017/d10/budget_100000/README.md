@@ -3,7 +3,7 @@
 This page combines the fixed-budget benchmark results and the two statistical analyses used for the related-method comparison with NEA2+.
 
 - **Benchmark:** MSC-CMA-ES vs NEA2+, 51 runs per function at B=10^5 NFE.
-- **MWU:** NEA2+ vs MSC-CMA-ES, independent two-sided Mann–Whitney U with Bonferroni adjustment over the functions in this setting.
+- **MWU:** independent two-sided Mann–Whitney U tests with Holm–Bonferroni adjustment, separately for all functions and for composition functions; symbols are stated from the MSC-CMA-ES perspective.
 - **DSC:** MSC-CMA-ES, NEA2+, and BIPOP-CMA-ES; all functions and composition functions are analyzed separately.
 
 Contents: [Benchmark results](#benchmark-results) · [Mann–Whitney U](#mannwhitney-u) · [Deep Statistical Comparison](#deep-statistical-comparison)
@@ -46,119 +46,114 @@ The descriptive metrics use the same definitions as the main benchmark reports. 
 
 ## Mann–Whitney U
 
-Independent, two-sided Mann–Whitney U tests compare NEA2+ with MSC-CMA-ES on each function. Each sample contains 51 unmodified run-wise terminal errors. SciPy's asymptotic Mann–Whitney U method (`method="asymptotic"`) with continuity correction (`use_continuity=True`) is used. Bonferroni adjustment is applied over the **29 functions** in this setting.
+Independent, two-sided Mann–Whitney U tests compare the MSC-CMA-ES and NEA2+ samples on each function. Each sample contains 51 stored run-wise terminal errors, without additional rounding or zero flooring; zeros returned by the algorithms are retained. SciPy's asymptotic method (`method="asymptotic"`) with continuity correction (`use_continuity=True`) is used.
 
-For minimization, `probability_nea2plus_lower` is $P(X_{NEA2+}<X_{MSC})+\frac12P(X_{NEA2+}=X_{MSC})$.
+Holm–Bonferroni adjustment is applied separately within this setting to **all 29 functions** and to the **10 composition functions**. These are two independently adjusted families of hypotheses.
 
-Setting summary from the NEA2+ perspective: **2 ↓**, **21 ↑**, and **6 —**.
+Let $\bar R_M$ and $\bar R_A$ denote the mean ranks of the MSC-CMA-ES and NEA2+ samples in their pooled sample, with ranks increasing with terminal error and average ranks assigned to ties.
 
-Composition subset: **0 ↓**, **8 ↑**, and **2 —** across 10 functions.
+- `<`: $p_{\mathrm{Holm}}\leq0.05$ and $\bar R_M<\bar R_A$.
+- `>`: $p_{\mathrm{Holm}}\leq0.05$ and $\bar R_M>\bar R_A$.
+- `=`: $p_{\mathrm{Holm}}>0.05$; the null hypothesis $H_0:F_M=F_A$ is not rejected.
 
-Direction is stated from the NEA2+ perspective: `↓` denotes a statistically significant shift toward lower terminal errors, `↑` a statistically significant shift toward higher terminal errors, and `—` no statistically significant difference after Bonferroni correction.
+The `=` symbol denotes non-rejection; it does not assert equality of the sample mean ranks or distributions. Counts are reported as $n_{<}/n_{>}/n_{=}$ from the MSC-CMA-ES perspective.
 
-### Mann–Whitney U statistic
+| Scope | Family size | $n_{<}$ | $n_{>}$ | $n_{=}$ |
+|:--|--:|--:|--:|--:|
+| All | 29 | 21 | 2 | 6 |
+| Composition | 10 | 8 | 0 | 2 |
 
-| Function | Class | U (NEA2+) | P(NEA2+ lower) |
-|:--|:--|--:|--:|
-| f1 | Unimodal and simple multimodal | 150 | 0.94233 |
-| f3 | Unimodal and simple multimodal | 2601 | 0 |
-| f4 | Unimodal and simple multimodal | 2277 | 0.124567 |
-| f5 | Unimodal and simple multimodal | 2556 | 0.017301 |
-| f6 | Unimodal and simple multimodal | 223 | 0.914264 |
-| f7 | Unimodal and simple multimodal | 1470 | 0.434833 |
-| f8 | Unimodal and simple multimodal | 2592 | 0.00346021 |
-| f9 | Unimodal and simple multimodal | 1683 | 0.352941 |
-| f10 | Unimodal and simple multimodal | 2335 | 0.102268 |
-| f11 | Hybrid | 2601 | 0 |
-| f12 | Hybrid | 1857 | 0.286044 |
-| f13 | Hybrid | 1861 | 0.284506 |
-| f14 | Hybrid | 2534 | 0.0257593 |
-| f15 | Hybrid | 2237 | 0.139946 |
-| f16 | Hybrid | 1440 | 0.446367 |
-| f17 | Hybrid | 2280 | 0.123414 |
-| f18 | Hybrid | 1308 | 0.497116 |
-| f19 | Hybrid | 1846 | 0.290273 |
-| f20 | Hybrid | 2520 | 0.0311419 |
-| f21 | Composition | 2140 | 0.17724 |
-| f22 | Composition | 2294 | 0.118032 |
-| f23 | Composition | 1825 | 0.298347 |
-| f24 | Composition | 2490 | 0.0426759 |
-| f25 | Composition | 2208 | 0.151096 |
-| f26 | Composition | 2335 | 0.102268 |
-| f27 | Composition | 1414 | 0.456363 |
-| f28 | Composition | 2505 | 0.0369089 |
-| f29 | Composition | 2398 | 0.0780469 |
-| f30 | Composition | 1225 | 0.529027 |
+### All functions: Holm-adjusted comparisons
 
-### p_raw
+| Function | Class | $p_{\mathrm{Holm}}$ | Symbol |
+|:--|:--|--:|:--:|
+| f1 | Unimodal and simple multimodal | **2.93411e-13** | **`>`** |
+| f3 | Unimodal and simple multimodal | **1.81338e-17** | **`<`** |
+| f4 | Unimodal and simple multimodal | **6.81456e-10** | **`<`** |
+| f5 | Unimodal and simple multimodal | **9.68218e-16** | **`<`** |
+| f6 | Unimodal and simple multimodal | **1.07845e-11** | **`>`** |
+| f7 | Unimodal and simple multimodal | 1 | `=` |
+| f8 | Unimodal and simple multimodal | **1.0482e-16** | **`<`** |
+| f9 | Unimodal and simple multimodal | 0.0598547 | `=` |
+| f10 | Unimodal and simple multimodal | **8.10911e-11** | **`<`** |
+| f11 | Hybrid | **8.36841e-17** | **`<`** |
+| f12 | Hybrid | **0.00178489** | **`<`** |
+| f13 | Hybrid | **0.0017831** | **`<`** |
+| f14 | Hybrid | **3.89061e-15** | **`<`** |
+| f15 | Hybrid | **4.86624e-09** | **`<`** |
+| f16 | Hybrid | 1 | `=` |
+| f17 | Hybrid | **7.93948e-10** | **`<`** |
+| f18 | Hybrid | 1 | `=` |
+| f19 | Hybrid | **0.00211822** | **`<`** |
+| f20 | Hybrid | **8.14711e-15** | **`<`** |
+| f21 | Composition | **2.15734e-07** | **`<`** |
+| f22 | Composition | **4.80424e-10** | **`<`** |
+| f23 | Composition | **0.00317246** | **`<`** |
+| f24 | Composition | **3.85457e-14** | **`<`** |
+| f25 | Composition | **1.5322e-08** | **`<`** |
+| f26 | Composition | **8.10911e-11** | **`<`** |
+| f27 | Composition | 1 | `=` |
+| f28 | Composition | **1.7831e-14** | **`<`** |
+| f29 | Composition | **4.21166e-12** | **`<`** |
+| f30 | Composition | 1 | `=` |
 
-| Function | p_raw |
-|:--|--:|
-| f1 | 1.3972e-14 |
-| f3 | 6.25304e-19 |
-| f4 | 4.54304e-11 |
-| f5 | 3.72391e-17 |
-| f6 | 5.67605e-13 |
-| f7 | 0.258027 |
-| f8 | 3.88223e-18 |
-| f9 | 0.00997579 |
-| f10 | 4.50506e-12 |
-| f11 | 2.98872e-18 |
-| f12 | 0.000198321 |
-| f13 | 0.00017831 |
-| f14 | 1.55624e-16 |
-| f15 | 3.74326e-10 |
-| f16 | 0.352223 |
-| f17 | 5.67105e-11 |
-| f18 | 0.962634 |
-| f19 | 0.000264778 |
-| f20 | 3.39463e-16 |
-| f21 | 1.96122e-08 |
-| f22 | 3.00265e-11 |
-| f23 | 0.000453209 |
-| f24 | 1.75208e-15 |
-| f25 | 1.27683e-09 |
-| f26 | 4.50817e-12 |
-| f27 | 0.449365 |
-| f28 | 7.75259e-16 |
-| f29 | 2.10583e-13 |
-| f30 | 0.615701 |
+### Composition functions: Holm-adjusted comparisons
 
-### p_Bonferroni and Direction
+| Function | Class | $p_{\mathrm{Holm}}$ | Symbol |
+|:--|:--|--:|:--:|
+| f21 | Composition | **7.84487e-08** | **`<`** |
+| f22 | Composition | **1.80159e-10** | **`<`** |
+| f23 | Composition | **0.00135963** | **`<`** |
+| f24 | Composition | **1.57687e-14** | **`<`** |
+| f25 | Composition | **6.38415e-09** | **`<`** |
+| f26 | Composition | **3.15572e-11** | **`<`** |
+| f27 | Composition | 0.898729 | `=` |
+| f28 | Composition | **7.75259e-15** | **`<`** |
+| f29 | Composition | **1.68466e-12** | **`<`** |
+| f30 | Composition | 0.898729 | `=` |
 
-| Function | p_Bonferroni | Direction |
-|:--|--:|:--:|
-| f1 | **4.05187e-13** | **↓** |
-| f3 | **1.81338e-17** | **↑** |
-| f4 | **1.31748e-09** | **↑** |
-| f5 | **1.07994e-15** | **↑** |
-| f6 | **1.64606e-11** | **↓** |
-| f7 | 1 | **—** |
-| f8 | **1.12585e-16** | **↑** |
-| f9 | 0.289298 | **—** |
-| f10 | **1.30647e-10** | **↑** |
-| f11 | **8.66728e-17** | **↑** |
-| f12 | **0.00575132** | **↑** |
-| f13 | **0.00517099** | **↑** |
-| f14 | **4.51311e-15** | **↑** |
-| f15 | **1.08555e-08** | **↑** |
-| f16 | 1 | **—** |
-| f17 | **1.64461e-09** | **↑** |
-| f18 | 1 | **—** |
-| f19 | **0.00767856** | **↑** |
-| f20 | **9.84442e-15** | **↑** |
-| f21 | **5.68753e-07** | **↑** |
-| f22 | **8.70768e-10** | **↑** |
-| f23 | **0.0131431** | **↑** |
-| f24 | **5.08103e-14** | **↑** |
-| f25 | **3.70281e-08** | **↑** |
-| f26 | **1.30737e-10** | **↑** |
-| f27 | 1 | **—** |
-| f28 | **2.24825e-14** | **↑** |
-| f29 | **6.1069e-12** | **↑** |
-| f30 | 1 | **—** |
+Bold entries indicate rejection of the null hypothesis at the specified Holm-adjusted threshold.
 
-Full-precision MWU statistics are available in [`../../../mwu/details.csv`](../../../mwu/details.csv) relative to the NEA2+ comparison root.
+<details>
+<summary>Unadjusted statistics and pooled-sample mean ranks</summary>
+
+These statistics are shared by both scopes for a given function. The `probability_nea2plus_lower` column is the empirical estimate of $P(X_A<X_M)+\frac12P(X_A=X_M)$, computed as $1-U_A/(n_A n_M)$.
+
+| Function | $U_A$ (NEA2+) | $\bar R_M$ | $\bar R_A$ | P(NEA2+ lower) | $p_{\mathrm{raw}}$ |
+|:--|--:|--:|--:|--:|--:|
+| f1 | 150 | 74.0588 | 28.9412 | 0.94233 | 1.3972e-14 |
+| f3 | 2601 | 26 | 77 | 0 | 6.25304e-19 |
+| f4 | 2277 | 32.3529 | 70.6471 | 0.124567 | 4.54304e-11 |
+| f5 | 2556 | 26.8824 | 76.1176 | 0.017301 | 3.72391e-17 |
+| f6 | 223 | 72.6275 | 30.3725 | 0.914264 | 5.67605e-13 |
+| f7 | 1470 | 48.1765 | 54.8235 | 0.434833 | 0.258027 |
+| f8 | 2592 | 26.1765 | 76.8235 | 0.00346021 | 3.88223e-18 |
+| f9 | 1683 | 44 | 59 | 0.352941 | 0.00997579 |
+| f10 | 2335 | 31.2157 | 71.7843 | 0.102268 | 4.50506e-12 |
+| f11 | 2601 | 26 | 77 | 0 | 2.98872e-18 |
+| f12 | 1857 | 40.5882 | 62.4118 | 0.286044 | 0.000198321 |
+| f13 | 1861 | 40.5098 | 62.4902 | 0.284506 | 0.00017831 |
+| f14 | 2534 | 27.3137 | 75.6863 | 0.0257593 | 1.55624e-16 |
+| f15 | 2237 | 33.1373 | 69.8627 | 0.139946 | 3.74326e-10 |
+| f16 | 1440 | 48.7647 | 54.2353 | 0.446367 | 0.352223 |
+| f17 | 2280 | 32.2941 | 70.7059 | 0.123414 | 5.67105e-11 |
+| f18 | 1308 | 51.3529 | 51.6471 | 0.497116 | 0.962634 |
+| f19 | 1846 | 40.8039 | 62.1961 | 0.290273 | 0.000264778 |
+| f20 | 2520 | 27.5882 | 75.4118 | 0.0311419 | 3.39463e-16 |
+| f21 | 2140 | 35.0392 | 67.9608 | 0.17724 | 1.96122e-08 |
+| f22 | 2294 | 32.0196 | 70.9804 | 0.118032 | 3.00265e-11 |
+| f23 | 1825 | 41.2157 | 61.7843 | 0.298347 | 0.000453209 |
+| f24 | 2490 | 28.1765 | 74.8235 | 0.0426759 | 1.75208e-15 |
+| f25 | 2208 | 33.7059 | 69.2941 | 0.151096 | 1.27683e-09 |
+| f26 | 2335 | 31.2157 | 71.7843 | 0.102268 | 4.50817e-12 |
+| f27 | 1414 | 49.2745 | 53.7255 | 0.456363 | 0.449365 |
+| f28 | 2505 | 27.8824 | 75.1176 | 0.0369089 | 7.75259e-16 |
+| f29 | 2398 | 29.9804 | 73.0196 | 0.0780469 | 2.10583e-13 |
+| f30 | 1225 | 52.9804 | 50.0196 | 0.529027 | 0.615701 |
+
+</details>
+
+Full-precision MWU statistics for both scopes are available in [`mwu/details.csv`](../../../mwu/details.csv).
 
 <a id="deep-statistical-comparison"></a>
 

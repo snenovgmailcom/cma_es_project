@@ -6,7 +6,7 @@ Inputs (already produced locally):
   experiments/.../MSC-CMA/maxevals_<B>/f*.pkl
   experiments/.../NEA2PLUS-PY/maxevals_<B>/f*.pkl
   related_comparisons/nea2plus/mwu/details.csv
-  related_comparisons/nea2plus/mwu/summary.csv
+  related_comparisons/nea2plus/mwu/summary.csv (all/composition scope rows)
   related_comparisons/nea2plus/dsc/<suite>/d<D>/budget_<B>/
       per_function_dsc_ranks.csv
       ordering_all.csv
@@ -19,6 +19,8 @@ Outputs (only README files):
 The script does not alter PKL, MWU, DSC, experiment, Git, or GitHub data.
 Benchmark metrics reuse analysis/summary_grid_clean.py so that flooring,
 sample-std, FBTC targets, and function classes match the main benchmark pages.
+With --reuse-benchmark-and-dsc, existing benchmark and DSC sections are
+preserved exactly; only the MWU text, introduction, and root index are rebuilt.
 """
 
 from __future__ import annotations
@@ -43,9 +45,6 @@ if str(HERE) not in sys.path:
 import summary_grid_clean as sg
 
 from report_style import (
-    ARROW_HIGHER,
-    ARROW_LOWER,
-    ARROW_NS,
     DESCRIPTIVE_BOLD_NOTE,
     class_label,
     display_name,
@@ -104,6 +103,11 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=Path("related_comparisons/nea2plus"),
         help="NEA2+ comparison root (default: related_comparisons/nea2plus)",
+    )
+    p.add_argument(
+        "--reuse-benchmark-and-dsc",
+        action="store_true",
+        help="preserve existing benchmark and DSC README sections; rebuild only MWU and navigation",
     )
     p.add_argument(
         "--check-only",
@@ -282,6 +286,21 @@ def render_benchmark(
     return "\n".join(lines)
 
 
+def holm_adjust(p_values: Sequence[float]) -> list[float]:
+    """Step-down adjusted p-values, in the original function order."""
+    order = sorted(range(len(p_values)), key=p_values.__getitem__)
+    adjusted = [0.0] * len(p_values)
+    running = 0.0
+    for index, position in enumerate(order):
+        running = max(running, (len(p_values) - index) * p_values[position])
+        adjusted[position] = min(1.0, running)
+    return adjusted
+
+
+def close(a: float, b: float) -> bool:
+    return math.isclose(a, b, rel_tol=1e-12, abs_tol=1e-15)
+
+
 def load_mwu_rows(
     comparison_root: Path,
     suite: str,
@@ -295,108 +314,176 @@ def load_mwu_rows(
         and int(r["dimension"]) == dim
         and int(r["budget"]) == budget
     ]
-    expected = set(expected_functions(suite))
-    found = {int(r["function"]) for r in selected}
-    if found != expected or len(selected) != len(expected):
-        raise BuildError(
-            f"MWU {suite} D={dim} B={budget}: expected {len(expected)} rows, "
-            f"got {len(selected)} with functions {sorted(found)}"
-        )
+    if {r["comparison_scope"] for r in selected} != {"all", "composition"}:
+        raise BuildError(f"MWU {suite} D={dim} B={budget}: both scopes are required")
+
+    for scope in ("all", "composition"):
+        scoped = [r for r in selected if r["comparison_scope"] == scope]
+        expected = set(class_functions(suite, scope))
+        found = {int(r["function"]) for r in scoped}
+        if found != expected or len(scoped) != len(expected):
+            raise BuildError(
+                f"MWU {suite} D={dim} B={budget}/{scope}: "
+                f"expected {len(expected)} rows, got {len(scoped)} "
+                f"with functions {sorted(found)}"
+            )
+        adjusted = holm_adjust([float(r["p_raw"]) for r in scoped])
+        for r, expected_p in zip(scoped, adjusted):
+            if r["competitor"] != COMPETITOR or r["reference"] != REFERENCE:
+                raise BuildError(f"Unexpected MWU algorithms in row: {r}")
+            if int(r["n_competitor"]) != EXPECTED_RUNS or int(r["n_reference"]) != EXPECTED_RUNS:
+                raise BuildError(f"Unexpected MWU sample size in row: {r}")
+            if int(r["test_family_size"]) != len(expected):
+                raise BuildError(f"Unexpected MWU family size in row: {r}")
+            if r["correction"] != "holm-bonferroni" or float(r["alpha"]) != ALPHA:
+                raise BuildError(f"Unexpected MWU correction or alpha in row: {r}")
+            fid = int(r["function"])
+            expected_class = next(
+                cls for cls in ("basic", "hybrid", "composition")
+                if fid in class_functions(suite, cls)
+            )
+            if r["function_class"] != expected_class:
+                raise BuildError(f"Unexpected MWU function class in row: {r}")
+            raw_p, p_holm = float(r["p_raw"]), float(r["p_holm"])
+            if not (0 <= raw_p <= 1 and 0 <= p_holm <= 1 and close(p_holm, expected_p)):
+                raise BuildError(f"Invalid Holm-adjusted p-value in row: {r}")
+            u_a = float(r["u_competitor"])
+            n_a, n_m = int(r["n_competitor"]), int(r["n_reference"])
+            rank_a = float(r["mean_rank_nea2plus"])
+            rank_m = float(r["mean_rank_msc"])
+            probability = float(r["probability_nea2plus_lower"])
+            if not (
+                0 <= u_a <= n_a * n_m
+                and close(rank_a, u_a / n_a + (n_a + 1) / 2)
+                and close(rank_m, (n_a * n_m - u_a) / n_m + (n_m + 1) / 2)
+                and close(probability, 1 - u_a / (n_a * n_m))
+            ):
+                raise BuildError(f"Inconsistent U, pooled mean ranks, or probability in row: {r}")
+            if p_holm > ALPHA:
+                expected_symbol = "="
+            elif rank_m < rank_a:
+                expected_symbol = "<"
+            elif rank_m > rank_a:
+                expected_symbol = ">"
+            else:
+                raise BuildError(f"Rejected MWU null with equal pooled mean ranks in row: {r}")
+            if r["mwu_symbol"] != expected_symbol:
+                raise BuildError(f"Inconsistent MSC-oriented MWU symbol in row: {r}")
+
+    # The same function samples have identical unadjusted statistics in both scopes.
+    all_rows = {r["function"]: r for r in selected if r["comparison_scope"] == "all"}
     for r in selected:
-        if r["competitor"] != COMPETITOR or r["reference"] != REFERENCE:
-            raise BuildError(f"Unexpected MWU algorithms in row: {r}")
-        if int(r["n_competitor"]) != EXPECTED_RUNS or int(r["n_reference"]) != EXPECTED_RUNS:
-            raise BuildError(f"Unexpected MWU sample size in row: {r}")
-        if int(r["bonferroni_family_size"]) != len(expected):
-            raise BuildError(f"Unexpected MWU Bonferroni family size in row: {r}")
-    return sorted(selected, key=lambda r: int(r["function"]))
+        if r["comparison_scope"] != "composition":
+            continue
+        other = all_rows[r["function"]]
+        for field in (
+            "u_competitor", "p_raw", "probability_nea2plus_lower",
+            "mean_rank_nea2plus", "mean_rank_msc", "median_nea2plus", "median_msc",
+        ):
+            if float(r[field]) != float(other[field]):
+                raise BuildError(f"MWU scopes have different {field} for f{r['function']}")
+    return sorted(selected, key=lambda r: (r["comparison_scope"] != "all", int(r["function"])))
 
 
-def decision_symbol(decision: str) -> str:
-    return {
-        "lower": ARROW_LOWER,
-        "higher": ARROW_HIGHER,
-        "not significant": ARROW_NS,
-    }[decision]
+def mwu_legend() -> list[str]:
+    return [
+        r"Let $\bar R_M$ and $\bar R_A$ denote the mean ranks of the MSC-CMA-ES "
+        "and NEA2+ samples in their pooled sample, with ranks increasing with "
+        "terminal error and average ranks assigned to ties.",
+        "",
+        r"- `<`: $p_{\mathrm{Holm}}\leq0.05$ and $\bar R_M<\bar R_A$.",
+        r"- `>`: $p_{\mathrm{Holm}}\leq0.05$ and $\bar R_M>\bar R_A$.",
+        r"- `=`: $p_{\mathrm{Holm}}>0.05$; the null hypothesis "
+        r"$H_0:F_M=F_A$ is not rejected.",
+        "",
+        "The `=` symbol denotes non-rejection; it does not assert equality of "
+        "the sample mean ranks or distributions. "
+        r"Counts are reported as $n_{<}/n_{>}/n_{=}$ from the MSC-CMA-ES perspective.",
+        "",
+    ]
 
 
 def render_mwu(rows: list[dict[str, str]], suite: str) -> str:
-    m = len(rows)
-    counts = Counter(r["decision"] for r in rows)
-    comp_rows = [r for r in rows if r["function_class"] == "composition"]
-    comp_counts = Counter(r["decision"] for r in comp_rows)
-
+    scoped = {
+        scope: [r for r in rows if r["comparison_scope"] == scope]
+        for scope in ("all", "composition")
+    }
     lines = [
         '<a id="mannwhitney-u"></a>',
         "",
         "## Mann–Whitney U",
         "",
-        "Independent, two-sided Mann–Whitney U tests compare NEA2+ with "
-        "MSC-CMA-ES on each function. Each sample contains 51 unmodified "
-        "run-wise terminal errors. SciPy's asymptotic Mann–Whitney U method "
-        '(`method="asymptotic"`) with continuity correction '
-        '(`use_continuity=True`) is used. Bonferroni adjustment is applied '
-        f"over the **{m} functions** in this setting.",
+        "Independent, two-sided Mann–Whitney U tests compare the MSC-CMA-ES "
+        "and NEA2+ samples on each function. Each sample contains 51 stored "
+        "run-wise terminal errors, without additional rounding or zero flooring; "
+        "zeros returned by the algorithms are retained. SciPy's asymptotic "
+        'method (`method="asymptotic"`) with continuity correction '
+        "(`use_continuity=True`) is used.",
         "",
-        "For minimization, `probability_nea2plus_lower` is "
-        r"$P(X_{NEA2+}<X_{MSC})+\frac12P(X_{NEA2+}=X_{MSC})$.",
+        "Holm–Bonferroni adjustment is applied separately within this setting "
+        f"to **all {len(scoped['all'])} functions** and to the "
+        f"**{len(scoped['composition'])} composition functions**. "
+        "These are two independently adjusted families of hypotheses.",
         "",
-        f"Setting summary from the NEA2+ perspective: **{counts['lower']} ↓**, "
-        f"**{counts['higher']} ↑**, and **{counts['not significant']} —**.",
-        "",
-        f"Composition subset: **{comp_counts['lower']} ↓**, "
-        f"**{comp_counts['higher']} ↑**, and "
-        f"**{comp_counts['not significant']} —** across "
-        f"{len(comp_rows)} functions.",
-        "",
-        "Direction is stated from the NEA2+ perspective: `↓` denotes a "
-        "statistically significant shift toward lower terminal errors, `↑` a "
-        "statistically significant shift toward higher terminal errors, and `—` "
-        "no statistically significant difference after Bonferroni correction.",
-        "",
-        "### Mann–Whitney U statistic",
-        "",
-        "| Function | Class | U (NEA2+) | P(NEA2+ lower) |",
-        "|:--|:--|--:|--:|",
+        *mwu_legend(),
+        "| Scope | Family size | $n_{<}$ | $n_{>}$ | $n_{=}$ |",
+        "|:--|--:|--:|--:|--:|",
     ]
-
-    for r in rows:
+    for scope, scope_rows in scoped.items():
+        counts = Counter(r["mwu_symbol"] for r in scope_rows)
         lines.append(
-            f"| f{int(r['function'])} | {class_label(r['function_class'])} | "
-            f"{fmt_number(float(r['u_competitor']))} | "
-            f"{fmt_number(float(r['probability_nea2plus_lower']))} |"
+            f"| {class_label(scope)} | {len(scope_rows)} | "
+            f"{counts['<']} | {counts['>']} | {counts['=']} |"
         )
 
-    lines += [
-        "",
-        "### p_raw",
-        "",
-        "| Function | p_raw |",
-        "|:--|--:|",
-    ]
-    for r in rows:
-        lines.append(f"| f{int(r['function'])} | {fmt_p(r['p_raw'])} |")
+    for scope, scope_rows in scoped.items():
+        lines += [
+            "",
+            f"### {class_label(scope)} functions: Holm-adjusted comparisons",
+            "",
+            "| Function | Class | $p_{\\mathrm{Holm}}$ | Symbol |",
+            "|:--|:--|--:|:--:|",
+        ]
+        for r in scope_rows:
+            rejected = float(r["p_holm"]) <= ALPHA
+            p_text = markdown_bold(fmt_p(r["p_holm"]), rejected)
+            symbol = markdown_bold(f"`{r['mwu_symbol']}`", rejected)
+            lines.append(
+                f"| f{int(r['function'])} | {class_label(r['function_class'])} | "
+                f"{p_text} | {symbol} |"
+            )
 
     lines += [
         "",
-        "### p_Bonferroni and Direction",
+        "Bold entries indicate rejection of the null hypothesis at the "
+        "specified Holm-adjusted threshold.",
         "",
-        "| Function | p_Bonferroni | Direction |",
-        "|:--|--:|:--:|",
+        "<details>",
+        "<summary>Unadjusted statistics and pooled-sample mean ranks</summary>",
+        "",
+        "These statistics are shared by both scopes for a given function. "
+        "The `probability_nea2plus_lower` column is the empirical estimate of "
+        r"$P(X_A<X_M)+\frac12P(X_A=X_M)$, computed as "
+        r"$1-U_A/(n_A n_M)$.",
+        "",
+        "| Function | $U_A$ (NEA2+) | $\\bar R_M$ | $\\bar R_A$ | "
+        "P(NEA2+ lower) | $p_{\\mathrm{raw}}$ |",
+        "|:--|--:|--:|--:|--:|--:|",
     ]
-    for r in rows:
-        p = float(r["p_bonferroni"])
-        symbol = decision_symbol(r["decision"])
-        pv = fmt_p(p)
-        if p < ALPHA:
-            pv = f"**{pv}**"
-        lines.append(f"| f{int(r['function'])} | {pv} | **{symbol}** |")
-
+    for r in scoped["all"]:
+        lines.append(
+            f"| f{int(r['function'])} | {fmt_number(float(r['u_competitor']))} | "
+            f"{fmt_number(float(r['mean_rank_msc']))} | "
+            f"{fmt_number(float(r['mean_rank_nea2plus']))} | "
+            f"{fmt_number(float(r['probability_nea2plus_lower']))} | "
+            f"{fmt_p(r['p_raw'])} |"
+        )
     lines += [
         "",
-        "Full-precision MWU statistics are available in "
-        "[`../../../mwu/details.csv`](../../../mwu/details.csv) "
-        "relative to the NEA2+ comparison root.",
+        "</details>",
+        "",
+        "Full-precision MWU statistics for both scopes are available in "
+        "[`mwu/details.csv`](../../../mwu/details.csv).",
         "",
     ]
     return "\n".join(lines)
@@ -538,17 +625,43 @@ def setting_page_path(root: Path, suite: str, dim: int, budget: int) -> Path:
     return root / suite / f"d{dim}" / f"budget_{budget}" / "README.md"
 
 
+def existing_benchmark_and_dsc(path: Path) -> tuple[str, str]:
+    """Return exact existing sections; do not infer missing experimental data."""
+    if not path.is_file():
+        raise BuildError(f"Missing existing setting README for reuse: {path}")
+    text = path.read_bytes().decode("utf-8")
+    markers = (
+        "## Benchmark results",
+        '<a id="mannwhitney-u"></a>',
+        '<a id="deep-statistical-comparison"></a>',
+    )
+    if any(text.count(marker) != 1 for marker in markers):
+        raise BuildError(f"Missing or repeated benchmark/MWU/DSC section marker: {path}")
+    benchmark_start, mwu_start, dsc_start = (text.index(marker) for marker in markers)
+    if not benchmark_start < mwu_start < dsc_start:
+        raise BuildError(f"Unexpected benchmark/MWU/DSC section order: {path}")
+    return text[benchmark_start:mwu_start], text[dsc_start:]
+
+
 def render_setting_page(
     experiments: Path,
     comparison_root: Path,
     suite: str,
     dim: int,
     budget: int,
+    reuse_benchmark_and_dsc: bool = False,
 ) -> str:
-    metric_grid = validate_metric_grid(experiments, suite, dim, budget)
-    agg = aggregate_benchmark(metric_grid, suite)
     mwu = load_mwu_rows(comparison_root, suite, dim, budget)
-    ranks, orderings = load_dsc(comparison_root, suite, dim, budget)
+    if reuse_benchmark_and_dsc:
+        benchmark_text, dsc_text = existing_benchmark_and_dsc(
+            setting_page_path(comparison_root, suite, dim, budget)
+        )
+    else:
+        metric_grid = validate_metric_grid(experiments, suite, dim, budget)
+        agg = aggregate_benchmark(metric_grid, suite)
+        ranks, orderings = load_dsc(comparison_root, suite, dim, budget)
+        benchmark_text = render_benchmark(agg, suite, dim, budget) + "\n"
+        dsc_text = render_dsc(ranks, orderings, suite)
 
     title = (
         f"# {suite.upper()}, D={dim}, B={budget_label(budget)} — "
@@ -561,8 +674,9 @@ def render_setting_page(
         "statistical analyses used for the related-method comparison with NEA2+.",
         "",
         f"- **Benchmark:** MSC-CMA-ES vs NEA2+, 51 runs per function at B={format_budget(budget)} NFE.",
-        "- **MWU:** NEA2+ vs MSC-CMA-ES, independent two-sided Mann–Whitney U "
-        "with Bonferroni adjustment over the functions in this setting.",
+        "- **MWU:** independent two-sided Mann–Whitney U tests with "
+        "Holm–Bonferroni adjustment, separately for all functions and for "
+        "composition functions; symbols are stated from the MSC-CMA-ES perspective.",
         "- **DSC:** MSC-CMA-ES, NEA2+, and BIPOP-CMA-ES; all functions and "
         "composition functions are analyzed separately.",
         "",
@@ -571,27 +685,41 @@ def render_setting_page(
         "[Deep Statistical Comparison](#deep-statistical-comparison)",
         "",
     ]
-    return (
-        "\n".join(intro)
-        + render_benchmark(agg, suite, dim, budget)
-        + "\n"
-        + render_mwu(mwu, suite)
-        + "\n"
-        + render_dsc(ranks, orderings, suite)
-    )
+    return "\n".join(intro) + benchmark_text + render_mwu(mwu, suite) + "\n" + dsc_text
+
+
+def validated_mwu_summary(comparison_root: Path) -> dict[tuple[str, int, int, str], dict[str, str]]:
+    rows = read_csv(comparison_root / "mwu" / "summary.csv")
+    expected = {(*setting, scope) for setting in SETTINGS for scope in ("all", "composition")}
+    by_key = {
+        (r["suite"], int(r["dimension"]), int(r["budget"]), r["comparison_scope"]): r
+        for r in rows
+    }
+    if len(rows) != len(expected) or set(by_key) != expected:
+        raise BuildError("MWU summary must have exactly the six settings and both scopes")
+    for suite, dim, budget in SETTINGS:
+        details = load_mwu_rows(comparison_root, suite, dim, budget)
+        for scope in ("all", "composition"):
+            detail_rows = [r for r in details if r["comparison_scope"] == scope]
+            counts = Counter(r["mwu_symbol"] for r in detail_rows)
+            row = by_key[(suite, dim, budget, scope)]
+            if (
+                int(row["n_functions"]) != len(detail_rows)
+                or int(row["n_lt"]) != counts["<"]
+                or int(row["n_gt"]) != counts[">"]
+                or int(row["n_eq"]) != counts["="]
+            ):
+                raise BuildError(f"MWU summary disagrees with details: {suite} D={dim} B={budget}/{scope}")
+    return by_key
 
 
 def render_index(
     comparison_root: Path,
     setting_pages: Mapping[tuple[str, int, int], str],
 ) -> str:
-    # MWU setting summaries for compact index counts.
-    mwu_summary = read_csv(comparison_root / "mwu" / "summary.csv")
-    mwu_by_key = {
-        (r["suite"], int(r["dimension"]), int(r["budget"])): r
-        for r in mwu_summary
-    }
-
+    if set(setting_pages) != set(SETTINGS):
+        raise BuildError("All six setting pages are required for the comparison index")
+    mwu_by_key = validated_mwu_summary(comparison_root)
     lines = [
         "# NEA2+ related-method comparison",
         "",
@@ -606,48 +734,64 @@ def render_index(
         "",
         "1. **Benchmark results** — fixed-budget descriptive metrics for "
         "MSC-CMA-ES and NEA2+.",
-        "2. **Mann–Whitney U** — function-wise NEA2+ vs MSC-CMA-ES tests on "
-        "51 unmodified terminal errors with Bonferroni adjustment.",
+        "2. **Mann–Whitney U** — independent, two-sided tests on "
+        "51 stored terminal errors per sample, with Holm–Bonferroni adjustment "
+        "applied separately to all functions and to composition functions "
+        "within each setting.",
         "3. **Deep Statistical Comparison** — MSC-CMA-ES, NEA2+, and "
         "BIPOP-CMA-ES, analyzed for all functions and for composition functions.",
         "",
         "CEC2020 D=20 is not included because a complete 51-run NEA2+ result "
         "set was not available.",
         "",
-        "| Suite | D | Budget | Benchmark results | MWU | DSC | MWU summary "
-        "(↓ / ↑ / —) |",
-        "|:--|--:|--:|:--|:--|:--|:--:|",
+        "## MWU symbols",
+        "",
+        *mwu_legend(),
+        "## Settings",
+        "",
+        "The two MWU count columns use independently adjusted families. "
+        "The composition column is not a subset of decisions adjusted over all functions.",
+        "",
+        "| Suite | D | Budget | Benchmark results | MWU | DSC | "
+        "All: $n_{<}/n_{>}/n_{=}$ | Composition: $n_{<}/n_{>}/n_{=}$ |",
+        "|:--|--:|--:|:--|:--|:--|:--:|:--:|",
     ]
-
-    total_functions = 0
+    totals = {scope: Counter() for scope in ("all", "composition")}
+    total_functions = {scope: 0 for scope in totals}
     for suite, dim, budget in SETTINGS:
         rel = f"{suite}/d{dim}/budget_{budget}/README.md"
-        m = mwu_by_key.get((suite, dim, budget))
-        if m is None:
-            raise BuildError(f"Missing MWU summary row for {suite} D={dim} B={budget}")
-        n = int(m["n_functions"])
-        total_functions += n
-        counts = (
-            f"{m['nea2plus_lower']} / {m['nea2plus_higher']} / "
-            f"{m['not_significant']}"
-        )
+        cells = []
+        for scope in ("all", "composition"):
+            row = mwu_by_key[(suite, dim, budget, scope)]
+            total_functions[scope] += int(row["n_functions"])
+            totals[scope].update({field: int(row[field]) for field in ("n_lt", "n_gt", "n_eq")})
+            cells.append(f"{row['n_lt']} / {row['n_gt']} / {row['n_eq']}")
         lines.append(
             f"| {suite.upper()} | {dim} | {budget_label(budget)} | "
             f"[Benchmark]({rel}#benchmark-results) | "
             f"[MWU]({rel}#mannwhitney-u) | "
-            f"[DSC]({rel}#deep-statistical-comparison) | {counts} |"
+            f"[DSC]({rel}#deep-statistical-comparison) | {cells[0]} | {cells[1]} |"
         )
-
+    count_totals = [
+        " / ".join(str(totals[scope][field]) for field in ("n_lt", "n_gt", "n_eq"))
+        for scope in ("all", "composition")
+    ]
     lines += [
+        f"| **Total** | | | | | | **{count_totals[0]}** | **{count_totals[1]}** |",
         "",
-        f"Across the six complete settings there are **{total_functions} "
-        f"functions**, i.e. **{total_functions * EXPECTED_RUNS} NEA2+ runs** "
-        "and the corresponding MSC-CMA-ES runs.",
+        f"Across the six complete settings there are **{total_functions['all']} "
+        "function–setting comparisons**, including "
+        f"**{total_functions['composition']} composition-function comparisons**. "
+        f"They use **{total_functions['all'] * EXPECTED_RUNS} runs per algorithm**; "
+        "the composition analysis reuses the corresponding samples.",
         "",
-        "MWU and DSC use the stored run-wise terminal errors without clipping, "
-        "rounding, sorting, or COCO-zero flooring. Descriptive benchmark metrics "
-        "use the same display/aggregation convention as the main benchmark "
-        "reports, including the `1e-8` zero rule.",
+        "MWU and DSC use the stored run-wise terminal errors without additional "
+        "rounding or zero flooring; zeros returned by the algorithms are retained. "
+        "Descriptive benchmark metrics use the same display/aggregation convention "
+        "as the main benchmark reports, including the `1e-8` zero rule.",
+        "",
+        "Full-precision results: [MWU details](mwu/details.csv) and "
+        "[MWU summaries](mwu/summary.csv).",
         "",
     ]
     return "\n".join(lines)
@@ -658,7 +802,7 @@ def main() -> int:
     experiments = args.experiments.resolve()
     root = args.comparison_root.resolve()
 
-    if not experiments.is_dir():
+    if not args.reuse_benchmark_and_dsc and not experiments.is_dir():
         raise BuildError(f"Experiment root does not exist: {experiments}")
     if not root.is_dir():
         raise BuildError(f"Comparison root does not exist: {root}")
@@ -667,7 +811,10 @@ def main() -> int:
     outputs: list[Path] = []
 
     for suite, dim, budget in SETTINGS:
-        text = render_setting_page(experiments, root, suite, dim, budget)
+        text = render_setting_page(
+            experiments, root, suite, dim, budget,
+            reuse_benchmark_and_dsc=args.reuse_benchmark_and_dsc,
+        )
         rendered[(suite, dim, budget)] = text
         outputs.append(setting_page_path(root, suite, dim, budget))
 

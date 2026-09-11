@@ -3,7 +3,7 @@
 This page combines the fixed-budget benchmark results and the two statistical analyses used for the related-method comparison with NEA2+.
 
 - **Benchmark:** MSC-CMA-ES vs NEA2+, 51 runs per function at B=2×10^5 NFE.
-- **MWU:** NEA2+ vs MSC-CMA-ES, independent two-sided Mann–Whitney U with Bonferroni adjustment over the functions in this setting.
+- **MWU:** independent two-sided Mann–Whitney U tests with Holm–Bonferroni adjustment, separately for all functions and for composition functions; symbols are stated from the MSC-CMA-ES perspective.
 - **DSC:** MSC-CMA-ES, NEA2+, and BIPOP-CMA-ES; all functions and composition functions are analyzed separately.
 
 Contents: [Benchmark results](#benchmark-results) · [Mann–Whitney U](#mannwhitney-u) · [Deep Statistical Comparison](#deep-statistical-comparison)
@@ -46,68 +46,74 @@ The descriptive metrics use the same definitions as the main benchmark reports. 
 
 ## Mann–Whitney U
 
-Independent, two-sided Mann–Whitney U tests compare NEA2+ with MSC-CMA-ES on each function. Each sample contains 51 unmodified run-wise terminal errors. SciPy's asymptotic Mann–Whitney U method (`method="asymptotic"`) with continuity correction (`use_continuity=True`) is used. Bonferroni adjustment is applied over the **12 functions** in this setting.
+Independent, two-sided Mann–Whitney U tests compare the MSC-CMA-ES and NEA2+ samples on each function. Each sample contains 51 stored run-wise terminal errors, without additional rounding or zero flooring; zeros returned by the algorithms are retained. SciPy's asymptotic method (`method="asymptotic"`) with continuity correction (`use_continuity=True`) is used.
 
-For minimization, `probability_nea2plus_lower` is $P(X_{NEA2+}<X_{MSC})+\frac12P(X_{NEA2+}=X_{MSC})$.
+Holm–Bonferroni adjustment is applied separately within this setting to **all 12 functions** and to the **4 composition functions**. These are two independently adjusted families of hypotheses.
 
-Setting summary from the NEA2+ perspective: **1 ↓**, **9 ↑**, and **2 —**.
+Let $\bar R_M$ and $\bar R_A$ denote the mean ranks of the MSC-CMA-ES and NEA2+ samples in their pooled sample, with ranks increasing with terminal error and average ranks assigned to ties.
 
-Composition subset: **0 ↓**, **2 ↑**, and **2 —** across 4 functions.
+- `<`: $p_{\mathrm{Holm}}\leq0.05$ and $\bar R_M<\bar R_A$.
+- `>`: $p_{\mathrm{Holm}}\leq0.05$ and $\bar R_M>\bar R_A$.
+- `=`: $p_{\mathrm{Holm}}>0.05$; the null hypothesis $H_0:F_M=F_A$ is not rejected.
 
-Direction is stated from the NEA2+ perspective: `↓` denotes a statistically significant shift toward lower terminal errors, `↑` a statistically significant shift toward higher terminal errors, and `—` no statistically significant difference after Bonferroni correction.
+The `=` symbol denotes non-rejection; it does not assert equality of the sample mean ranks or distributions. Counts are reported as $n_{<}/n_{>}/n_{=}$ from the MSC-CMA-ES perspective.
 
-### Mann–Whitney U statistic
+| Scope | Family size | $n_{<}$ | $n_{>}$ | $n_{=}$ |
+|:--|--:|--:|--:|--:|
+| All | 12 | 11 | 1 | 0 |
+| Composition | 4 | 4 | 0 | 0 |
 
-| Function | Class | U (NEA2+) | P(NEA2+ lower) |
-|:--|:--|--:|--:|
-| f1 | Unimodal and simple multimodal | 2601 | 0 |
-| f2 | Unimodal and simple multimodal | 2550 | 0.0196078 |
-| f3 | Unimodal and simple multimodal | 77 | 0.970396 |
-| f4 | Unimodal and simple multimodal | 2589 | 0.00461361 |
-| f5 | Unimodal and simple multimodal | 1938 | 0.254902 |
-| f6 | Hybrid | 2428 | 0.0665129 |
-| f7 | Hybrid | 2393 | 0.0799692 |
-| f8 | Hybrid | 1960 | 0.246444 |
-| f9 | Composition | 2550 | 0.0196078 |
-| f10 | Composition | 1691 | 0.349865 |
-| f11 | Composition | 2601 | 0 |
-| f12 | Composition | 1608 | 0.381776 |
+### All functions: Holm-adjusted comparisons
 
-### p_raw
+| Function | Class | $p_{\mathrm{Holm}}$ | Symbol |
+|:--|:--|--:|:--:|
+| f1 | Unimodal and simple multimodal | **7.50365e-18** | **`<`** |
+| f2 | Unimodal and simple multimodal | **1.22579e-16** | **`<`** |
+| f3 | Unimodal and simple multimodal | **1.90326e-15** | **`>`** |
+| f4 | Unimodal and simple multimodal | **3.63169e-17** | **`<`** |
+| f5 | Unimodal and simple multimodal | **5.05077e-05** | **`<`** |
+| f6 | Hybrid | **2.76243e-13** | **`<`** |
+| f7 | Hybrid | **1.35134e-12** | **`<`** |
+| f8 | Hybrid | **4.1254e-05** | **`<`** |
+| f9 | Composition | **6.98751e-17** | **`<`** |
+| f10 | Composition | **0.0181002** | **`<`** |
+| f11 | Composition | **3.63169e-17** | **`<`** |
+| f12 | Composition | **0.038834** | **`<`** |
 
-| Function | p_raw |
-|:--|--:|
-| f1 | 6.25304e-19 |
-| f2 | 1.53224e-17 |
-| f3 | 2.71895e-16 |
-| f4 | 3.50546e-18 |
-| f5 | 1.68359e-05 |
-| f6 | 4.60406e-14 |
-| f7 | 2.70269e-13 |
-| f8 | 1.03135e-05 |
-| f9 | 7.7639e-18 |
-| f10 | 0.0090501 |
-| f11 | 3.30153e-18 |
-| f12 | 0.038834 |
+### Composition functions: Holm-adjusted comparisons
 
-### p_Bonferroni and Direction
+| Function | Class | $p_{\mathrm{Holm}}$ | Symbol |
+|:--|:--|--:|:--:|
+| f9 | Composition | **2.32917e-17** | **`<`** |
+| f10 | Composition | **0.0181002** | **`<`** |
+| f11 | Composition | **1.32061e-17** | **`<`** |
+| f12 | Composition | **0.038834** | **`<`** |
 
-| Function | p_Bonferroni | Direction |
-|:--|--:|:--:|
-| f1 | **7.50365e-18** | **↑** |
-| f2 | **1.83868e-16** | **↑** |
-| f3 | **3.26273e-15** | **↓** |
-| f4 | **4.20656e-17** | **↑** |
-| f5 | **0.000202031** | **↑** |
-| f6 | **5.52487e-13** | **↑** |
-| f7 | **3.24323e-12** | **↑** |
-| f8 | **0.000123762** | **↑** |
-| f9 | **9.31668e-17** | **↑** |
-| f10 | 0.108601 | **—** |
-| f11 | **3.96184e-17** | **↑** |
-| f12 | 0.466008 | **—** |
+Bold entries indicate rejection of the null hypothesis at the specified Holm-adjusted threshold.
 
-Full-precision MWU statistics are available in [`../../../mwu/details.csv`](../../../mwu/details.csv) relative to the NEA2+ comparison root.
+<details>
+<summary>Unadjusted statistics and pooled-sample mean ranks</summary>
+
+These statistics are shared by both scopes for a given function. The `probability_nea2plus_lower` column is the empirical estimate of $P(X_A<X_M)+\frac12P(X_A=X_M)$, computed as $1-U_A/(n_A n_M)$.
+
+| Function | $U_A$ (NEA2+) | $\bar R_M$ | $\bar R_A$ | P(NEA2+ lower) | $p_{\mathrm{raw}}$ |
+|:--|--:|--:|--:|--:|--:|
+| f1 | 2601 | 26 | 77 | 0 | 6.25304e-19 |
+| f2 | 2550 | 27 | 76 | 0.0196078 | 1.53224e-17 |
+| f3 | 77 | 75.4902 | 27.5098 | 0.970396 | 2.71895e-16 |
+| f4 | 2589 | 26.2353 | 76.7647 | 0.00461361 | 3.50546e-18 |
+| f5 | 1938 | 39 | 64 | 0.254902 | 1.68359e-05 |
+| f6 | 2428 | 29.3922 | 73.6078 | 0.0665129 | 4.60406e-14 |
+| f7 | 2393 | 30.0784 | 72.9216 | 0.0799692 | 2.70269e-13 |
+| f8 | 1960 | 38.5686 | 64.4314 | 0.246444 | 1.03135e-05 |
+| f9 | 2550 | 27 | 76 | 0.0196078 | 7.7639e-18 |
+| f10 | 1691 | 43.8431 | 59.1569 | 0.349865 | 0.0090501 |
+| f11 | 2601 | 26 | 77 | 0 | 3.30153e-18 |
+| f12 | 1608 | 45.4706 | 57.5294 | 0.381776 | 0.038834 |
+
+</details>
+
+Full-precision MWU statistics for both scopes are available in [`mwu/details.csv`](../../../mwu/details.csv).
 
 <a id="deep-statistical-comparison"></a>
 
