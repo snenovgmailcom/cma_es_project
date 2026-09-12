@@ -1,7 +1,9 @@
-# NEA2-INIT: joint basin-initialization ablation
+# MSC-fixed_sigma_lambda: joint basin-initialization ablation
 
 This variant tests the combined contribution of basin-dependent initial
-step size and population size in MSC-CMA-ES. Results are pending.
+step size and population size in MSC-CMA-ES. The statistical report is pending.
+The name refers to prescribed initialization rules; sigma0 is still drawn
+separately for each topological restart.
 
 For each executed topological restart, replace the two MSC initialization
 rules with those used by the public NEA2+ v1.1 (28 September 2016):
@@ -46,16 +48,16 @@ and all 29 valid functions (`f2` excluded).
 From the repository root, with the benchmark environment active:
 
 ```bash
-python ablations/benchmark/nea2_init_ablation.py \
+python ablations/benchmark/msc_fixed_sigma_lambda_ablation.py \
   --suite cec2017 --dim 10 --maxevals 100000 --runs 51 --jobs 51
 ```
 
 For SLURM, from the same directory and active environment:
 
 ```bash
-sbatch --job-name=msc-nea2-init --nodes=1 --ntasks=1 \
-  --cpus-per-task=51 --export=ALL --output=nea2-init-%j.log \
-  --wrap='env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 python -u ablations/benchmark/nea2_init_ablation.py --suite cec2017 --dim 10 --maxevals 100000 --runs 51 --jobs 51'
+sbatch --job-name=msc-fixed-sigma-lambda --nodes=1 --ntasks=1 \
+  --cpus-per-task=51 --export=ALL --output=msc-fixed-sigma-lambda-%j.log \
+  --wrap='env OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 python -u ablations/benchmark/msc_fixed_sigma_lambda_ablation.py --suite cec2017 --dim 10 --maxevals 100000 --runs 51 --jobs 51'
 ```
 
 `--functions` optionally selects comma-separated function numbers.
@@ -68,10 +70,10 @@ Existing result files are protected unless `--force` is specified.
 Output directory:
 
 ```text
-ablations/experiments/cec2017/d10/NEA2-INIT/maxevals_100000/
+ablations/experiments/cec2017/d10/MSC-fixed_sigma_lambda/maxevals_100000/
 ```
 
-Each PKL has `algorithm='NEA2-INIT'`, raw terminal errors, improvements,
+Each PKL has `algorithm='MSC-fixed_sigma_lambda'`, raw terminal errors, improvements,
 cycle summaries, pre-refinement errors and evaluation counts in the same
 schema as the other ablations. `params['local_searches_per_seed']` stores
 actual sigma0, population, final sigma, evaluation count, error and stop
@@ -87,4 +89,16 @@ do not justify a paired statistical test.
 
 Source implementation of the replacement rules:
 [`benchmark/nea2plus.py`](../../benchmark/nea2plus.py).
-Runner: [`nea2_init_ablation.py`](../benchmark/nea2_init_ablation.py).
+Runner: [`msc_fixed_sigma_lambda_ablation.py`](../benchmark/msc_fixed_sigma_lambda_ablation.py).
+
+## Rename existing results
+
+For runs previously saved as `NEA2-INIT`, execute from the repository root:
+
+```bash
+python analysis/rename_msc_fixed_sigma_lambda.py --apply
+```
+
+The migration renames result directories, PKL algorithm metadata and comparison
+links. The recorded objective values, seeds and optimization histories are
+preserved. Without `--apply`, the script previews the migration.

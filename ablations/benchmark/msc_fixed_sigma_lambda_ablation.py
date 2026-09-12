@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-r"""Joint sigma0/population ablation of FULL MSC-CMA-ES (NEA2-INIT).
+r"""Joint sigma0/population ablation of FULL MSC-CMA-ES (MSC-fixed_sigma_lambda).
 
 Only initialization of executed Phase-1 (topo) CMA restarts is replaced:
     sigma_unit = max(0.025*sqrt(D), Normal(0.05*sqrt(D), 0.025*sqrt(D)))
@@ -15,12 +15,12 @@ cycles, sample reuse, CMA seeds, stopping, budget accounting and refinement.
 Refinement keeps its original rule, which can receive a different final
 sigma from a preceding topo restart. No NEA2+ solver or vendor code is loaded.
 
-Output: ablations/experiments/<suite>/d<D>/NEA2-INIT/maxevals_<B>/f<k>.pkl
+Output: ablations/experiments/<suite>/d<D>/MSC-fixed_sigma_lambda/maxevals_<B>/f<k>.pkl
 Uses the shared benchmark schema, with cycle/pre-refinement fields and
 actual local-search settings in params['local_searches_per_seed'].
 
 Example (all 29 valid CEC2017 functions):
-    python ablations/benchmark/nea2_init_ablation.py \
+    python ablations/benchmark/msc_fixed_sigma_lambda_ablation.py \
         --suite cec2017 --dim 10 --maxevals 100000 --runs 51 --jobs 51
 """
 
@@ -48,7 +48,7 @@ from _common import (  # noqa: E402
 from auto_config import get_B, get_C  # noqa: E402
 from msc_cma import MSC_CMA  # noqa: E402
 
-ALGO = 'NEA2-INIT'
+ALGO = 'MSC-fixed_sigma_lambda'
 _SIGMA_STREAM = 0x4E454132  # Fixed namespace: ASCII "NEA2".
 _FUNCTIONS = {
     'cec2014': tuple(range(1, 31)),
@@ -58,7 +58,7 @@ _FUNCTIONS = {
 }
 
 
-class MSC_NEA2Init(MSC_CMA):
+class MSC_FixedSigmaLambda(MSC_CMA):
     """FULL MSC with NEA2+ sigma0/lambda for topo restarts only."""
 
     def __init__(self, *args, **kwargs):
@@ -66,7 +66,7 @@ class MSC_NEA2Init(MSC_CMA):
         widths = self.bounds[:, 1] - self.bounds[:, 0]
         if (not len(widths) or not np.all(np.isfinite(widths))
                 or np.any(widths <= 0) or not np.all(widths == widths[0])):
-            raise ValueError('NEA2-INIT requires equal, finite, positive '
+            raise ValueError('MSC-fixed_sigma_lambda requires equal, finite, positive '
                              'coordinate widths for scalar sigma conversion.')
         self._domain_width = float(widths[0])
         # Do not consume MSC's jitter RNG or CMA's global NumPy RNG.
@@ -85,7 +85,7 @@ class MSC_NEA2Init(MSC_CMA):
             sigma0 = self._domain_width * sigma_unit
             popsize = 4 + int(3 * np.log(self.dim))
             if self.disp:
-                print(f'    NEA2-INIT R{restart_idx}: '
+                print(f'    MSC-fixed_sigma_lambda R{restart_idx}: '
                       f'sigma_unit={sigma_unit:.8g} '
                       f'sigma0={sigma0:.8g} popsize={popsize}')
         return super()._run_cma(x0, sigma0, popsize, budget, restart_idx,
@@ -96,7 +96,7 @@ def _run_seed(suite, fnum, dim, maxevals, seed, cfg_C, cfg_B, disp=False):
     cec_cls, bias, bounds = suite_config(suite, fnum, dim)
     recorder = ImprovementRecorder(cec_cls(fnum, dim), f_opt=bias,
                                     maxevals=maxevals)
-    solver = MSC_NEA2Init(recorder, bounds, maxevals, seed=seed,
+    solver = MSC_FixedSigmaLambda(recorder, bounds, maxevals, seed=seed,
                           config=cfg_C, mode_schedule=[cfg_C, cfg_B],
                           disp=disp)
     result = solver.solve()
@@ -177,7 +177,7 @@ def main():
           'FULL MSC scheduler and refinement rule retained.')
     print(f'C[{cfg_C.summary()}]  B[{cfg_B.summary()}]', flush=True)
     params = {
-        'cli_args': vars(args), 'variant': 'nea2-init',
+        'cli_args': vars(args), 'variant': 'fixed_sigma_lambda',
         'ablation_version': 1, 'mode': 'alt-CB',
         'config_C': dataclasses.asdict(cfg_C),
         'config_B': dataclasses.asdict(cfg_B),
