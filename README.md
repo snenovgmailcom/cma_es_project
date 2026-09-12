@@ -103,7 +103,7 @@ References:
 <tr>
 <td width="67%" valign="top">
 
-<strong>Comparison with NEA2+ and CMAES-NBC-qN</strong>
+<strong>Comparison with NEA2+ and CMAES-NBC</strong>
 
 <p>
 <b>NEA2+</b> is a nearest-better-clustering CMA-ES niching method developed
@@ -125,15 +125,19 @@ DOI: 10.1007/978-3-030-79553-5_1.
 </p>
 
 <p>
-<b>CMAES-NBC-qN</b> is the nearest-better-clustering CMA-ES variant proposed
-by Nguyen, combining NBC-based population adaptation with a quasi-Newton
-local-search mechanism. This comparison uses the numerical results reported
-in Nguyen (2024),
+<b>CMAES-NBC</b> adapts the CMA-ES population size using nearest-better
+clustering. The comparison uses 51 locally executed runs of the author's
+non-qN implementation in ten suite–dimension–budget settings across
+CEC2014, CEC2017, CEC2020 and CEC2022.
+The method is described in Nguyen (2024),
 <em>Adapting the population size in CMA-ES using nearest-better clustering
 method for multimodal optimization</em>,
-DOI: 10.1016/j.asoc.2024.112361. Since the individual run-wise
-CMAES-NBC-qN values are not available, no Mann–Whitney U or DSC analysis
-is performed against MSC-CMA-ES.
+DOI: 10.1016/j.asoc.2024.112361.
+The setting pages report descriptive metrics, independent Mann–Whitney U
+tests with separate Holm adjustments for all and composition functions,
+and DSC for MSC-CMA-ES, CMAES-NBC and BIPOP-CMA-ES.
+For CMAES-NBC, B is the configured budget and the stored errors are taken
+at algorithm termination; the pages state this reporting convention.
 </p>
 
 </td>
@@ -166,22 +170,34 @@ D=10 · 10^5</a>
 </td>
 </tr>
 
-<tr><th colspan="2" align="left">MSC-CMA-ES vs CMAES-NBC-qN</th></tr>
+<tr><th colspan="2" align="left">MSC-CMA-ES vs CMAES-NBC</th></tr>
 
 <tr><td>CEC2014</td><td>
-<a href="related_comparisons/cmaes_nbc_qn/cec2014/d30/budget_300000/README.md">
-D=30 · 3×10^5</a>
+<a href="related_comparisons/cmaes_nbc/cec2014/d10/budget_100000/README.md">D=10 · 10^5</a><br>
+<a href="related_comparisons/cmaes_nbc/cec2014/d30/budget_300000/README.md">D=30 · 3×10^5</a>
 </td></tr>
 
 <tr><td>CEC2017</td><td>
-<a href="related_comparisons/cmaes_nbc_qn/cec2017/d30/budget_300000/README.md">
-D=30 · 3×10^5</a>
+<a href="related_comparisons/cmaes_nbc/cec2017/d10/budget_100000/README.md">D=10 · 10^5</a><br>
+<a href="related_comparisons/cmaes_nbc/cec2017/d30/budget_300000/README.md">D=30 · 3×10^5</a>
+</td></tr>
+
+<tr><td>CEC2020</td><td>
+<a href="related_comparisons/cmaes_nbc/cec2020/d5/budget_50000/README.md">D=5 · 5×10^4</a><br>
+<a href="related_comparisons/cmaes_nbc/cec2020/d10/budget_1000000/README.md">D=10 · 10^6</a><br>
+<a href="related_comparisons/cmaes_nbc/cec2020/d15/budget_3000000/README.md">D=15 · 3×10^6</a><br>
+<a href="related_comparisons/cmaes_nbc/cec2020/d20/budget_10000000/README.md">D=20 · 10^7</a>
+</td></tr>
+
+<tr><td>CEC2022</td><td>
+<a href="related_comparisons/cmaes_nbc/cec2022/d10/budget_200000/README.md">D=10 · 2×10^5</a><br>
+<a href="related_comparisons/cmaes_nbc/cec2022/d20/budget_1000000/README.md">D=20 · 10^6</a>
 </td></tr>
 
 <tr>
 <td colspan="2" align="center">
-<a href="related_comparisons/cmaes_nbc_qn/README.md">
-<strong>CMAES-NBC-qN overview</strong></a>
+<a href="related_comparisons/cmaes_nbc/README.md">
+<strong>Overview — 10 settings</strong></a>
 </td>
 </tr>
 
