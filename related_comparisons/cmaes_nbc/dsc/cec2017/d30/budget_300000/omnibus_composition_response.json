@@ -1,0 +1,22 @@
+{
+  "result" : {
+    "message" : "The null hypothesis is not rejected.",
+    "p_value" : 0.16121764412977668,
+    "t" : 3.650000000000002,
+    "method" : {
+      "name" : "friedman",
+      "alpha" : 0.05
+    },
+    "algorithm_means" : [ {
+      "algorithm" : "BIPOP-CMA",
+      "mean" : 2.4
+    }, {
+      "algorithm" : "CMAES-NBC",
+      "mean" : 1.55
+    }, {
+      "algorithm" : "MSC-CMA",
+      "mean" : 2.05
+    } ]
+  },
+  "success" : true
+}

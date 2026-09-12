@@ -1,0 +1,1 @@
+{"algorithm_means":[{"algorithm":"BIPOP-CMA","mean":2.0},{"algorithm":"CMAES-NBC","mean":1.5333333333333334},{"algorithm":"MSC-CMA","mean":2.466666666666667}],"k":3,"n":30,"base_algorithm":"CMAES-NBC","method":{"name":"friedman","alpha":0.05}}

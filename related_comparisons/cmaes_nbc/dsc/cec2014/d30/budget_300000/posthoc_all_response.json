@@ -1,0 +1,40 @@
+{
+  "result" : [ {
+    "name" : "ZValue",
+    "algorithms" : [ {
+      "algorithm" : "BIPOP-CMA",
+      "value" : -1.8073922282301276
+    }, {
+      "algorithm" : "MSC-CMA",
+      "value" : -3.614784456460256
+    } ]
+  }, {
+    "name" : "UnadjustedPValue",
+    "algorithms" : [ {
+      "algorithm" : "BIPOP-CMA",
+      "value" : 0.03535057243299151
+    }, {
+      "algorithm" : "MSC-CMA",
+      "value" : 1.502988037202254E-4
+    } ]
+  }, {
+    "name" : "Holm",
+    "algorithms" : [ {
+      "algorithm" : "BIPOP-CMA",
+      "value" : 0.03535057243299151
+    }, {
+      "algorithm" : "MSC-CMA",
+      "value" : 3.005976074404508E-4
+    } ]
+  }, {
+    "name" : "Hochberg",
+    "algorithms" : [ {
+      "algorithm" : "BIPOP-CMA",
+      "value" : 0.03535057243299151
+    }, {
+      "algorithm" : "MSC-CMA",
+      "value" : 3.005976074404508E-4
+    } ]
+  } ],
+  "success" : true
+}
