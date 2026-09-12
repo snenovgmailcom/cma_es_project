@@ -12,9 +12,10 @@ The following ablations are considered:
 | FIXED-PHI | Fixed NBC threshold `phi = 2` instead of automatic staircase selection | [Data + MWU](cec2017/d10/budget_100000/FIXED-PHI/README.md) | 4 / 2 / 23 |
 | NO-EXCLUSION | Removal of suppression of repeatedly resolved basins | [Data + MWU](cec2017/d10/budget_100000/NO-EXCLUSION/README.md) | 1 / 0 / 28 |
 | C-ONLY | C configuration only, without C/B alternation and cross-cycle Phase-0 reuse | [Data + MWU](cec2017/d10/budget_100000/C-ONLY/README.md) | 5 / 13 / 11 |
+| NEA2-INIT | Joint replacement of basin-dependent sigma0 and population size with NEA2+ initialization | [Protocol + runner](NEA2-INIT/README.md); results pending | — |
 | Final refinement | Incumbent immediately before vs after the final refinement stage | [Contribution analysis](cec2017/d10/budget_100000/REFINEMENT/README.md) | — |
 
-For the four algorithmic ablations, statistical comparisons against full MSC-CMA-ES use independent two-sided Mann–Whitney U tests on the 51 raw terminal errors per function, with Bonferroni correction across the 29 CEC2017 functions.
+For the four algorithmic ablations with reported results, statistical comparisons against full MSC-CMA-ES use independent two-sided Mann–Whitney U tests on the 51 raw terminal errors per function, with Bonferroni correction across the 29 CEC2017 functions.
 
 Deep Statistical Comparison is not used for the ablation study: each ablation addresses a direct component-wise comparison against the full algorithm rather than a multi-algorithm ranking question.
 
