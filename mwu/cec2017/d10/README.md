@@ -524,8 +524,6 @@ fractional ranks. Smaller numerical ranks are lower in this ordering.
 
 Composition-function set: `f21–f30`.
 
-
-
 #### Statistical comparison
 
 | Function set | n | Lowest-mean-rank method | Lowest mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p | p_Holm | Result |
@@ -582,8 +580,6 @@ fractional ranks. Smaller numerical ranks are lower in this ordering.
 | **f30** | 5 | 4 | 1.5 | 7 | 6 | 3 | 1.5 |
 
 Composition-function set: `f21–f30`.
-
-
 
 #### Statistical comparison
 

@@ -200,6 +200,30 @@ def bold_pair(a, b, higher=False):
     return format_value(a), f"**{format_value(b)}**"
 
 
+def apply_holm(rows):
+    """Adjust one complete function family, preserving its original order."""
+    adjusted = 0.0
+    for rank, row in enumerate(sorted(rows, key=lambda r: r["p_raw"])):
+        p_raw = row["p_raw"]
+        if not math.isfinite(p_raw) or not 0.0 <= p_raw <= 1.0:
+            raise ValueError(f"Invalid raw p-value: {p_raw}")
+        adjusted = max(adjusted, min(1.0, (len(rows) - rank) * p_raw))
+        row["p_holm"] = adjusted
+        probability_lower = row["probability_variant_lower"]
+        if adjusted > ALPHA or math.isclose(
+            probability_lower, 0.5, abs_tol=1e-15
+        ):
+            row["decision"] = "not significant"
+            row["symbol"] = ARROW_NS
+        elif probability_lower > 0.5:
+            row["decision"] = "lower"
+            row["symbol"] = ARROW_LOWER
+        else:
+            row["decision"] = "higher"
+            row["symbol"] = ARROW_HIGHER
+    return rows
+
+
 def calculate_mwu(full, variant):
     rows = []
 
@@ -217,23 +241,10 @@ def calculate_mwu(full, variant):
 
         u = float(r.statistic)
         p_raw = float(r.pvalue)
-        p_bonf = min(1.0, len(FUNCS) * p_raw)
 
         # For minimization:
         # P(X_variant < X_full) + 1/2 P(equal)
         probability_lower = 1.0 - u / (len(x) * len(y))
-
-        if p_bonf >= ALPHA or math.isclose(
-            probability_lower, 0.5, abs_tol=1e-15
-        ):
-            decision = "not significant"
-            symbol = ARROW_NS
-        elif probability_lower > 0.5:
-            decision = "lower"
-            symbol = ARROW_LOWER
-        else:
-            decision = "higher"
-            symbol = ARROW_HIGHER
 
         rows.append({
             "function": fid,
@@ -241,12 +252,9 @@ def calculate_mwu(full, variant):
             "u_variant": u,
             "probability_variant_lower": probability_lower,
             "p_raw": p_raw,
-            "p_bonferroni": p_bonf,
-            "decision": decision,
-            "symbol": symbol,
         })
 
-    return rows
+    return apply_holm(rows)
 
 
 def count_decisions(rows, ids=None):
@@ -268,7 +276,7 @@ def write_mwu_csv(path, rows):
         "u_variant",
         "probability_variant_lower",
         "p_raw",
-        "p_bonferroni",
+        "p_holm",
         "decision",
     ]
 
@@ -369,7 +377,7 @@ def render_conly_cross_suite():
         "For CEC2017 at D=10 and B=10^5, this cross-suite analysis "
         "uses Bonferroni correction over the 10 composition "
         "functions. The full ablation MWU analysis below uses "
-        "correction over all 29 CEC2017 functions; therefore the "
+        "Holm–Bonferroni correction over all 29 CEC2017 functions; therefore the "
         "composition-subset counts need not be identical.",
         "",
     ]
@@ -463,8 +471,9 @@ def render_variant(name, info, full, variant, rows):
         f"**{name}** with **MSC-CMA-ES** on each function. Each sample "
         "contains 51 unmodified run-wise terminal errors. SciPy's "
         "asymptotic method (`method=\"asymptotic\"`) with continuity "
-        "correction (`use_continuity=True`) is used. Bonferroni adjustment "
-        "is applied over the **29 CEC2017 functions**.",
+        "correction (`use_continuity=True`) is used. Holm–Bonferroni adjustment "
+        "is applied separately for each ablation over the **29 CEC2017 functions**. "
+        "Significance is determined by the full-precision `p_Holm <= 0.05`.",
         "",
     ]
 
@@ -477,17 +486,18 @@ def render_variant(name, info, full, variant, rows):
         f"Setting summary from the {name} perspective: "
         f"**↓ {vb}**, **↑ {fb}**, **— {ns}**.",
         "",
-        f"Composition subset from the {name} perspective: "
+        f"Composition subset (using the same 29-function correction family) "
+        f"from the {name} perspective: "
         f"**↓ {cvb}**, **↑ {cfb}**, **— {cns}**.",
         "",
         f"`↓` denotes a statistically significant shift toward lower "
         f"terminal errors for {name}; `↑` denotes a statistically "
         "significant shift toward higher terminal errors; `—` denotes "
-        "no statistically significant difference after Bonferroni "
+        "no statistically significant difference after Holm–Bonferroni "
         "correction.",
         "",
         "| Function | Class | U (" + name + ") | "
-        "P(" + name + " lower) | p_raw | p_Bonferroni | Direction |",
+        "P(" + name + " lower) | p_raw | p_Holm | Direction |",
         "|:--|:--|--:|--:|--:|--:|:--:|",
     ]
 
@@ -497,7 +507,7 @@ def render_variant(name, info, full, variant, rows):
             f"{format_value(r['u_variant'])} | "
             f"{format_value(r['probability_variant_lower'])} | "
             f"{format_p(r['p_raw'])} | "
-            f"{format_p(r['p_bonferroni'])} | "
+            f"{format_p(r['p_holm'])} | "
             f"**{r['symbol']}** |"
         )
 
@@ -678,15 +688,20 @@ def render_overview(summaries):
         )
 
     lines += [
+        "| MSC-fixed_sigma_lambda | Joint replacement of basin-dependent "
+        "sigma0 and population size with NEA2+ initialization | "
+        "[Protocol + runner](MSC-fixed_sigma_lambda/README.md); "
+        "[Descriptive results]"
+        "(../related_comparisons/msc_fixed_sigma_lambda/README.md) | — |",
         "| Final refinement | Incumbent immediately before vs after the "
         "final refinement stage | "
         "[Contribution analysis]"
         "(cec2017/d10/budget_100000/REFINEMENT/README.md) | — |",
         "",
-        "For the four algorithmic ablations, statistical comparisons against "
+        "For the four algorithmic ablations with reported MWU results, statistical comparisons against "
         "full MSC-CMA-ES use independent two-sided Mann–Whitney U tests on "
-        "the 51 raw terminal errors per function, with Bonferroni correction "
-        "across the 29 CEC2017 functions.",
+        "the 51 raw terminal errors per function, with Holm–Bonferroni correction "
+        "across the 29 CEC2017 functions separately for each ablation.",
         "",
         "Deep Statistical Comparison is not used for the ablation study: "
         "each ablation addresses a direct component-wise comparison against "
@@ -719,6 +734,15 @@ def main():
     # Validate refinement data too.
     refinement_text = render_refinement(full)
 
+    # Render every report before writing; --check-only validates these too.
+    variant_readmes = {
+        name: render_variant(
+            name, info, full, variant_payloads[name], variant_mwu[name]
+        )
+        for name, info in VARIANTS.items()
+    }
+    overview_text = render_overview(summaries)
+
     if args.check_only:
         print("CHECK PASSED")
         print("FULL: 29 functions x 51 runs")
@@ -738,13 +762,7 @@ def main():
         out = OUT_ROOT / name
         out.mkdir(parents=True, exist_ok=True)
 
-        readme = render_variant(
-            name,
-            info,
-            full,
-            variant_payloads[name],
-            variant_mwu[name],
-        )
+        readme = variant_readmes[name]
 
         (out / "README.md").write_text(
             readme + "\n", encoding="utf-8"
@@ -766,7 +784,7 @@ def main():
     print("WROTE", refdir / "README.md")
 
     Path("ablations/README.md").write_text(
-        render_overview(summaries) + "\n",
+        overview_text + "\n",
         encoding="utf-8",
     )
     print("WROTE ablations/README.md")

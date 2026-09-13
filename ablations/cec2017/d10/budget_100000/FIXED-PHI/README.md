@@ -49,43 +49,43 @@ The descriptive metrics use the same definitions as the main benchmark reports. 
 
 ## Mann–Whitney U
 
-Independent, two-sided Mann–Whitney U tests compare **FIXED-PHI** with **MSC-CMA-ES** on each function. Each sample contains 51 unmodified run-wise terminal errors. SciPy's asymptotic method (`method="asymptotic"`) with continuity correction (`use_continuity=True`) is used. Bonferroni adjustment is applied over the **29 CEC2017 functions**.
+Independent, two-sided Mann–Whitney U tests compare **FIXED-PHI** with **MSC-CMA-ES** on each function. Each sample contains 51 unmodified run-wise terminal errors. SciPy's asymptotic method (`method="asymptotic"`) with continuity correction (`use_continuity=True`) is used. Holm–Bonferroni adjustment is applied separately for each ablation over the **29 CEC2017 functions**. Significance is determined by the full-precision `p_Holm <= 0.05`.
 
 Setting summary from the FIXED-PHI perspective: **↓ 4**, **↑ 2**, **— 23**.
 
-Composition subset from the FIXED-PHI perspective: **↓ 0**, **↑ 2**, **— 8**.
+Composition subset (using the same 29-function correction family) from the FIXED-PHI perspective: **↓ 0**, **↑ 2**, **— 8**.
 
-`↓` denotes a statistically significant shift toward lower terminal errors for FIXED-PHI; `↑` denotes a statistically significant shift toward higher terminal errors; `—` denotes no statistically significant difference after Bonferroni correction.
+`↓` denotes a statistically significant shift toward lower terminal errors for FIXED-PHI; `↑` denotes a statistically significant shift toward higher terminal errors; `—` denotes no statistically significant difference after Holm–Bonferroni correction.
 
-| Function | Class | U (FIXED-PHI) | P(FIXED-PHI lower) | p_raw | p_Bonferroni | Direction |
+| Function | Class | U (FIXED-PHI) | P(FIXED-PHI lower) | p_raw | p_Holm | Direction |
 |:--|:--|--:|--:|--:|--:|:--:|
 | f1 | Unimodal and simple multimodal | 1272.5 | 0.510765 | 0.85396 | 1 | **—** |
-| f3 | Unimodal and simple multimodal | 892.5 | 0.656863 | 3.62431e-05 | 0.00105105 | **↓** |
+| f3 | Unimodal and simple multimodal | 892.5 | 0.656863 | 3.62431e-05 | 0.000906077 | **↓** |
 | f4 | Unimodal and simple multimodal | 1529.5 | 0.411957 | 0.106321 | 1 | **—** |
 | f5 | Unimodal and simple multimodal | 1258.5 | 0.516148 | 0.776962 | 1 | **—** |
 | f6 | Unimodal and simple multimodal | 1234 | 0.525567 | 0.658693 | 1 | **—** |
 | f7 | Unimodal and simple multimodal | 1136.5 | 0.563053 | 0.273841 | 1 | **—** |
-| f8 | Unimodal and simple multimodal | 847 | 0.674356 | 0.000887769 | 0.0257453 | **↓** |
+| f8 | Unimodal and simple multimodal | 847 | 0.674356 | 0.000887769 | 0.0213064 | **↓** |
 | f9 | Unimodal and simple multimodal | 1216 | 0.532488 | 0.539513 | 1 | **—** |
 | f10 | Unimodal and simple multimodal | 1168 | 0.550942 | 0.376968 | 1 | **—** |
 | f11 | Hybrid | 1555.5 | 0.401961 | 0.086648 | 1 | **—** |
-| f12 | Hybrid | 491 | 0.811226 | 6.14945e-08 | 1.78334e-06 | **↓** |
-| f13 | Hybrid | 947 | 0.635909 | 0.0181509 | 0.526376 | **—** |
+| f12 | Hybrid | 491 | 0.811226 | 6.14945e-08 | 1.66035e-06 | **↓** |
+| f13 | Hybrid | 947 | 0.635909 | 0.0181509 | 0.399319 | **—** |
 | f14 | Hybrid | 1238 | 0.524029 | 0.67818 | 1 | **—** |
 | f15 | Hybrid | 1056 | 0.594002 | 0.102465 | 1 | **—** |
 | f16 | Hybrid | 1176 | 0.547866 | 0.406598 | 1 | **—** |
 | f17 | Hybrid | 1217 | 0.532103 | 0.578556 | 1 | **—** |
-| f18 | Hybrid | 470 | 0.8193 | 2.77696e-08 | 8.05318e-07 | **↓** |
+| f18 | Hybrid | 470 | 0.8193 | 2.77696e-08 | 7.77548e-07 | **↓** |
 | f19 | Hybrid | 1084 | 0.583237 | 0.148282 | 1 | **—** |
 | f20 | Hybrid | 1039 | 0.600538 | 0.0806726 | 1 | **—** |
-| f21 | Composition | 971 | 0.626682 | 0.0275352 | 0.798521 | **—** |
-| f22 | Composition | 972.5 | 0.626105 | 0.0283237 | 0.821388 | **—** |
+| f21 | Composition | 971 | 0.626682 | 0.0275352 | 0.578239 | **—** |
+| f22 | Composition | 972.5 | 0.626105 | 0.0283237 | 0.578239 | **—** |
 | f23 | Composition | 1401 | 0.461361 | 0.503287 | 1 | **—** |
-| f24 | Composition | 1657 | 0.362937 | 0.017179 | 0.498192 | **—** |
+| f24 | Composition | 1657 | 0.362937 | 0.017179 | 0.395118 | **—** |
 | f25 | Composition | 2465.5 | 0.0520953 | 6.5074e-15 | 1.88715e-13 | **↑** |
 | f26 | Composition | 1584.5 | 0.390811 | 0.0577761 | 1 | **—** |
 | f27 | Composition | 1552.5 | 0.403114 | 0.0917328 | 1 | **—** |
-| f28 | Composition | 2055 | 0.209919 | 4.4984e-07 | 1.30454e-05 | **↑** |
+| f28 | Composition | 2055 | 0.209919 | 4.4984e-07 | 1.16958e-05 | **↑** |
 | f29 | Composition | 1216 | 0.532488 | 0.573988 | 1 | **—** |
 | f30 | Composition | 1316 | 0.494041 | 0.920034 | 1 | **—** |
 

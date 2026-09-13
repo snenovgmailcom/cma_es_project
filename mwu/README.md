@@ -5,8 +5,9 @@ NL-SHADE-RSP, j2020, and jSO.
 
 Contents: [All functions](#all) · [Composition functions](#composition) · [Method and symbols](#method-and-symbols)
 
-**17 suite/dimension/budget settings**. Each table cell contains $n_{<}/n_{>}/n_{=}$: counts of functions for which
-the MWU symbol is `<`, `>`, or `=`, respectively. See the definitions below.
+**17 suite/dimension/budget settings**. Each table cell contains $n_{<}/n_{>}/n_{=}$ for MSC-CMA-ES:
+counts of significantly lower or higher pooled sample mean ranks, and
+comparisons without a significant difference after Holm correction.
 
 Each setting links to the per-function p_Holm table. U and raw p-values
 are available in expandable sections on those pages.
@@ -119,15 +120,7 @@ identifies the function family used for each correction.
 Composition functions occur once in the all-function analysis and again
 in the independently corrected composition analysis.
 
-The U statistics and raw p-values are preserved from the
-[previous published results](https://github.com/snenovgmailcom/cma_es_project/blob/3f9bac714bc0e4d7b519ed459956dd774abc3442/mwu/mann_whitney_u_all_settings.csv).
-Holm corrections are calculated independently for each selected function family.
-The DSC tables use the [existing DSC results](https://github.com/snenovgmailcom/cma_es_project/tree/3f9bac714bc0e4d7b519ed459956dd774abc3442/dsc).
-
-Regeneration requires the updated `run_mwu_all_functions.py` generator with
-Holm correction and `--func-class both` support. The older Bonferroni generator
-under `analysis/` is outside the scope of this directory update. After installing
-the updated generator, run from the repository root:
+From the repository root:
 
 ```bash
 python analysis/run_mwu_all_functions.py --dsc-results dsc

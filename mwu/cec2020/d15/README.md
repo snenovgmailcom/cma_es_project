@@ -1,10 +1,26 @@
-# CEC2020, D=15
+# CEC2020 · D=15
 
 [MWU overview](../../README.md) · [Full results CSV](details.csv)
 
-Contents: [Budget 3×10^6](#budget-3m) · [Deep Statistical Comparison](#deep-statistical-comparison)
+[MWU summary](#mwu-summary) · [MWU results](#mwu-results) · [Deep Statistical Comparison](#deep-statistical-comparison)
 
-## Mann–Whitney U tests on terminal errors
+## MWU summary
+
+Counts are from the **MSC-CMA-ES perspective**, using 51 runs per algorithm and function. Cells report **lower / higher / not significant** pooled sample mean-rank comparisons after Holm correction:
+
+- `<`: MSC-CMA-ES has a significantly lower pooled sample mean rank.
+- `>`: MSC-CMA-ES has a significantly higher pooled sample mean rank.
+- `=`: the null hypothesis is not rejected; this does not assert equality.
+
+| Budget / function scope | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
+|:--|--:|--:|--:|--:|--:|--:|
+| [3×10^6 / All functions](#budget-3m-all) | 3/7/0 | 2/6/2 | 4/3/3 | 3/5/2 | 2/5/3 | 5/3/2 |
+| [3×10^6 / Composition functions](#budget-3m-composition) | 2/1/0 | 2/1/0 | 3/0/0 | 1/1/1 | 1/2/0 | 3/0/0 |
+
+All summary cells contain $n_{<}/n_{>}/n_{=}$ as defined above.
+
+<details>
+<summary>Statistical protocol and full MWU notation</summary>
 
 Each competitor is compared with MSC-CMA-ES using independent, two-sided
 Mann–Whitney U tests on 51 stored run-wise terminal errors at the stated budget.
@@ -40,14 +56,9 @@ three categories defined above.
 CSV values retain full numerical precision. Only descriptive medians use
 a separate copy with `abs(error) <= 1e-8` set to zero.
 
-### Summary
+</details>
 
-| Budget / function scope | BIPOP-CMA-ES | ARRDE | L-SRTDE | NL-SHADE-RSP | j2020 | jSO |
-|:--|--:|--:|--:|--:|--:|--:|
-| [3×10^6 / All functions](#budget-3m-all) | 3/7/0 | 2/6/2 | 4/3/3 | 3/5/2 | 2/5/3 | 5/3/2 |
-| [3×10^6 / Composition functions](#budget-3m-composition) | 2/1/0 | 2/1/0 | 3/0/0 | 1/1/1 | 1/2/0 | 3/0/0 |
-
-All summary cells contain $n_{<}/n_{>}/n_{=}$ as defined above.
+## MWU results
 
 <a id="budget-3m"></a>
 
@@ -56,6 +67,9 @@ All summary cells contain $n_{<}/n_{>}/n_{=}$ as defined above.
 <a id="budget-3m-all"></a>
 
 #### All functions
+
+<details>
+<summary>Per-function comparisons, U statistics and raw p-values</summary>
 
 Function scope: `all`. Holm family size: **10** per competitor.
 Each cell reports **p_Holm · MWU symbol** (`<`, `>`, or `=`).
@@ -74,8 +88,7 @@ Each cell reports **p_Holm · MWU symbol** (`<`, `>`, or `=`).
 | **f10** | **2.02625e-08 · `<`** | 0.0549905 · `=` | **1.04905e-09 · `<`** | **5.24525e-10 · `<`** | **3.22031e-09 · `<`** | **1.13388e-09 · `<`** |
 | $n_{<}/n_{>}/n_{=}$ | 3/7/0 | 2/6/2 | 4/3/3 | 3/5/2 | 2/5/3 | 5/3/2 |
 
-<details>
-<summary>U statistics and raw p-values</summary>
+##### U statistics and raw p-values
 
 U is for the compared algorithm's sample. The symbols above describe
 the MSC-CMA-ES sample's mean-rank relation after Holm correction.
@@ -116,6 +129,9 @@ the MSC-CMA-ES sample's mean-rank relation after Holm correction.
 
 #### Composition functions
 
+<details>
+<summary>Per-function comparisons, U statistics and raw p-values</summary>
+
 Function scope: `composition`. Holm family size: **3** per competitor.
 Each cell reports **p_Holm · MWU symbol** (`<`, `>`, or `=`).
 
@@ -126,8 +142,7 @@ Each cell reports **p_Holm · MWU symbol** (`<`, `>`, or `=`).
 | **f10** | **6.75416e-09 · `<`** | **0.0274953 · `<`** | **1.74842e-10 · `<`** | **3.49683e-10 · `<`** | **1.61015e-09 · `<`** | **2.8347e-10 · `<`** |
 | $n_{<}/n_{>}/n_{=}$ | 2/1/0 | 2/1/0 | 3/0/0 | 1/1/1 | 1/2/0 | 3/0/0 |
 
-<details>
-<summary>U statistics and raw p-values</summary>
+##### U statistics and raw p-values
 
 U is for the compared algorithm's sample. The symbols above describe
 the MSC-CMA-ES sample's mean-rank relation after Holm correction.
@@ -158,6 +173,26 @@ MSC-CMA-ES, `lower` to `>`, and `not significant` to `=`.
 
 ## Deep Statistical Comparison
 
+`★` means that MSC-CMA-ES has the lowest mean DSC rank and the Friedman
+test rejects the null hypothesis; `≈` means that the Friedman test
+rejects the null hypothesis but the Holm-adjusted comparison between
+MSC-CMA-ES and the lowest-mean-rank method is not significant; `↓` means
+that the lowest-mean-rank method has a smaller mean DSC rank than
+MSC-CMA-ES and the Holm-adjusted comparison is significant; `O` means
+that the Friedman test does not reject the null hypothesis and no
+post-hoc interpretation is made.
+
+<a id="dsc-cell-summary"></a>
+
+### Cell summary
+
+| Budget | All functions | Composition functions |
+|--:|:--|:--|
+| 3×10^6 | ARRDE · 3/7 · O | MSC-CMA-ES · 1/7 · ★ |
+
+<details>
+<summary>DSC protocol</summary>
+
 Following the fixed-budget analysis workflow described by
 [Wang et al. (2022)](https://doi.org/10.1145/3510426), we applied
 [Deep Statistical Comparison (Eftimov et al., 2017)](https://doi.org/10.1016/j.ins.2017.07.015)
@@ -172,23 +207,19 @@ and `monte_carlo_iterations=0`; Friedman omnibus tests over functions;
 and, after rejection of the omnibus null hypothesis, Holm-adjusted
 post-hoc comparisons against the method with the lowest mean DSC rank.
 
-`★` means that MSC-CMA-ES has the lowest mean DSC rank and the Friedman
-test rejects the null hypothesis; `≈` means that the Friedman test
-rejects the null hypothesis but the Holm-adjusted comparison between
-MSC-CMA-ES and the lowest-mean-rank method is not significant; `↓` means
-that the lowest-mean-rank method has a smaller mean DSC rank than
-MSC-CMA-ES and the Holm-adjusted comparison is significant; `O` means
-that the Friedman test does not reject the null hypothesis and no
-post-hoc interpretation is made.
-
 `p_Holm` is shown only when the lowest-mean-rank algorithm is not
 MSC-CMA-ES and the Friedman test rejects the null hypothesis.
 
+</details>
+
 <a id="dsc-budget-3m"></a>
+<a id="dsc-budget-3m-ranks"></a>
+<a id="dsc-budget-3m-comparison"></a>
 
 ### Budget 3×10^6
 
-<a id="dsc-budget-3m-ranks"></a>
+<details>
+<summary>DSC ranks by function and statistical comparison</summary>
 
 #### DSC ranks by function
 
@@ -210,8 +241,6 @@ fractional ranks. Smaller numerical ranks are lower in this ordering.
 
 Composition-function set: `f8–f10`.
 
-<a id="dsc-budget-3m-comparison"></a>
-
 #### Statistical comparison
 
 | Function set | n | Lowest-mean-rank method | Lowest mean rank | MSC-CMA-ES mean rank | MSC position | Friedman Q | Friedman p | p_Holm | Result |
@@ -219,10 +248,4 @@ Composition-function set: `f8–f10`.
 | All functions | 10 | ARRDE | 3 | 3.45 | 3/7 | 11.1964 | 0.082492 | — | O |
 | Composition functions | 3 | MSC-CMA-ES | 1 | 1 | 1/7 | 14.0357 | 0.0292397 | — | ★ |
 
-<a id="dsc-cell-summary"></a>
-
-### Cell summary
-
-| Budget | All functions | Composition functions |
-|--:|:--|:--|
-| 3×10^6 | ARRDE · 3/7 · O | MSC-CMA-ES · 1/7 · ★ |
+</details>

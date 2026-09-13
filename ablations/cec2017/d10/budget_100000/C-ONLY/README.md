@@ -29,7 +29,7 @@ The cross-suite Mann–Whitney U tests use independent two-sided comparisons of 
 
 From the C-ONLY perspective, ↓ denotes a statistically significant shift toward lower terminal errors, ↑ a statistically significant shift toward higher terminal errors, and — no statistically significant difference after Bonferroni correction.
 
-For CEC2017 at D=10 and B=10^5, this cross-suite analysis uses Bonferroni correction over the 10 composition functions. The full ablation MWU analysis below uses correction over all 29 CEC2017 functions; therefore the composition-subset counts need not be identical.
+For CEC2017 at D=10 and B=10^5, this cross-suite analysis uses Bonferroni correction over the 10 composition functions. The full ablation MWU analysis below uses Holm–Bonferroni correction over all 29 CEC2017 functions; therefore the composition-subset counts need not be identical.
 
 ## Benchmark results
 
@@ -70,44 +70,44 @@ The descriptive metrics use the same definitions as the main benchmark reports. 
 
 ## Mann–Whitney U
 
-Independent, two-sided Mann–Whitney U tests compare **C-ONLY** with **MSC-CMA-ES** on each function. Each sample contains 51 unmodified run-wise terminal errors. SciPy's asymptotic method (`method="asymptotic"`) with continuity correction (`use_continuity=True`) is used. Bonferroni adjustment is applied over the **29 CEC2017 functions**.
+Independent, two-sided Mann–Whitney U tests compare **C-ONLY** with **MSC-CMA-ES** on each function. Each sample contains 51 unmodified run-wise terminal errors. SciPy's asymptotic method (`method="asymptotic"`) with continuity correction (`use_continuity=True`) is used. Holm–Bonferroni adjustment is applied separately for each ablation over the **29 CEC2017 functions**. Significance is determined by the full-precision `p_Holm <= 0.05`.
 
-Setting summary from the C-ONLY perspective: **↓ 5**, **↑ 13**, **— 11**.
+Setting summary from the C-ONLY perspective: **↓ 6**, **↑ 13**, **— 10**.
 
-Composition subset from the C-ONLY perspective: **↓ 2**, **↑ 2**, **— 6**.
+Composition subset (using the same 29-function correction family) from the C-ONLY perspective: **↓ 3**, **↑ 2**, **— 5**.
 
-`↓` denotes a statistically significant shift toward lower terminal errors for C-ONLY; `↑` denotes a statistically significant shift toward higher terminal errors; `—` denotes no statistically significant difference after Bonferroni correction.
+`↓` denotes a statistically significant shift toward lower terminal errors for C-ONLY; `↑` denotes a statistically significant shift toward higher terminal errors; `—` denotes no statistically significant difference after Holm–Bonferroni correction.
 
-| Function | Class | U (C-ONLY) | P(C-ONLY lower) | p_raw | p_Bonferroni | Direction |
+| Function | Class | U (C-ONLY) | P(C-ONLY lower) | p_raw | p_Holm | Direction |
 |:--|:--|--:|--:|--:|--:|:--:|
-| f1 | Unimodal and simple multimodal | 66.5 | 0.974433 | 1.5103e-16 | 4.37986e-15 | **↓** |
-| f3 | Unimodal and simple multimodal | 918 | 0.647059 | 0.000149967 | 0.00434904 | **↓** |
-| f4 | Unimodal and simple multimodal | 715.5 | 0.724913 | 1.83051e-06 | 5.30847e-05 | **↓** |
-| f5 | Unimodal and simple multimodal | 2418 | 0.0703576 | 4.89157e-14 | 1.41855e-12 | **↑** |
-| f6 | Unimodal and simple multimodal | 1868 | 0.281815 | 0.000147783 | 0.00428572 | **↑** |
+| f1 | Unimodal and simple multimodal | 66.5 | 0.974433 | 1.5103e-16 | 4.0778e-15 | **↓** |
+| f3 | Unimodal and simple multimodal | 918 | 0.647059 | 0.000149967 | 0.00221675 | **↓** |
+| f4 | Unimodal and simple multimodal | 715.5 | 0.724913 | 1.83051e-06 | 3.11186e-05 | **↓** |
+| f5 | Unimodal and simple multimodal | 2418 | 0.0703576 | 4.89157e-14 | 1.12506e-12 | **↑** |
+| f6 | Unimodal and simple multimodal | 1868 | 0.281815 | 0.000147783 | 0.00221675 | **↑** |
 | f7 | Unimodal and simple multimodal | 1114 | 0.571703 | 0.213181 | 1 | **—** |
-| f8 | Unimodal and simple multimodal | 2572 | 0.0111496 | 1.00282e-17 | 2.90818e-16 | **↑** |
+| f8 | Unimodal and simple multimodal | 2572 | 0.0111496 | 1.00282e-17 | 2.80789e-16 | **↑** |
 | f9 | Unimodal and simple multimodal | 1175.5 | 0.548058 | 0.359615 | 1 | **—** |
-| f10 | Unimodal and simple multimodal | 2439.5 | 0.0620915 | 2.53988e-14 | 7.36565e-13 | **↑** |
+| f10 | Unimodal and simple multimodal | 2439.5 | 0.0620915 | 2.53988e-14 | 6.09571e-13 | **↑** |
 | f11 | Hybrid | 2592 | 0.00346021 | 5.06328e-18 | 1.46835e-16 | **↑** |
 | f12 | Hybrid | 1502.5 | 0.422338 | 0.177463 | 1 | **—** |
 | f13 | Hybrid | 1381 | 0.46905 | 0.592362 | 1 | **—** |
-| f14 | Hybrid | 2464 | 0.052672 | 7.0479e-15 | 2.04389e-13 | **↑** |
-| f15 | Hybrid | 2348 | 0.0972703 | 2.43022e-12 | 7.04765e-11 | **↑** |
+| f14 | Hybrid | 2464 | 0.052672 | 7.0479e-15 | 1.83245e-13 | **↑** |
+| f15 | Hybrid | 2348 | 0.0972703 | 2.43022e-12 | 5.34649e-11 | **↑** |
 | f16 | Hybrid | 1351 | 0.480584 | 0.7379 | 1 | **—** |
-| f17 | Hybrid | 2180 | 0.161861 | 4.03164e-09 | 1.16918e-07 | **↑** |
-| f18 | Hybrid | 1859 | 0.285275 | 0.000188066 | 0.0054539 | **↑** |
-| f19 | Hybrid | 2311 | 0.111496 | 1.3834e-11 | 4.01187e-10 | **↑** |
-| f20 | Hybrid | 2455 | 0.0561323 | 1.13281e-14 | 3.28515e-13 | **↑** |
-| f21 | Composition | 705.5 | 0.728758 | 6.77587e-05 | 0.001965 | **↓** |
+| f17 | Hybrid | 2180 | 0.161861 | 4.03164e-09 | 7.25696e-08 | **↑** |
+| f18 | Hybrid | 1859 | 0.285275 | 0.000188066 | 0.00244485 | **↑** |
+| f19 | Hybrid | 2311 | 0.111496 | 1.3834e-11 | 2.62847e-10 | **↑** |
+| f20 | Hybrid | 2455 | 0.0561323 | 1.13281e-14 | 2.83203e-13 | **↑** |
+| f21 | Composition | 705.5 | 0.728758 | 6.77587e-05 | 0.00108414 | **↓** |
 | f22 | Composition | 1357 | 0.478278 | 0.707574 | 1 | **—** |
-| f23 | Composition | 898.5 | 0.654556 | 0.00720608 | 0.208976 | **—** |
-| f24 | Composition | 912 | 0.649366 | 0.00940686 | 0.272799 | **—** |
+| f23 | Composition | 898.5 | 0.654556 | 0.00720608 | 0.0720608 | **—** |
+| f24 | Composition | 912 | 0.649366 | 0.00940686 | 0.0846617 | **—** |
 | f25 | Composition | 1166 | 0.551711 | 0.369813 | 1 | **—** |
-| f26 | Composition | 856.5 | 0.670704 | 0.00299485 | 0.0868506 | **—** |
-| f27 | Composition | 2344.5 | 0.0986159 | 2.80547e-12 | 8.13585e-11 | **↑** |
-| f28 | Composition | 828.5 | 0.681469 | 0.00160138 | 0.0464399 | **↓** |
-| f29 | Composition | 2323 | 0.106882 | 7.92225e-12 | 2.29745e-10 | **↑** |
+| f26 | Composition | 856.5 | 0.670704 | 0.00299485 | 0.0329433 | **↓** |
+| f27 | Composition | 2344.5 | 0.0986159 | 2.80547e-12 | 5.89148e-11 | **↑** |
+| f28 | Composition | 828.5 | 0.681469 | 0.00160138 | 0.0192165 | **↓** |
+| f29 | Composition | 2323 | 0.106882 | 7.92225e-12 | 1.58445e-10 | **↑** |
 | f30 | Composition | 1282.5 | 0.50692 | 0.906755 | 1 | **—** |
 
 Full-precision statistics: [`mwu_details.csv`](mwu_details.csv).

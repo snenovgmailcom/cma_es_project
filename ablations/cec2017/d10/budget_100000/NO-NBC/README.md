@@ -49,45 +49,45 @@ The descriptive metrics use the same definitions as the main benchmark reports. 
 
 ## Mann–Whitney U
 
-Independent, two-sided Mann–Whitney U tests compare **NO-NBC** with **MSC-CMA-ES** on each function. Each sample contains 51 unmodified run-wise terminal errors. SciPy's asymptotic method (`method="asymptotic"`) with continuity correction (`use_continuity=True`) is used. Bonferroni adjustment is applied over the **29 CEC2017 functions**.
+Independent, two-sided Mann–Whitney U tests compare **NO-NBC** with **MSC-CMA-ES** on each function. Each sample contains 51 unmodified run-wise terminal errors. SciPy's asymptotic method (`method="asymptotic"`) with continuity correction (`use_continuity=True`) is used. Holm–Bonferroni adjustment is applied separately for each ablation over the **29 CEC2017 functions**. Significance is determined by the full-precision `p_Holm <= 0.05`.
 
 Setting summary from the NO-NBC perspective: **↓ 5**, **↑ 17**, **— 7**.
 
-Composition subset from the NO-NBC perspective: **↓ 0**, **↑ 6**, **— 4**.
+Composition subset (using the same 29-function correction family) from the NO-NBC perspective: **↓ 0**, **↑ 6**, **— 4**.
 
-`↓` denotes a statistically significant shift toward lower terminal errors for NO-NBC; `↑` denotes a statistically significant shift toward higher terminal errors; `—` denotes no statistically significant difference after Bonferroni correction.
+`↓` denotes a statistically significant shift toward lower terminal errors for NO-NBC; `↑` denotes a statistically significant shift toward higher terminal errors; `—` denotes no statistically significant difference after Holm–Bonferroni correction.
 
-| Function | Class | U (NO-NBC) | P(NO-NBC lower) | p_raw | p_Bonferroni | Direction |
+| Function | Class | U (NO-NBC) | P(NO-NBC lower) | p_raw | p_Holm | Direction |
 |:--|:--|--:|--:|--:|--:|:--:|
 | f1 | Unimodal and simple multimodal | 31 | 0.988082 | 1.51247e-18 | 4.38616e-17 | **↓** |
-| f3 | Unimodal and simple multimodal | 867 | 0.666667 | 7.1472e-06 | 0.000207269 | **↓** |
-| f4 | Unimodal and simple multimodal | 586.5 | 0.77451 | 1.08567e-09 | 3.14845e-08 | **↓** |
-| f5 | Unimodal and simple multimodal | 2401.5 | 0.0767013 | 1.13716e-13 | 3.29778e-12 | **↑** |
-| f6 | Unimodal and simple multimodal | 310 | 0.880815 | 3.45419e-11 | 1.00171e-09 | **↓** |
-| f7 | Unimodal and simple multimodal | 1931 | 0.257593 | 2.48227e-05 | 0.000719859 | **↑** |
-| f8 | Unimodal and simple multimodal | 2574.5 | 0.0101884 | 8.69018e-18 | 2.52015e-16 | **↑** |
-| f9 | Unimodal and simple multimodal | 637.5 | 0.754902 | 6.86254e-09 | 1.99014e-07 | **↓** |
-| f10 | Unimodal and simple multimodal | 2163.5 | 0.168205 | 7.80468e-09 | 2.26336e-07 | **↑** |
-| f11 | Hybrid | 2555 | 0.0176855 | 3.94016e-17 | 1.14265e-15 | **↑** |
+| f3 | Unimodal and simple multimodal | 867 | 0.666667 | 7.1472e-06 | 6.43248e-05 | **↓** |
+| f4 | Unimodal and simple multimodal | 586.5 | 0.77451 | 1.08567e-09 | 1.51994e-08 | **↓** |
+| f5 | Unimodal and simple multimodal | 2401.5 | 0.0767013 | 1.13716e-13 | 2.38804e-12 | **↑** |
+| f6 | Unimodal and simple multimodal | 310 | 0.880815 | 3.45419e-11 | 5.5267e-10 | **↓** |
+| f7 | Unimodal and simple multimodal | 1931 | 0.257593 | 2.48227e-05 | 0.000198582 | **↑** |
+| f8 | Unimodal and simple multimodal | 2574.5 | 0.0101884 | 8.69018e-18 | 2.43325e-16 | **↑** |
+| f9 | Unimodal and simple multimodal | 637.5 | 0.754902 | 6.86254e-09 | 8.9213e-08 | **↓** |
+| f10 | Unimodal and simple multimodal | 2163.5 | 0.168205 | 7.80468e-09 | 9.36562e-08 | **↑** |
+| f11 | Hybrid | 2555 | 0.0176855 | 3.94016e-17 | 1.02444e-15 | **↑** |
 | f12 | Hybrid | 1346 | 0.482507 | 0.763261 | 1 | **—** |
 | f13 | Hybrid | 1392 | 0.464821 | 0.542444 | 1 | **—** |
-| f14 | Hybrid | 2521 | 0.0307574 | 3.21161e-16 | 9.31367e-15 | **↑** |
-| f15 | Hybrid | 2399 | 0.0776624 | 2.00305e-13 | 5.80883e-12 | **↑** |
-| f16 | Hybrid | 929 | 0.64283 | 0.0130283 | 0.377821 | **—** |
-| f17 | Hybrid | 2250 | 0.134948 | 2.13393e-10 | 6.18839e-09 | **↑** |
-| f18 | Hybrid | 2004 | 0.229527 | 2.53899e-06 | 7.36308e-05 | **↑** |
-| f19 | Hybrid | 2343 | 0.0991926 | 3.0849e-12 | 8.94622e-11 | **↑** |
-| f20 | Hybrid | 2402 | 0.076509 | 1.72338e-13 | 4.99779e-12 | **↑** |
+| f14 | Hybrid | 2521 | 0.0307574 | 3.21161e-16 | 8.02903e-15 | **↑** |
+| f15 | Hybrid | 2399 | 0.0776624 | 2.00305e-13 | 3.80579e-12 | **↑** |
+| f16 | Hybrid | 929 | 0.64283 | 0.0130283 | 0.0781699 | **—** |
+| f17 | Hybrid | 2250 | 0.134948 | 2.13393e-10 | 3.20089e-09 | **↑** |
+| f18 | Hybrid | 2004 | 0.229527 | 2.53899e-06 | 2.53899e-05 | **↑** |
+| f19 | Hybrid | 2343 | 0.0991926 | 3.0849e-12 | 5.55282e-11 | **↑** |
+| f20 | Hybrid | 2402 | 0.076509 | 1.72338e-13 | 3.44675e-12 | **↑** |
 | f21 | Composition | 1396 | 0.463283 | 0.524422 | 1 | **—** |
-| f22 | Composition | 2034 | 0.217993 | 9.2557e-07 | 2.68415e-05 | **↑** |
-| f23 | Composition | 1517 | 0.416763 | 0.14826 | 1 | **—** |
-| f24 | Composition | 2562.5 | 0.014802 | 3.08744e-17 | 8.95358e-16 | **↑** |
-| f25 | Composition | 2477 | 0.047674 | 3.36605e-15 | 9.76156e-14 | **↑** |
-| f26 | Composition | 2483 | 0.0453672 | 2.53812e-15 | 7.36055e-14 | **↑** |
-| f27 | Composition | 1679.5 | 0.354287 | 0.0110156 | 0.319452 | **—** |
-| f28 | Composition | 2315.5 | 0.109765 | 1.11745e-11 | 3.24061e-10 | **↑** |
-| f29 | Composition | 2499 | 0.0392157 | 1.076e-15 | 3.12041e-14 | **↑** |
-| f30 | Composition | 1489 | 0.427528 | 0.208309 | 1 | **—** |
+| f22 | Composition | 2034 | 0.217993 | 9.2557e-07 | 1.01813e-05 | **↑** |
+| f23 | Composition | 1517 | 0.416763 | 0.14826 | 0.741298 | **—** |
+| f24 | Composition | 2562.5 | 0.014802 | 3.08744e-17 | 8.33609e-16 | **↑** |
+| f25 | Composition | 2477 | 0.047674 | 3.36605e-15 | 7.40532e-14 | **↑** |
+| f26 | Composition | 2483 | 0.0453672 | 2.53812e-15 | 5.83768e-14 | **↑** |
+| f27 | Composition | 1679.5 | 0.354287 | 0.0110156 | 0.077109 | **—** |
+| f28 | Composition | 2315.5 | 0.109765 | 1.11745e-11 | 1.89967e-10 | **↑** |
+| f29 | Composition | 2499 | 0.0392157 | 1.076e-15 | 2.58241e-14 | **↑** |
+| f30 | Composition | 1489 | 0.427528 | 0.208309 | 0.833236 | **—** |
 
 Full-precision statistics: [`mwu_details.csv`](mwu_details.csv).
 

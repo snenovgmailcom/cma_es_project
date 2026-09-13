@@ -49,15 +49,15 @@ The descriptive metrics use the same definitions as the main benchmark reports. 
 
 ## Mann–Whitney U
 
-Independent, two-sided Mann–Whitney U tests compare **NO-EXCLUSION** with **MSC-CMA-ES** on each function. Each sample contains 51 unmodified run-wise terminal errors. SciPy's asymptotic method (`method="asymptotic"`) with continuity correction (`use_continuity=True`) is used. Bonferroni adjustment is applied over the **29 CEC2017 functions**.
+Independent, two-sided Mann–Whitney U tests compare **NO-EXCLUSION** with **MSC-CMA-ES** on each function. Each sample contains 51 unmodified run-wise terminal errors. SciPy's asymptotic method (`method="asymptotic"`) with continuity correction (`use_continuity=True`) is used. Holm–Bonferroni adjustment is applied separately for each ablation over the **29 CEC2017 functions**. Significance is determined by the full-precision `p_Holm <= 0.05`.
 
 Setting summary from the NO-EXCLUSION perspective: **↓ 1**, **↑ 0**, **— 28**.
 
-Composition subset from the NO-EXCLUSION perspective: **↓ 0**, **↑ 0**, **— 10**.
+Composition subset (using the same 29-function correction family) from the NO-EXCLUSION perspective: **↓ 0**, **↑ 0**, **— 10**.
 
-`↓` denotes a statistically significant shift toward lower terminal errors for NO-EXCLUSION; `↑` denotes a statistically significant shift toward higher terminal errors; `—` denotes no statistically significant difference after Bonferroni correction.
+`↓` denotes a statistically significant shift toward lower terminal errors for NO-EXCLUSION; `↑` denotes a statistically significant shift toward higher terminal errors; `—` denotes no statistically significant difference after Holm–Bonferroni correction.
 
-| Function | Class | U (NO-EXCLUSION) | P(NO-EXCLUSION lower) | p_raw | p_Bonferroni | Direction |
+| Function | Class | U (NO-EXCLUSION) | P(NO-EXCLUSION lower) | p_raw | p_Holm | Direction |
 |:--|:--|--:|--:|--:|--:|:--:|
 | f1 | Unimodal and simple multimodal | 1349 | 0.481353 | 0.748021 | 1 | **—** |
 | f3 | Unimodal and simple multimodal | 892.5 | 0.656863 | 3.62431e-05 | 0.00105105 | **↓** |
@@ -65,18 +65,18 @@ Composition subset from the NO-EXCLUSION perspective: **↓ 0**, **↑ 0**, **�
 | f5 | Unimodal and simple multimodal | 1150.5 | 0.55767 | 0.304705 | 1 | **—** |
 | f6 | Unimodal and simple multimodal | 1245 | 0.521338 | 0.712799 | 1 | **—** |
 | f7 | Unimodal and simple multimodal | 1381 | 0.46905 | 0.592358 | 1 | **—** |
-| f8 | Unimodal and simple multimodal | 998.5 | 0.616109 | 0.0293401 | 0.850864 | **—** |
-| f9 | Unimodal and simple multimodal | 958 | 0.63168 | 0.00821476 | 0.238228 | **—** |
+| f8 | Unimodal and simple multimodal | 998.5 | 0.616109 | 0.0293401 | 0.733504 | **—** |
+| f9 | Unimodal and simple multimodal | 958 | 0.63168 | 0.00821476 | 0.230013 | **—** |
 | f10 | Unimodal and simple multimodal | 1391.5 | 0.465013 | 0.544684 | 1 | **—** |
 | f11 | Hybrid | 1194 | 0.540946 | 0.471093 | 1 | **—** |
 | f12 | Hybrid | 1420.5 | 0.453864 | 0.423835 | 1 | **—** |
 | f13 | Hybrid | 1128 | 0.566321 | 0.249672 | 1 | **—** |
-| f14 | Hybrid | 1688 | 0.351019 | 0.00959543 | 0.278267 | **—** |
+| f14 | Hybrid | 1688 | 0.351019 | 0.00959543 | 0.259077 | **—** |
 | f15 | Hybrid | 1268 | 0.512495 | 0.830417 | 1 | **—** |
 | f16 | Hybrid | 1066 | 0.590158 | 0.117327 | 1 | **—** |
 | f17 | Hybrid | 1284.5 | 0.506151 | 0.917376 | 1 | **—** |
 | f18 | Hybrid | 1519 | 0.415994 | 0.144562 | 1 | **—** |
-| f19 | Hybrid | 1683 | 0.352941 | 0.0105696 | 0.306519 | **—** |
+| f19 | Hybrid | 1683 | 0.352941 | 0.0105696 | 0.274811 | **—** |
 | f20 | Hybrid | 1231 | 0.52672 | 0.644227 | 1 | **—** |
 | f21 | Composition | 1351.5 | 0.480392 | 0.735304 | 1 | **—** |
 | f22 | Composition | 1269 | 0.512111 | 0.835541 | 1 | **—** |
