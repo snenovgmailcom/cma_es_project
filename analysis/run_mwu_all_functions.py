@@ -562,6 +562,40 @@ def render_dsc_section(
     lines = [
         "## Deep Statistical Comparison",
         "",
+        "`★` means that MSC-CMA-ES has the lowest mean DSC rank and the Friedman",
+        "test rejects the null hypothesis; `≈` means that the Friedman test",
+        "rejects the null hypothesis but the Holm-adjusted comparison between",
+        "MSC-CMA-ES and the lowest-mean-rank method is not significant; `↓` means",
+        "that the lowest-mean-rank method has a smaller mean DSC rank than",
+        "MSC-CMA-ES and the Holm-adjusted comparison is significant; `O` means",
+        "that the Friedman test does not reject the null hypothesis and no",
+        "post-hoc interpretation is made.",
+        "",
+        '<a id="dsc-cell-summary"></a>',
+        "",
+        "### Cell summary",
+        "",
+        "| Budget | All functions | Composition functions |",
+        "|--:|:--|:--|",
+    ]
+    ordered_budgets = sorted(dsc_by_budget)
+    for budget in ordered_budgets:
+        summaries = dsc_by_budget[budget]["summaries"]
+        cells = []
+        for scope in ("all", "composition"):
+            row = summaries[scope]
+            cells.append(
+                f"{display_name(row['best_algorithm'])} · "
+                f"{row['msc_position']} · {row['label']}"
+            )
+        lines.append(
+            f"| {format_budget(budget)} | {cells[0]} | {cells[1]} |"
+        )
+    lines.extend([
+        "",
+        "<details>",
+        "<summary>DSC protocol</summary>",
+        "",
         "Following the fixed-budget analysis workflow described by",
         "[Wang et al. (2022)](https://doi.org/10.1145/3510426), we applied",
         "[Deep Statistical Comparison (Eftimov et al., 2017)](https://doi.org/10.1016/j.ins.2017.07.015)",
@@ -576,21 +610,13 @@ def render_dsc_section(
         "and, after rejection of the omnibus null hypothesis, Holm-adjusted",
         "post-hoc comparisons against the method with the lowest mean DSC rank.",
         "",
-        "`★` means that MSC-CMA-ES has the lowest mean DSC rank and the Friedman",
-        "test rejects the null hypothesis; `≈` means that the Friedman test",
-        "rejects the null hypothesis but the Holm-adjusted comparison between",
-        "MSC-CMA-ES and the lowest-mean-rank method is not significant; `↓` means",
-        "that the lowest-mean-rank method has a smaller mean DSC rank than",
-        "MSC-CMA-ES and the Holm-adjusted comparison is significant; `O` means",
-        "that the Friedman test does not reject the null hypothesis and no",
-        "post-hoc interpretation is made.",
-        "",
         "`p_Holm` is shown only when the lowest-mean-rank algorithm is not",
         "MSC-CMA-ES and the Friedman test rejects the null hypothesis.",
         "",
-    ]
+        "</details>",
+        "",
+    ])
 
-    ordered_budgets = sorted(dsc_by_budget)
     for budget in ordered_budgets:
         data = dsc_by_budget[budget]
         rank_lookup = data["rank_lookup"]
@@ -604,10 +630,13 @@ def render_dsc_section(
         lines.extend(
             [
                 f'<a id="{anchor}"></a>',
+                f'<a id="{anchor}-ranks"></a>',
+                f'<a id="{anchor}-comparison"></a>',
                 "",
                 f"### Budget {format_budget(budget)}",
                 "",
-                f'<a id="{anchor}-ranks"></a>',
+                "<details>",
+                "<summary>DSC ranks by function and statistical comparison</summary>",
                 "",
                 "#### DSC ranks by function",
                 "",
@@ -634,8 +663,6 @@ def render_dsc_section(
             [
                 "",
                 f"Composition-function set: `{composition_label}`.",
-                "",
-                f'<a id="{anchor}-comparison"></a>',
                 "",
                 "#### Statistical comparison",
                 "",
@@ -665,31 +692,7 @@ def render_dsc_section(
                 )
                 + " |"
             )
-        lines.append("")
-
-    lines.extend(
-        [
-            '<a id="dsc-cell-summary"></a>',
-            "",
-            "### Cell summary",
-            "",
-            "| Budget | All functions | Composition functions |",
-            "|--:|:--|:--|",
-        ]
-    )
-    for budget in ordered_budgets:
-        summaries = dsc_by_budget[budget]["summaries"]
-        cells = []
-        for scope in ("all", "composition"):
-            row = summaries[scope]
-            cells.append(
-                f"{display_name(row['best_algorithm'])} · "
-                f"{row['msc_position']} · {row['label']}"
-            )
-        lines.append(
-            f"| {format_budget(budget)} | {cells[0]} | {cells[1]} |"
-        )
-    lines.append("")
+        lines.extend(["", "</details>", ""])
     return lines
 
 
@@ -706,7 +709,7 @@ SCOPE_LABELS = {
 
 def msc_outcome(row: Mapping[str, Any]) -> str:
     """Translate the stored competitor direction to the reference perspective."""
-    labels = {"higher": "W", "lower": "L", "not significant": "NS"}
+    labels = {"higher": "<", "lower": ">", "not significant": "="}
     try:
         return labels[str(row["decision"])]
     except KeyError as exc:
@@ -715,7 +718,7 @@ def msc_outcome(row: Mapping[str, Any]) -> str:
 
 def result_counts(rows: Sequence[Mapping[str, Any]], competitor: str) -> str:
     outcomes = [msc_outcome(row) for row in rows if row["competitor"] == competitor]
-    return "/".join(str(outcomes.count(label)) for label in ("W", "L", "NS"))
+    return "/".join(str(outcomes.count(label)) for label in ("<", ">", "="))
 
 
 def ordered_scopes(rows: Sequence[Mapping[str, Any]]) -> list[str]:
@@ -764,15 +767,24 @@ def protocol_lines() -> list[str]:
         "of the same raw p-values. For CEC2017 the family sizes are 29 and 10,",
         "respectively; withdrawn function f2 is excluded.",
         "",
-        "**MWU legend — all outcomes are from the MSC-CMA-ES perspective:**",
+        "**MWU symbols:**",
         "",
-        "- **W**: significant result in favour of MSC-CMA-ES (lower terminal errors).",
-        "- **L**: significant result in favour of the competitor.",
-        "- **NS**: no statistically significant difference after Holm correction.",
+        "For each comparison, $\\bar R_M$ and $\\bar R_A$ are the mean ranks of",
+        "the MSC-CMA-ES sample and the compared algorithm's sample in the pooled",
+        "sample, using average ranks for ties. These are the observation ranks",
+        "used by MWU, distinct from DSC ranks.",
+        "",
+        "- **`<`**: $p_{\\mathrm{Holm}}\\leq0.05$ and $\\bar R_M<\\bar R_A$.",
+        "- **`>`**: $p_{\\mathrm{Holm}}\\leq0.05$ and $\\bar R_M>\\bar R_A$.",
+        "- **`=`**: $p_{\\mathrm{Holm}}>0.05$; the null hypothesis is not rejected.",
+        "",
+        "The symbol `=` denotes non-rejection of $H_0:F_M=F_A$; it does not",
+        "assert equality of the sample mean ranks.",
         "",
         "Significance uses the full-precision adjusted p-value (`p_Holm <= 0.05`).",
-        "Direction follows U, not rounded medians. W/L/NS summary cells contain",
-        "counts of functions; NS does not assert equality of the algorithms.",
+        "The mean-rank relation is obtained from U without rounding the input errors.",
+        "Summary cells contain $n_{<}/n_{>}/n_{=}$: counts of functions in the",
+        "three categories defined above.",
         "",
         "CSV values retain full numerical precision. Only descriptive medians use",
         "a separate copy with `abs(error) <= 1e-8` set to zero.",
@@ -798,8 +810,10 @@ def render_scope_table(
     lines = [
         f'<a id="{anchor}"></a>', "",
         f"#### {SCOPE_LABELS[scope]}", "",
+        "<details>",
+        "<summary>Per-function comparisons, U statistics and raw p-values</summary>", "",
         f"Function scope: `{scope}`. Holm family size: **{len(functions)}** per competitor.",
-        "Each cell reports **p_Holm · outcome for MSC-CMA-ES**.", "",
+        "Each cell reports **p_Holm · MWU symbol** (`<`, `>`, or `=`).", "",
         *comparison_header(),
     ]
     for fid in functions:
@@ -807,13 +821,14 @@ def render_scope_table(
         for competitor in COMPETITOR_ORDER:
             row = lookup[(fid, competitor)]
             outcome = msc_outcome(row)
-            cell = f"{format_p(row['p_holm'])} · {outcome}"
-            cells.append(f"**{cell}**" if outcome != "NS" else cell)
+            cell = f"{format_p(row['p_holm'])} · `{outcome}`"
+            cells.append(f"**{cell}**" if outcome != "=" else cell)
         lines.append(f"| **f{fid}** | " + " | ".join(cells) + " |")
     lines.extend([
-        "| **W/L/NS** | " + " | ".join(result_counts(rows, a) for a in COMPETITOR_ORDER) + " |",
-        "", "<details>", "<summary>U statistics and raw p-values</summary>", "",
-        "U is for the competitor sample; the W/L/NS outcomes above are for MSC-CMA-ES.",
+        r"| $n_{<}/n_{>}/n_{=}$ | " + " | ".join(result_counts(rows, a) for a in COMPETITOR_ORDER) + " |",
+        "", "##### U statistics and raw p-values", "",
+        "U is for the compared algorithm's sample. The symbols above describe",
+        "the MSC-CMA-ES sample's mean-rank relation after Holm correction.",
         "", "##### U statistic", "", *comparison_header(),
     ])
     for fid in functions:
@@ -839,13 +854,18 @@ def render_readme(
     scopes = ordered_scopes(rows)
     budgets = sorted({int(row["budget"]) for row in rows})
     lines = [
-        f"# {suite.upper()}, D={dimension}", "",
+        f"# {suite.upper()} · D={dimension}", "",
         "[MWU overview](../../README.md) · [Full results CSV](details.csv)", "",
-        "Contents: " + " · ".join(
-            f"[Budget {format_budget(b)}](#{budget_anchor(b)})" for b in budgets
-        ) + (" · [Deep Statistical Comparison](#deep-statistical-comparison)" if dsc_by_budget else ""),
-        "", "## Mann–Whitney U tests on terminal errors", "", *protocol_lines(),
-        "### Summary", "", *comparison_header("Budget / function scope"),
+        "[MWU summary](#mwu-summary) · [MWU results](#mwu-results)"
+        + (" · [Deep Statistical Comparison](#deep-statistical-comparison)" if dsc_by_budget else ""),
+        "", "## MWU summary", "",
+        "Counts are from the **MSC-CMA-ES perspective**, using 51 runs per algorithm and function. "
+        "Cells report **lower / higher / not significant** pooled sample mean-rank comparisons after Holm correction:",
+        "",
+        "- `<`: MSC-CMA-ES has a significantly lower pooled sample mean rank.",
+        "- `>`: MSC-CMA-ES has a significantly higher pooled sample mean rank.",
+        "- `=`: the null hypothesis is not rejected; this does not assert equality.",
+        "", *comparison_header("Budget / function scope"),
     ]
     for budget in budgets:
         for selected_scope in scopes:
@@ -856,7 +876,11 @@ def render_readme(
                 f"| [{link}](#{budget_anchor(budget)}-{selected_scope}) | "
                 + " | ".join(result_counts(group, a) for a in COMPETITOR_ORDER) + " |"
             )
-    lines.extend(["", "All summary cells are **W/L/NS for MSC-CMA-ES**.", ""])
+    lines.extend([
+        "", r"All summary cells contain $n_{<}/n_{>}/n_{=}$ as defined above.", "",
+        "<details>", "<summary>Statistical protocol and full MWU notation</summary>", "",
+        *protocol_lines(), "</details>", "", "## MWU results", "",
+    ])
     for budget in budgets:
         lines.extend([f'<a id="{budget_anchor(budget)}"></a>', "",
                       f"### Budget {format_budget(budget)}", ""])
@@ -866,8 +890,9 @@ def render_readme(
     lines.extend([
         "The complete U statistics, raw and adjusted p-values, sample sizes,",
         "descriptive medians, scopes, and family sizes are in [`details.csv`](details.csv).",
-        "The CSV `decision` field describes the competitor: `higher` maps to W for",
-        "MSC-CMA-ES, `lower` to L, and `not significant` to NS.", "",
+        "The CSV `decision` field describes the compared algorithm's pooled mean rank",
+        "conditional on rejection after Holm correction: `higher` maps to `<` for",
+        "MSC-CMA-ES, `lower` to `>`, and `not significant` to `=`.", "",
     ])
     if dsc_by_budget:
         lines.extend(render_dsc_section(suite, dimension, dsc_by_budget))
@@ -884,8 +909,9 @@ def render_root_readme(rows: Sequence[Mapping[str, Any]], include_dsc: bool) -> 
         "Contents: " + " · ".join(f"[{SCOPE_LABELS[s]}](#{s})" for s in scopes)
         + " · [Method and symbols](#method-and-symbols)", "",
         f"**{len(settings)} suite/dimension/budget settings**. "
-        "Each table cell is **W/L/NS for MSC-CMA-ES**: significant wins, significant losses,",
-        "and comparisons without a significant difference.", "",
+        r"Each table cell contains $n_{<}/n_{>}/n_{=}$ for MSC-CMA-ES:",
+        "counts of significantly lower or higher pooled sample mean ranks, and",
+        "comparisons without a significant difference after Holm correction.", "",
         "Each setting links to the per-function p_Holm table. U and raw p-values",
         "are available in expandable sections on those pages.", "",
     ]
