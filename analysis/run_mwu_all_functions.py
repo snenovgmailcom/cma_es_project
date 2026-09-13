@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
-"""Generate per-cell MWU and DSC supplementary-material READMEs.
+"""Generate the root and per-dimension MWU/DSC READMEs under mwu/.
 
 The script reads ``pkl['errors']`` exactly as stored.  It does not round,
 clip, floor, sort, or otherwise transform the 51 run-wise terminal errors.
 
 For every suite--dimension--budget setting, each competitor is compared with
 MSC-CMA independently on every function using a two-sided Mann--Whitney U
-test.  Bonferroni correction is applied across all functions separately for
-each (setting, competitor) family.
+test. Holm--Bonferroni correction is applied across the selected function
+scope separately for each (setting, competitor) family. By default both
+all-function and composition-function families are reported in the same
+pages. The raw tests are calculated once; each scope is adjusted separately.
 
 Only these files are created/replaced under --output:
 
 * <suite>/d<dimension>/details.csv
 * <suite>/d<dimension>/README.md
+* README.md
 * mann_whitney_u_all_settings.csv
 
 No existing directory is deleted and no unrelated file is modified.
@@ -39,14 +42,44 @@ from typing import Any, Iterable, Mapping, Sequence
 import numpy as np
 from scipy import stats
 
-from report_style import (
-    ARROW_HIGHER,
-    ARROW_LOWER,
-    ARROW_NS,
-    display_name,
-    format_budget,
-    format_p,
-)
+# Keep this generator standalone: only NumPy and SciPy are required.
+# These presentation helpers follow analysis/report_style.py.
+ARROW_HIGHER, ARROW_LOWER, ARROW_NS = "↑", "↓", "—"
+
+
+def display_name(name: str) -> str:
+    return {
+        "MSC-CMA": "MSC-CMA-ES", "BIPOP-CMA": "BIPOP-CMA-ES",
+        "LSRTDE": "L-SRTDE", "NLSHADE-RSP": "NL-SHADE-RSP",
+    }.get(name, name)
+
+
+def format_budget(budget: int) -> str:
+    if budget <= 0:
+        raise ValueError(f"Budget must be positive: {budget}")
+    exponent = int(math.floor(math.log10(budget)))
+    power = 10 ** exponent
+    if budget % power == 0:
+        coefficient = budget // power
+        return f"10^{exponent}" if coefficient == 1 else f"{coefficient}×10^{exponent}"
+    return f"{budget:,}"
+
+
+def format_p(value: Any) -> str:
+    return format(float(value), ".6g")
+
+
+def holm_correction(p_values: Iterable[float]) -> list[float]:
+    """Holm step-down adjustment for one complete function family."""
+    values = [float(p) for p in p_values]
+    if any(not math.isfinite(p) or not 0 <= p <= 1 for p in values):
+        raise ValueError("Holm correction requires finite p-values in [0, 1]")
+    adjusted = [0.0] * len(values)
+    running_max = 0.0
+    for rank, index in enumerate(sorted(range(len(values)), key=values.__getitem__)):
+        running_max = max(running_max, (len(values) - rank) * values[index])
+        adjusted[index] = min(1.0, running_max)
+    return adjusted
 
 
 REFERENCE = "MSC-CMA"
@@ -141,6 +174,8 @@ FIELDS = (
     "budget",
     "function",
     "function_class",
+    "scope",
+    "correction",
     "competitor",
     "reference",
     "n_competitor",
@@ -150,8 +185,8 @@ FIELDS = (
     "median_competitor",
     "median_reference",
     "p_raw",
-    "bonferroni_family_size",
-    "p_bonferroni",
+    "holm_family_size",
+    "p_holm",
     "alpha",
     "decision",
 )
@@ -177,8 +212,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--dsc-results",
         type=Path,
-        default=Path("dsc_python_results_final"),
-        help="Existing final DSCTool result root (default: dsc_python_results_final)",
+        default=Path("dsc"),
+        help="Existing final DSCTool result root (default: dsc)",
+    )
+    parser.add_argument(
+        "--func-class", choices=("both", "all", "basic", "hybrid", "composition"),
+        default="both", help="Function families (default: both = all and composition)",
     )
     parser.add_argument(
         "--dry-run",
@@ -240,16 +279,23 @@ def load_errors(path: Path, setting: Setting, fid: int) -> np.ndarray:
     return values
 
 
-def calculate_setting(experiments: Path, setting: Setting) -> list[dict[str, Any]]:
-    functions = FUNCTIONS[setting.suite]
+def selected_functions(suite: str, scope: str = "all") -> tuple[int, ...]:
+    if scope == "all":
+        return FUNCTIONS[suite]
+    if scope not in FUNCTION_CLASSES[suite]:
+        raise MwuError(f"Unknown function scope: {scope}")
+    return tuple(fid for fid in FUNCTIONS[suite] if fid in FUNCTION_CLASSES[suite][scope])
+
+
+def calculate_setting(
+    experiments: Path, setting: Setting, scope: str = "all"
+) -> list[dict[str, Any]]:
+    functions = selected_functions(setting.suite, scope)
     samples: dict[str, dict[int, np.ndarray]] = {}
     for algorithm in setting.algorithms:
         budget_dir = (
-            experiments
-            / setting.suite
-            / f"d{setting.dimension}"
-            / algorithm
-            / f"maxevals_{setting.budget}"
+            experiments / setting.suite / f"d{setting.dimension}"
+            / algorithm / f"maxevals_{setting.budget}"
         )
         samples[algorithm] = {
             fid: load_errors(budget_dir / f"f{fid}.pkl", setting, fid)
@@ -260,55 +306,81 @@ def calculate_setting(experiments: Path, setting: Setting) -> list[dict[str, Any
     family_size = len(functions)
     rows: list[dict[str, Any]] = []
     for competitor in sorted(set(setting.algorithms) - {REFERENCE}):
+        family: list[dict[str, Any]] = []
         for fid in functions:
             x = samples[competitor][fid]
             y = reference_samples[fid]
             result = stats.mannwhitneyu(
-                x,
-                y,
-                alternative="two-sided",
-                method="asymptotic",
+                x, y, alternative="two-sided", method="asymptotic",
                 use_continuity=True,
             )
             u = float(result.statistic)
-            p_raw = float(result.pvalue)
-            p_bonferroni = min(1.0, family_size * p_raw)
             probability_lower = 1.0 - u / (len(x) * len(y))
-
-            if p_bonferroni >= ALPHA or math.isclose(
+            family.append({
+                "suite": setting.suite,
+                "dimension": setting.dimension,
+                "budget": setting.budget,
+                "function": fid,
+                "function_class": function_class(setting.suite, fid),
+                "scope": scope,
+                "correction": "holm-bonferroni",
+                "competitor": competitor,
+                "reference": REFERENCE,
+                "n_competitor": len(x),
+                "n_reference": len(y),
+                "u_competitor": format(u, ".17g"),
+                "probability_competitor_lower": format(probability_lower, ".17g"),
+                "median_competitor": format(float(np.median(np.where(np.abs(x) <= 1e-8, 0.0, x))), ".17g"),
+                "median_reference": format(float(np.median(np.where(np.abs(y) <= 1e-8, 0.0, y))), ".17g"),
+                "p_raw": format(float(result.pvalue), ".17g"),
+                "holm_family_size": family_size,
+                "alpha": ALPHA,
+            })
+        adjusted = holm_correction(float(row["p_raw"]) for row in family)
+        for row, p_holm in zip(family, adjusted):
+            probability_lower = float(row["probability_competitor_lower"])
+            if p_holm > ALPHA or math.isclose(
                 probability_lower, 0.5, rel_tol=0.0, abs_tol=1e-15
             ):
                 decision = "not significant"
-            elif probability_lower > 0.5:
-                decision = "lower"
             else:
-                decision = "higher"
-
-            rows.append(
-                {
-                    "suite": setting.suite,
-                    "dimension": setting.dimension,
-                    "budget": setting.budget,
-                    "function": fid,
-                    "function_class": function_class(setting.suite, fid),
-                    "competitor": competitor,
-                    "reference": REFERENCE,
-                    "n_competitor": len(x),
-                    "n_reference": len(y),
-                    "u_competitor": format(u, ".17g"),
-                    "probability_competitor_lower": format(
-                        probability_lower, ".17g"
-                    ),
-                    "median_competitor": format(float(np.median(x)), ".17g"),
-                    "median_reference": format(float(np.median(y)), ".17g"),
-                    "p_raw": format(p_raw, ".17g"),
-                    "bonferroni_family_size": family_size,
-                    "p_bonferroni": format(p_bonferroni, ".17g"),
-                    "alpha": ALPHA,
-                    "decision": decision,
-                }
-            )
+                decision = "lower" if probability_lower > 0.5 else "higher"
+            row["p_holm"] = format(p_holm, ".17g")
+            row["decision"] = decision
+        rows.extend(family)
     return rows
+
+
+def recorrect_scope(
+    rows: Sequence[Mapping[str, Any]], setting: Setting, scope: str
+) -> list[dict[str, Any]]:
+    """Reuse raw tests and adjust a complete scope independently of all-scope p_Holm."""
+    functions = selected_functions(setting.suite, scope)
+    families: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    for original in rows:
+        if original["scope"] != "all":
+            raise MwuError("Scope correction requires the all-function raw tests")
+        if int(original["function"]) in functions:
+            families[str(original["competitor"])].append(dict(original))
+    if set(families) != set(setting.algorithms) - {REFERENCE}:
+        raise MwuError(f"Incomplete competitor set for {setting} {scope}")
+    result = []
+    for competitor, family in sorted(families.items()):
+        family.sort(key=lambda row: int(row["function"]))
+        if [int(row["function"]) for row in family] != list(functions):
+            raise MwuError(f"Incomplete function family: {setting} {scope} {competitor}")
+        adjusted = holm_correction(float(row["p_raw"]) for row in family)
+        for row, p_holm in zip(family, adjusted):
+            u = float(row["u_competitor"])
+            midpoint = int(row["n_competitor"]) * int(row["n_reference"]) / 2
+            decision = "not significant"
+            if p_holm <= ALPHA and u != midpoint:
+                decision = "lower" if u < midpoint else "higher"
+            row.update(scope=scope, correction="holm-bonferroni",
+                       holm_family_size=len(functions),
+                       p_holm=format(p_holm, ".17g"), decision=decision)
+        result.extend(family)
+    return result
 
 
 def atomic_write_text(path: Path, text: str) -> None:
@@ -513,6 +585,9 @@ def render_dsc_section(
         "that the Friedman test does not reject the null hypothesis and no",
         "post-hoc interpretation is made.",
         "",
+        "`p_Holm` is shown only when the lowest-mean-rank algorithm is not",
+        "MSC-CMA-ES and the Friedman test rejects the null hypothesis.",
+        "",
     ]
 
     ordered_budgets = sorted(dsc_by_budget)
@@ -582,7 +657,9 @@ def render_dsc_section(
                         row["msc_position"],
                         format_p(row["friedman_statistic"]),
                         format_p(row["friedman_p_value"]),
-                        format_optional_p(row["holm_p_best_vs_msc"]),
+                        (format_optional_p(row["holm_p_best_vs_msc"])
+                         if row["best_algorithm"] != REFERENCE
+                         and float(row["friedman_p_value"]) <= ALPHA else "—"),
                         row["label"],
                     ]
                 )
@@ -616,171 +693,249 @@ def render_dsc_section(
     return lines
 
 
+COMPETITOR_ORDER = (
+    "BIPOP-CMA", "ARRDE", "LSRTDE", "NLSHADE-RSP", "j2020", "jSO",
+)
+SCOPE_LABELS = {
+    "all": "All functions",
+    "composition": "Composition functions",
+    "basic": "Basic functions",
+    "hybrid": "Hybrid functions",
+}
+
+
+def msc_outcome(row: Mapping[str, Any]) -> str:
+    """Translate the stored competitor direction to the reference perspective."""
+    labels = {"higher": "W", "lower": "L", "not significant": "NS"}
+    try:
+        return labels[str(row["decision"])]
+    except KeyError as exc:
+        raise MwuError(f"Unknown MWU decision: {row['decision']}") from exc
+
+
+def result_counts(rows: Sequence[Mapping[str, Any]], competitor: str) -> str:
+    outcomes = [msc_outcome(row) for row in rows if row["competitor"] == competitor]
+    return "/".join(str(outcomes.count(label)) for label in ("W", "L", "NS"))
+
+
+def ordered_scopes(rows: Sequence[Mapping[str, Any]]) -> list[str]:
+    present = {str(row["scope"]) for row in rows}
+    if not present or not present <= set(SCOPE_LABELS):
+        raise MwuError(f"Invalid or empty scope set: {present}")
+    return [scope for scope in SCOPE_LABELS if scope in present]
+
+
+def validate_family_rows(
+    rows: Sequence[Mapping[str, Any]], suite: str, dimension: int, budget: int, scope: str
+) -> None:
+    functions = selected_functions(suite, scope)
+    expected = {(fid, algorithm) for fid in functions for algorithm in COMPETITOR_ORDER}
+    found = set()
+    for row in rows:
+        key = (int(row["function"]), str(row["competitor"]))
+        if key in found:
+            raise MwuError(f"Duplicate result: {suite} D={dimension} B={budget} {scope} {key}")
+        found.add(key)
+        if (row["suite"] != suite or int(row["dimension"]) != dimension
+                or int(row["budget"]) != budget or row["scope"] != scope
+                or row["reference"] != REFERENCE
+                or row["correction"] != "holm-bonferroni"
+                or int(row["holm_family_size"]) != len(functions)):
+            raise MwuError(f"Wrong result metadata: {suite} D={dimension} B={budget} {scope}")
+        p_holm = float(row["p_holm"])
+        if not math.isfinite(p_holm) or not 0 <= p_holm <= 1:
+            raise MwuError(f"Invalid p_Holm: {p_holm}")
+        msc_outcome(row)
+    if found != expected:
+        raise MwuError(f"Incomplete result table: {suite} D={dimension} B={budget} {scope}")
+
+
+def protocol_lines() -> list[str]:
+    return [
+        "Each competitor is compared with MSC-CMA-ES using independent, two-sided",
+        "Mann–Whitney U tests on 51 stored run-wise terminal errors at the stated budget.",
+        "The tests use the asymptotic method with tie and continuity corrections.",
+        "No zero threshold or rounding is applied to the MWU inputs; zeros already",
+        "present in the stored samples are retained.",
+        "",
+        "Holm–Bonferroni correction is applied separately for each competitor, suite,",
+        "dimension, budget, and function scope, at `alpha=0.05`.",
+        "All-function and composition-function results use independent corrections",
+        "of the same raw p-values. For CEC2017 the family sizes are 29 and 10,",
+        "respectively; withdrawn function f2 is excluded.",
+        "",
+        "**MWU legend — all outcomes are from the MSC-CMA-ES perspective:**",
+        "",
+        "- **W**: significant result in favour of MSC-CMA-ES (lower terminal errors).",
+        "- **L**: significant result in favour of the competitor.",
+        "- **NS**: no statistically significant difference after Holm correction.",
+        "",
+        "Significance uses the full-precision adjusted p-value (`p_Holm <= 0.05`).",
+        "Direction follows U, not rounded medians. W/L/NS summary cells contain",
+        "counts of functions; NS does not assert equality of the algorithms.",
+        "",
+        "CSV values retain full numerical precision. Only descriptive medians use",
+        "a separate copy with `abs(error) <= 1e-8` set to zero.",
+        "",
+    ]
+
+
+def comparison_header(first: str = "Function") -> list[str]:
+    return [
+        f"| {first} | " + " | ".join(display_name(a) for a in COMPETITOR_ORDER) + " |",
+        "|:--|" + "|".join("--:" for _ in COMPETITOR_ORDER) + "|",
+    ]
+
+
+def render_scope_table(
+    suite: str, dimension: int, budget: int, scope: str,
+    rows: Sequence[Mapping[str, Any]],
+) -> list[str]:
+    validate_family_rows(rows, suite, dimension, budget, scope)
+    functions = selected_functions(suite, scope)
+    lookup = {(int(row["function"]), str(row["competitor"])): row for row in rows}
+    anchor = f"{budget_anchor(budget)}-{scope}"
+    lines = [
+        f'<a id="{anchor}"></a>', "",
+        f"#### {SCOPE_LABELS[scope]}", "",
+        f"Function scope: `{scope}`. Holm family size: **{len(functions)}** per competitor.",
+        "Each cell reports **p_Holm · outcome for MSC-CMA-ES**.", "",
+        *comparison_header(),
+    ]
+    for fid in functions:
+        cells = []
+        for competitor in COMPETITOR_ORDER:
+            row = lookup[(fid, competitor)]
+            outcome = msc_outcome(row)
+            cell = f"{format_p(row['p_holm'])} · {outcome}"
+            cells.append(f"**{cell}**" if outcome != "NS" else cell)
+        lines.append(f"| **f{fid}** | " + " | ".join(cells) + " |")
+    lines.extend([
+        "| **W/L/NS** | " + " | ".join(result_counts(rows, a) for a in COMPETITOR_ORDER) + " |",
+        "", "<details>", "<summary>U statistics and raw p-values</summary>", "",
+        "U is for the competitor sample; the W/L/NS outcomes above are for MSC-CMA-ES.",
+        "", "##### U statistic", "", *comparison_header(),
+    ])
+    for fid in functions:
+        lines.append(f"| f{fid} | " + " | ".join(
+            format_u(lookup[(fid, a)]["u_competitor"]) for a in COMPETITOR_ORDER
+        ) + " |")
+    lines.extend(["", "##### p_raw", "", *comparison_header()])
+    for fid in functions:
+        lines.append(f"| f{fid} | " + " | ".join(
+            format_p(lookup[(fid, a)]["p_raw"]) for a in COMPETITOR_ORDER
+        ) + " |")
+    lines.extend(["", "</details>", ""])
+    return lines
+
+
 def render_readme(
     suite: str,
     dimension: int,
     rows: Sequence[Mapping[str, Any]],
     dsc_by_budget: Mapping[int, Mapping[str, Any]],
+    scope: str = "both",
 ) -> str:
-    by_budget: dict[int, list[Mapping[str, Any]]] = defaultdict(list)
-    for row in rows:
-        by_budget[int(row["budget"])].append(row)
-
+    scopes = ordered_scopes(rows)
+    budgets = sorted({int(row["budget"]) for row in rows})
     lines = [
-        f"# {suite.upper()}, D={dimension}",
-        "",
-        "Contents: [Mann–Whitney U tests on terminal errors]"
-        "(#mannwhitney-u-tests-on-terminal-errors) · "
-        "[Deep Statistical Comparison](#deep-statistical-comparison)",
-        "",
-        "## Mann–Whitney U tests on terminal errors",
-        "",
+        f"# {suite.upper()}, D={dimension}", "",
+        "[MWU overview](../../README.md) · [Full results CSV](details.csv)", "",
+        "Contents: " + " · ".join(
+            f"[Budget {format_budget(b)}](#{budget_anchor(b)})" for b in budgets
+        ) + (" · [Deep Statistical Comparison](#deep-statistical-comparison)" if dsc_by_budget else ""),
+        "", "## Mann–Whitney U tests on terminal errors", "", *protocol_lines(),
+        "### Summary", "", *comparison_header("Budget / function scope"),
     ]
-
-    lines.extend(
-        [
-            "Independent, two-sided Mann–Whitney U tests compare each competitor",
-            "with MSC-CMA-ES on every function. Each sample contains 51 unmodified",
-            "run-wise terminal errors. Bonferroni adjustment is applied over all",
-            "functions separately for each budget and competitor.",
-            "The test is evaluated with SciPy's asymptotic Mann–Whitney U method",
-            "(`method=\"asymptotic\"`) with continuity correction (`use_continuity=True`).",
-            "",
-            "The U statistic in [`details.csv`](details.csv) is for the competitor",
-            "sample. For minimization, `probability_competitor_lower` is",
-            r"$P(X_{competitor}<X_{MSC})+\frac12P(X_{competitor}=X_{MSC})$.",
-            "",
-            "Each function is reported with the U statistic, p_raw, and",
-            "p_Bonferroni. Direction is stated from the competitor perspective:",
-            "`↓` denotes a statistically significant shift toward lower terminal",
-            "errors, `↑` a statistically significant shift toward higher terminal",
-            "errors, and `—` no statistically significant difference after",
-            "Bonferroni correction. Significant adjusted p-values are shown in bold.",
-            "",
-        ]
-    )
-
-    for budget, budget_rows in sorted(by_budget.items()):
-        competitors = sorted({str(row["competitor"]) for row in budget_rows})
-        functions = sorted({int(row["function"]) for row in budget_rows})
-        lookup = {
-            (int(row["function"]), str(row["competitor"])): row
-            for row in budget_rows
-        }
-        if len(lookup) != len(budget_rows):
-            raise MwuError(
-                f"Duplicate function/competitor result in {suite} D={dimension} "
-                f"B={budget}"
-            )
-
-        ordered = ["BIPOP-CMA"]
-        ordered.extend(
-            algorithm
-            for algorithm in ("ARRDE", "LSRTDE", "NLSHADE-RSP", "j2020", "jSO")
-            if algorithm in competitors
-        )
-        if set(ordered) != set(competitors):
-            raise MwuError(
-                f"Unexpected competitor set in {suite} D={dimension} B={budget}: "
-                f"{competitors}"
-            )
-
-        family_size = len(functions)
-        anchor = budget_anchor(budget)
-        lines.extend(
-            [
-                f'<a id="{anchor}"></a>',
-                "",
-                f"### Budget {format_budget(budget)}",
-                "",
-                f"Bonferroni family size: `{family_size}` functions.",
-                "",
-            ]
-        )
-
-        header = (
-            "| Function | "
-            + " | ".join(display_name(algorithm) for algorithm in ordered)
-            + " |"
-        )
-        alignment = "|:--|" + "|".join("--:" for _ in ordered) + "|"
-
-        lines.extend(
-            [
-                f'<a id="{anchor}-u"></a>',
-                "",
-                "#### Mann–Whitney U statistic",
-                "",
-                header,
-                alignment,
-            ]
-        )
-        for fid in functions:
-            function_rows = [lookup[(fid, algorithm)] for algorithm in ordered]
-            u_cells = [format_u(row["u_competitor"]) for row in function_rows]
+    for budget in budgets:
+        for selected_scope in scopes:
+            group = [r for r in rows if int(r["budget"]) == budget and r["scope"] == selected_scope]
+            validate_family_rows(group, suite, dimension, budget, selected_scope)
+            link = f"{format_budget(budget)} / {SCOPE_LABELS[selected_scope]}"
             lines.append(
-                f"| **f{fid}** | "
-                + " | ".join(u_cells)
-                + " |"
+                f"| [{link}](#{budget_anchor(budget)}-{selected_scope}) | "
+                + " | ".join(result_counts(group, a) for a in COMPETITOR_ORDER) + " |"
             )
+    lines.extend(["", "All summary cells are **W/L/NS for MSC-CMA-ES**.", ""])
+    for budget in budgets:
+        lines.extend([f'<a id="{budget_anchor(budget)}"></a>', "",
+                      f"### Budget {format_budget(budget)}", ""])
+        for selected_scope in scopes:
+            group = [r for r in rows if int(r["budget"]) == budget and r["scope"] == selected_scope]
+            lines.extend(render_scope_table(suite, dimension, budget, selected_scope, group))
+    lines.extend([
+        "The complete U statistics, raw and adjusted p-values, sample sizes,",
+        "descriptive medians, scopes, and family sizes are in [`details.csv`](details.csv).",
+        "The CSV `decision` field describes the competitor: `higher` maps to W for",
+        "MSC-CMA-ES, `lower` to L, and `not significant` to NS.", "",
+    ])
+    if dsc_by_budget:
+        lines.extend(render_dsc_section(suite, dimension, dsc_by_budget))
+    return "\n".join(lines)
 
-        lines.extend(
-            [
-                "",
-                f'<a id="{anchor}-raw-p"></a>',
-                "",
-                "#### p_raw",
-                "",
-                header,
-                alignment,
-            ]
-        )
-        for fid in functions:
-            function_rows = [lookup[(fid, algorithm)] for algorithm in ordered]
-            raw_cells = [format_p(row["p_raw"]) for row in function_rows]
-            lines.append(
-                f"| **f{fid}** | "
-                + " | ".join(raw_cells)
-                + " |"
-            )
 
-        lines.extend(
-            [
-                "",
-                f'<a id="{anchor}-bonferroni"></a>',
-                "",
-                "#### p_Bonferroni and Direction",
-                "",
-                header,
-                alignment,
-            ]
-        )
-        for fid in functions:
-            function_rows = [lookup[(fid, algorithm)] for algorithm in ordered]
-            adjusted_cells = []
-            for row in function_rows:
-                p_adjusted = format_p(row["p_bonferroni"])
-                symbol = decision_symbol(str(row["decision"]))
-                cell = f"{p_adjusted} ({symbol})"
-                if symbol != ARROW_NS:
-                    cell = f"**{cell}**"
-                adjusted_cells.append(cell)
+def render_root_readme(rows: Sequence[Mapping[str, Any]], include_dsc: bool) -> str:
+    scopes = ordered_scopes(rows)
+    settings = sorted({(str(r["suite"]), int(r["dimension"]), int(r["budget"])) for r in rows})
+    lines = [
+        "# Mann–Whitney U comparisons with MSC-CMA-ES", "",
+        "Fixed-budget comparisons with BIPOP-CMA-ES, ARRDE, L-SRTDE,",
+        "NL-SHADE-RSP, j2020, and jSO.", "",
+        "Contents: " + " · ".join(f"[{SCOPE_LABELS[s]}](#{s})" for s in scopes)
+        + " · [Method and symbols](#method-and-symbols)", "",
+        f"**{len(settings)} suite/dimension/budget settings**. "
+        "Each table cell is **W/L/NS for MSC-CMA-ES**: significant wins, significant losses,",
+        "and comparisons without a significant difference.", "",
+        "Each setting links to the per-function p_Holm table. U and raw p-values",
+        "are available in expandable sections on those pages.", "",
+    ]
+    for scope in scopes:
+        lines.extend([
+            f'<a id="{scope}"></a>', "", f"## {SCOPE_LABELS[scope]}", "",
+            "| Suite | D | Budget | Functions | "
+            + " | ".join(display_name(a) for a in COMPETITOR_ORDER) + " |",
+            "|:--|--:|--:|--:|" + "|".join("--:" for _ in COMPETITOR_ORDER) + "|",
+        ])
+        for suite, dimension, budget in settings:
+            group = [r for r in rows if r["suite"] == suite and int(r["dimension"]) == dimension
+                     and int(r["budget"]) == budget and r["scope"] == scope]
+            validate_family_rows(group, suite, dimension, budget, scope)
+            link = f"{suite}/d{dimension}/README.md#{budget_anchor(budget)}-{scope}"
             lines.append(
-                f"| **f{fid}** | "
-                + " | ".join(adjusted_cells)
-                + " |"
+                f"| {suite.upper()} | {dimension} | [{format_budget(budget)}]({link}) "
+                f"| {len(selected_functions(suite, scope))} | "
+                + " | ".join(result_counts(group, a) for a in COMPETITOR_ORDER) + " |"
             )
         lines.append("")
-
-    lines.extend(
-        [
-            "Full-precision U statistics, raw and Bonferroni-adjusted p-values,",
-            "effect directions, sample medians, and family sizes are available in",
-            "[`details.csv`](details.csv).",
+    lines.extend(["## Method and symbols", "", *protocol_lines()])
+    if include_dsc:
+        lines.extend([
+            "## Deep Statistical Comparison", "",
+            "Each suite/dimension page also contains the existing DSC ranks,",
+            "Friedman results, and Holm-adjusted post-hoc comparisons for both scopes.",
+            "They are read from the existing DSC result files; no DSC test is recomputed.",
+            "", "### Symbols", "",
+            "- **★** — MSC-CMA-ES has the lowest mean DSC rank and the Friedman test rejects the null hypothesis.",
+            "- **≈** — the Friedman test rejects the null hypothesis, but the Holm-adjusted comparison between MSC-CMA-ES and the lowest-mean-rank algorithm is not significant.",
+            "- **↓** — the lowest-mean-rank algorithm has a smaller mean DSC rank than MSC-CMA-ES and the Holm-adjusted comparison is significant.",
+            "- **O** — the Friedman test does not reject the null hypothesis; no post-hoc interpretation is made.",
             "",
-        ]
-    )
-    lines.extend(render_dsc_section(suite, dimension, dsc_by_budget))
+            "`p_Holm` is shown only when the lowest-mean-rank algorithm is not MSC-CMA-ES",
+            "and the Friedman test rejects the null hypothesis.", "",
+        ])
+    lines.extend([
+        "## Data and regeneration", "",
+        "[Download all settings and scopes as CSV](mann_whitney_u_all_settings.csv).",
+        "Per-dimension `details.csv` files use the same schema. The `scope` column",
+        "identifies the function family used for each correction.",
+        *( ["Composition functions occur once in the all-function analysis and again",
+            "in the independently corrected composition analysis."]
+           if scopes == ["all", "composition"] else [] ), "",
+        "From the repository root:", "", "```bash",
+        "python analysis/run_mwu_all_functions.py --dsc-results dsc"
+        + ("" if scopes == ["all", "composition"] else f" --func-class {scopes[0]}"),
+        "```", "",
+    ])
     return "\n".join(lines)
 
 
@@ -788,56 +943,59 @@ def main() -> int:
     args = parse_args()
     experiments = args.experiments.resolve()
     output = args.output.resolve()
+    if args.func_class not in {"all", "both"}:
+        output = output / args.func_class
+    scopes = ("all", "composition") if args.func_class == "both" else (args.func_class,)
+    include_dsc = "all" in scopes
     dsc_root = args.dsc_results.resolve()
     if not experiments.is_dir():
         raise MwuError(f"Experiment directory does not exist: {experiments}")
-    if not dsc_root.is_dir():
+    if include_dsc and not dsc_root.is_dir():
         raise MwuError(f"DSC result directory does not exist: {dsc_root}")
-
-    dsc_results = load_dsc_results(dsc_root)
+    dsc_results = load_dsc_results(dsc_root) if include_dsc else {}
 
     all_rows: list[dict[str, Any]] = []
     by_cell: dict[tuple[str, int], list[dict[str, Any]]] = defaultdict(list)
     for setting in SETTINGS:
-        print(
-            f"[{setting.suite} D={setting.dimension} B={setting.budget}] calculating",
-            flush=True,
+        print(f"[{setting.suite} D={setting.dimension} B={setting.budget}] "
+              f"calculating ({', '.join(scopes)})", flush=True)
+        if args.func_class == "both":
+            raw_rows = calculate_setting(experiments, setting, "all")
+            rows = raw_rows + recorrect_scope(raw_rows, setting, "composition")
+        else:
+            rows = calculate_setting(experiments, setting, args.func_class)
+        expected = (len(setting.algorithms) - 1) * sum(
+            len(selected_functions(setting.suite, scope)) for scope in scopes
         )
-        rows = calculate_setting(experiments, setting)
-        expected = (len(setting.algorithms) - 1) * len(FUNCTIONS[setting.suite])
         if len(rows) != expected:
-            raise MwuError(
-                f"{setting}: calculated {len(rows)} rows, expected {expected}"
-            )
+            raise MwuError(f"{setting}: calculated {len(rows)} rows, expected {expected}")
         all_rows.extend(rows)
         by_cell[(setting.suite, setting.dimension)].extend(rows)
 
-    if len(all_rows) != 1992:
-        raise MwuError(f"Calculated {len(all_rows)} total rows, expected 1992")
-
-    if args.dry_run:
-        print(f"Dry run passed: {len(SETTINGS)} settings, {len(by_cell)} cells, 1992 tests")
-        return 0
-
+    # Prepare and validate every page before replacing any output file.
+    outputs: list[tuple[Path, str]] = []
     for (suite, dimension), rows in sorted(by_cell.items()):
         cell = output / suite / f"d{dimension}"
         dsc_by_budget = {
             setting.budget: dsc_results[(suite, dimension, setting.budget)]
             for setting in SETTINGS
             if setting.suite == suite and setting.dimension == dimension
+            and (suite, dimension, setting.budget) in dsc_results
         }
-        atomic_write_text(cell / "details.csv", csv_text(rows, FIELDS))
-        atomic_write_text(
-            cell / "README.md",
-            render_readme(suite, dimension, rows, dsc_by_budget),
-        )
-    atomic_write_text(
-        output / "mann_whitney_u_all_settings.csv",
-        csv_text(all_rows, FIELDS),
-    )
+        outputs.append((cell / "details.csv", csv_text(rows, FIELDS)))
+        outputs.append((cell / "README.md", render_readme(suite, dimension, rows, dsc_by_budget)))
+    outputs.append((output / "mann_whitney_u_all_settings.csv", csv_text(all_rows, FIELDS)))
+    outputs.append((output / "README.md", render_root_readme(all_rows, include_dsc)))
 
+    if args.dry_run:
+        print(f"Dry run passed: {len(SETTINGS)} settings, {len(by_cell) + 1} READMEs, "
+              f"{len(all_rows)} result rows, scopes={','.join(scopes)}")
+        return 0
+    for path, content in outputs:
+        atomic_write_text(path, content)
     print(
-        f"Wrote 10 MWU+DSC cell READMEs, 10 details.csv files, and 1 aggregate CSV under {output}"
+        f"Wrote 1 root README, {len(by_cell)} cell READMEs, {len(by_cell)} details.csv files, "
+        f"and 1 aggregate CSV ({len(all_rows)} rows; scopes={','.join(scopes)}) under {output}"
     )
     return 0
 

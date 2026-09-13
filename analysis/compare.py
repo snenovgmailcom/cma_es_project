@@ -10,27 +10,35 @@ Adds two extra metrics (article terminology):
                     runtime-integrated ECDF.
   --metric thr    : THR_k — per-CEC-display-target hit counts (7 targets), shown
                     as a separate per-function block (visualisation only). Not a
-                    scalar; no Wilcoxon table (use 'mean' or 'fbtc' for stats).
+                    scalar; no Mann-Whitney U table (use 'mean' or 'fbtc'
+                    for stats).
 
 Deprecated metric aliases still accepted: 'ecdf' -> 'fbtc', 'hits' -> 'thr'.
+
+For every scalar display metric, inference uses two-sided Mann-Whitney U
+tests on the unmodified stored terminal errors. Descriptive metrics alone
+use the numerical-zero convention. Holm-Bonferroni is the default correction,
+applied separately for each comparator over the selected common functions.
+CEC2017 f2 is excluded. Stars always describe the terminal-error test, with
+direction determined by U; they are not tests of the displayed statistic.
 
 Usage
 -----
     python analysis/compare.py \
         --base-dir experiments/cec2020/d10 \
-        --metric median --ref MSC-CMA --correction bh
+        --metric median --ref MSC-CMA --correction holm
 
     # FBTC (fixed-budget target coverage) table
     python analysis/compare.py \
         --base-dir experiments/cec2020/d10 \
-        --metric fbtc --ref MSC-CMA --correction bh
+        --metric fbtc --ref MSC-CMA --correction holm
 
     # THR_k per-target table
     python analysis/compare.py \
         --base-dir experiments/cec2020/d10 \
         --metric thr --ref MSC-CMA
 
-    # Composition functions only (Wilcoxon on the thesis-driving class)
+    # Composition functions only (Mann-Whitney U on the thesis-driving class)
     python analysis/compare.py \
         --base-dir experiments/cec2020/d20 --maxevals 10_000_000 \
         --ref MSC-CMA --metric median --func-class composition
@@ -41,7 +49,6 @@ import glob
 import os
 import pickle
 import sys
-import warnings
 
 import numpy as np
 from scipy import stats
@@ -88,7 +95,8 @@ def per_seed_fbtc(errs: np.ndarray, taus=COCO_TAUS) -> np.ndarray:
     """Per-seed FBTC: for each seed, fraction of targets it reaches.
 
     Returns array of length len(errs), each value in [0, 1].
-    Used for paired Wilcoxon on FBTC metric.
+    Used to compute the displayed FBTC scalar. Statistical testing is carried
+    out on the original terminal-error samples.
     """
     a = np.asarray(errs, dtype=np.float64)
     if len(a) == 0:
@@ -142,7 +150,7 @@ def _detect_suite(base_dir: str) -> str:
 
 
 # =========================================================================
-# BH correction
+# Multiple-testing corrections
 # =========================================================================
 
 def bh_correction(p_values: list) -> list:
@@ -161,51 +169,76 @@ def bh_correction(p_values: list) -> list:
     return adjusted
 
 
+def holm_correction(p_values: list) -> list:
+    """Holm-Bonferroni adjusted p-values (step-down, FWER controlled)."""
+    n = len(p_values)
+    if n == 0:
+        return []
+
+    indexed = sorted(enumerate(p_values), key=lambda x: x[1])
+    adjusted = [0.0] * n
+    running_max = 0.0
+    for rank_minus_1, (orig_idx, p) in enumerate(indexed):
+        candidate = min((n - rank_minus_1) * p, 1.0)
+        running_max = max(running_max, candidate)
+        adjusted[orig_idx] = running_max
+    return adjusted
+
+
 def bonferroni_correction(p_values: list) -> list:
     n = len(p_values)
     return [min(p * n, 1.0) for p in p_values]
 
 
 # =========================================================================
-# Wilcoxon
+# Mann-Whitney U
 # =========================================================================
 
-def paired_wilcoxon(errors_a: np.ndarray, errors_b: np.ndarray,
-                    higher_better: bool = False):
-    """Wilcoxon signed-rank test (two-sided), COCO/CEC-conformant.
+def _raw_sample(errors: np.ndarray) -> np.ndarray:
+    """Validate stored terminal errors without flooring or other transforms."""
+    sample = np.asarray(errors, dtype=np.float64)
+    if sample.ndim != 1 or sample.size == 0:
+        raise ValueError("Mann-Whitney U requires non-empty one-dimensional samples")
+    if not np.all(np.isfinite(sample)):
+        raise ValueError("Mann-Whitney U requires finite terminal errors")
+    return sample
 
-    For higher_better=True (e.g. per-seed FBTC), test for a > b.
-    For higher_better=False (default, errors), test for a < b.
+
+def mann_whitney_u(errors_a: np.ndarray, errors_b: np.ndarray):
+    """Two-sided asymptotic MWU on independent, unmodified terminal errors.
+
+    U belongs to sample a; U < len(a)*len(b)/2 favors lower errors in a.
+    The third return value is retained for callers of the previous interface;
+    it is the smaller sample size, not a count of paired observations.
     """
-    a = np.asarray(errors_a, dtype=np.float64)
-    b = np.asarray(errors_b, dtype=np.float64)
+    a = _raw_sample(errors_a)
+    b = _raw_sample(errors_b)
 
-    if np.all(a == b):
-        return 0.0, 1.0, len(a)
+    if len(a) == len(b) and np.array_equal(a, b):
+        return len(a) * len(b) / 2.0, 1.0, len(a)
 
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore')
-        try:
-            result = stats.wilcoxon(
-                a, b,
-                zero_method='pratt',
-                alternative='two-sided',
-                method='auto',
-            )
-        except ValueError:
-            return 0.0, 1.0, len(a)
+    result = stats.mannwhitneyu(
+        a, b,
+        alternative='two-sided',
+        method='asymptotic',
+        use_continuity=True,
+    )
 
-    return float(result.statistic), float(result.pvalue), len(a)
+    return float(result.statistic), float(result.pvalue), min(len(a), len(b))
 
 
 # =========================================================================
 # Auto-discovery
 # =========================================================================
 
-def discover_algorithms(base_dir: str, maxevals: int = None) -> dict:
+def discover_algorithms(base_dir: str, maxevals: int = None,
+                        exclude=None) -> dict:
     algorithms = {}
+    excluded = set(exclude or ())
 
     for alg_dir in sorted(os.listdir(base_dir)):
+        if alg_dir in excluded:
+            continue
         alg_path = os.path.join(base_dir, alg_dir)
         if not os.path.isdir(alg_path):
             continue
@@ -237,6 +270,8 @@ def discover_algorithms(base_dir: str, maxevals: int = None) -> dict:
             with open(p, 'rb') as f:
                 d = pickle.load(f)
             fn = d['func']
+            if _detect_suite(base_dir) == 'CEC2017' and fn == 'f2':
+                continue
             funcs[fn] = d
 
         # Use directory name as the algorithm key, not the pkl's `algorithm`
@@ -266,10 +301,13 @@ FUNC_CLASSES = {
 
 def restrict_to_class(common, base_dir, func_class):
     """Subset `common` to one CEC function class (basic/hybrid/composition).
-    func_class == 'all' is a no-op."""
+    CEC2017 f2 is excluded for every scope, including 'all'."""
+    suite = _detect_suite(base_dir).lower()
+    common = [fn for fn in common if not (suite == 'cec2017' and fn == 'f2')]
+    if not common:
+        raise ValueError("No common non-withdrawn functions across all algorithms")
     if func_class == 'all':
         return common
-    suite = _detect_suite(base_dir).lower()
     cls = FUNC_CLASSES.get(suite)
     if cls is None:
         raise ValueError(f"No function-class map for suite '{suite}'")
@@ -281,10 +319,10 @@ def restrict_to_class(common, base_dir, func_class):
 
 
 def run_comparison(base_dir, ref, metric, correction, alpha,
-                   maxevals=None, func_class='all'):
+                   maxevals=None, func_class='all', exclude=None):
     """Run scalar-metric comparison. metric is one of
     {median, mean, best, worst, std, fbtc}."""
-    algorithms = discover_algorithms(base_dir, maxevals)
+    algorithms = discover_algorithms(base_dir, maxevals, exclude=exclude)
 
     if not algorithms:
         raise FileNotFoundError(
@@ -307,19 +345,18 @@ def run_comparison(base_dir, ref, metric, correction, alpha,
 
     common = restrict_to_class(common, base_dir, func_class)
 
-    higher_better = (metric == 'fbtc')
     ref_data = algorithms[ref]
 
     metric_table = {a: {} for a in alg_names}
     sig_table = {a: {} for a in alg_names}
     raw_p = {a: [] for a in alg_names if a != ref}
+    lower_error_direction = {a: {} for a in alg_names if a != ref}
 
     for fn in common:
-        ref_errors = _floor(ref_data[fn]['errors'])
-        ref_per_seed_fbtc = per_seed_fbtc(ref_errors) if metric == 'fbtc' else None
-
+        ref_errors = _raw_sample(ref_data[fn]['errors'])
         for alg in alg_names:
-            errs = _floor(algorithms[alg][fn]['errors'])
+            raw_errors = _raw_sample(algorithms[alg][fn]['errors'])
+            errs = _floor(raw_errors)
 
             if metric == 'median':
                 metric_table[alg][fn] = float(np.median(errs))
@@ -335,22 +372,23 @@ def run_comparison(base_dir, ref, metric, correction, alpha,
                 metric_table[alg][fn] = fbtc_area(errs)
 
             if alg != ref:
-                if metric == 'fbtc':
-                    # Wilcoxon on per-seed FBTC vectors
-                    alg_seed_fbtc = per_seed_fbtc(errs)
-                    _, p, _ = paired_wilcoxon(
-                        alg_seed_fbtc, ref_per_seed_fbtc,
-                        higher_better=True)
-                else:
-                    _, p, _ = paired_wilcoxon(errs, ref_errors)
+                # The inferential comparison is always based on the two
+                # independent terminal-error samples (51 runs each).  FBTC is
+                # the displayed fixed-budget coverage scalar, not the sample
+                # passed to the rank-sum test.
+                u, p, _ = mann_whitney_u(raw_errors, ref_errors)
                 raw_p[alg].append((fn, p))
+                lower_error_direction[alg][fn] = (
+                    u < len(raw_errors) * len(ref_errors) / 2.0)
 
     for fn in common:
         sig_table[ref][fn] = False
 
     for alg in raw_p:
         p_list = [x[1] for x in raw_p[alg]]
-        if correction == 'bh':
+        if correction == 'holm':
+            adj = holm_correction(p_list)
+        elif correction == 'bh':
             adj = bh_correction(p_list)
         elif correction == 'bonferroni':
             adj = bonferroni_correction(p_list)
@@ -358,13 +396,8 @@ def run_comparison(base_dir, ref, metric, correction, alpha,
             adj = p_list
 
         for i, (fn, _) in enumerate(raw_p[alg]):
-            alg_val = metric_table[alg][fn]
-            ref_val = metric_table[ref][fn]
-            if higher_better:
-                better = alg_val > ref_val
-            else:
-                better = alg_val < ref_val
-            sig_table[alg][fn] = (adj[i] < alpha) and better
+            sig_table[alg][fn] = bool(
+                (adj[i] <= alpha) and lower_error_direction[alg][fn])
 
     return common, alg_names, metric_table, sig_table
 
@@ -377,7 +410,8 @@ def print_table(common, alg_names, metric_table, sig_table,
                 ref, metric, base_dir, correction, alpha):
     """Print scalar metric table."""
 
-    corr_label = {'bh': 'Benjamini-Hochberg (FDR)',
+    corr_label = {'holm': 'Holm-Bonferroni',
+                  'bh': 'Benjamini-Hochberg (FDR)',
                   'bonferroni': 'Bonferroni',
                   'none': 'none'}
     corr_str = corr_label.get(correction, correction)
@@ -386,10 +420,12 @@ def print_table(common, alg_names, metric_table, sig_table,
                       else 'lower is better')
 
     print(f"Loaded {len(alg_names)} algorithms from {base_dir}")
-    print(f"Wilcoxon vs {ref}  ({corr_str}, \u03b1={alpha})")
-    print(f"  * = significantly better than {ref} on this function "
-          f"({direction_note})")
-    print(f"{base_dir}  metric={metric}")
+    print(f"Two-sided Mann-Whitney U vs {ref}  ({corr_str}, \u03b1={alpha})")
+    print(f"  Correction family: {len(common)} common selected functions, "
+          "separately for each comparator.")
+    print("  * = significant MWU result favoring lower raw terminal errors "
+          "(direction from U).")
+    print(f"{base_dir}  metric={metric} ({direction_note}; descriptive only)")
 
     col_w = max(len(a) for a in alg_names)
     col_w = max(col_w, 15)
@@ -458,27 +494,8 @@ def print_table(common, alg_names, metric_table, sig_table,
             val_str = f"{wins[alg]}/{n_funcs}"
         row += f"  {val_str:>{col_w}s}"
     print(row)
-    print("  (wins = funcs where algo is significantly better than ref)")
-
-    # Aggregate stats block
-    print()
-    print(f"Aggregate statistics of per-function {metric} across "
-          f"{len(common)} functions:")
-    print(f"{'algo':>30s}  {'sum':>10s}  {'mean':>10s}  {'median':>10s}  "
-          f"{'best':>10s}  {'worst':>10s}  {'std':>10s}")
-    print("-" * 102)
-
-    def _fmt(v):
-        if metric == 'fbtc':
-            return f"{v:10.3f}"
-        return "0.000e+00" if abs(v) <= COCO_ZERO else f"{v:10.3e}"
-
-    for alg in alg_names:
-        vec = np.asarray(per_func_vals[alg], dtype=np.float64)
-        print(f"{alg:>30s}  {_fmt(vec.sum())}  {_fmt(vec.mean())}  "
-              f"{_fmt(np.median(vec))}  {_fmt(vec.min())}  "
-              f"{_fmt(vec.max())}  {_fmt(vec.std())}")
-
+    print("  (wins = funcs where MWU significantly favors lower raw terminal "
+          "errors than ref)")
 
 # =========================================================================
 # Hits-per-target display (--metric hits)
@@ -571,7 +588,8 @@ def print_hits_table(base_dir, alg_names, algorithms,
 # =========================================================================
 
 def print_latex_errstats(base_dir, alg_names, algorithms,
-                         maxevals=None, caption=None, label=None):
+                         maxevals=None, caption=None, label=None,
+                         func_class='all'):
     func_sets = [set(algorithms[a].keys()) for a in alg_names]
     common = sorted(
         set.intersection(*func_sets),
@@ -579,6 +597,7 @@ def print_latex_errstats(base_dir, alg_names, algorithms,
     if not common:
         raise ValueError("No common functions across all algorithms")
 
+    common = restrict_to_class(common, base_dir, func_class)
     stats_tbl = {a: {fn: {} for fn in common} for a in alg_names}
     for fn in common:
         for alg in alg_names:
@@ -795,7 +814,7 @@ def _fmt_metric(v, metric):
 
 
 def print_all_metrics_category_table(base_dir, ref, correction, alpha,
-                                     maxevals):
+                                     maxevals, exclude=None, func_class='all'):
     """Consolidated category x metric x algorithm table.
 
     Runs every scalar metric in ALL_METRICS and prints one table whose rows
@@ -820,7 +839,8 @@ def print_all_metrics_category_table(base_dir, ref, correction, alpha,
     alg_names = None
     for metric in ALL_METRICS:
         c, a, mt, _ = run_comparison(base_dir, ref, metric, correction,
-                                     alpha, maxevals)
+                                     alpha, maxevals, exclude=exclude,
+                                     func_class=func_class)
         metric_tables[metric] = mt
         common, alg_names = c, a
 
@@ -915,9 +935,17 @@ def main():
                     help='Restrict to one CEC function class before testing '
                          '(default: all functions in the cell).')
     ap.add_argument('--correction',
-                    choices=['bh', 'bonferroni', 'none'], default='bh')
+                    choices=['holm', 'bh', 'bonferroni', 'none'],
+                    default='holm',
+                    help='Multiple-testing correction over the selected '
+                         'common functions, separately per comparator '
+                         '(default: holm).')
     ap.add_argument('--alpha', type=float, default=0.05)
     ap.add_argument('--maxevals', type=int, default=None)
+    ap.add_argument(
+        '--exclude', nargs='+', default=[], metavar='ALGORITHM',
+        help='Exclude one or more algorithm directory names before finding '
+             'the common function set.')
     ap.add_argument('--latex', action='store_true')
     ap.add_argument('--caption', type=str, default=None)
     ap.add_argument('--label', type=str, default=None)
@@ -926,9 +954,8 @@ def main():
                          'grouped by {Basic, Hybrid, Composition}.')
     ap.add_argument('--quiet', '--by-category-only', action='store_true',
                     dest='quiet',
-                    help='With --by-category, suppress the per-function table '
-                         'and the aggregate-statistics block; print only the '
-                         'By-category sums table.')
+                    help='With --by-category, suppress the per-function table; '
+                         'print only the By-category sums table.')
     ap.add_argument('--all-metrics', action='store_true',
                     help='Iterate over [mean, median, best, worst, std, fbtc] '
                          'and print one consolidated category x metric x '
@@ -941,20 +968,23 @@ def main():
         # Overrides --metric (incl. 'hits') and --by-category.
         print_all_metrics_category_table(
             args.base_dir, args.ref, args.correction, args.alpha,
-            args.maxevals)
+            args.maxevals, exclude=args.exclude, func_class=args.func_class)
 
         if args.latex:
             print()
-            algorithms = discover_algorithms(args.base_dir, args.maxevals)
+            algorithms = discover_algorithms(
+                args.base_dir, args.maxevals, exclude=args.exclude)
             alg_names = sorted(algorithms.keys())
             print_latex_errstats(args.base_dir, alg_names, algorithms,
                                  maxevals=args.maxevals,
-                                 caption=args.caption, label=args.label)
+                                 caption=args.caption, label=args.label,
+                                 func_class=args.func_class)
         return
 
     if args.metric == 'thr':
-        # Special path: no Wilcoxon, custom display
-        algorithms = discover_algorithms(args.base_dir, args.maxevals)
+        # Special path: no Mann-Whitney U test, custom display
+        algorithms = discover_algorithms(
+            args.base_dir, args.maxevals, exclude=args.exclude)
         if not algorithms:
             raise FileNotFoundError(
                 f"No algorithm directories found in {args.base_dir}")
@@ -973,14 +1003,15 @@ def main():
             print()
             print_latex_errstats(args.base_dir, alg_names, algorithms,
                                  maxevals=args.maxevals,
-                                 caption=args.caption, label=args.label)
+                                 caption=args.caption, label=args.label,
+                                 func_class=args.func_class)
         return
 
     # Scalar metrics (including 'fbtc')
     common, alg_names, metric_table, sig_table = \
         run_comparison(args.base_dir, args.ref, args.metric,
                        args.correction, args.alpha, args.maxevals,
-                       func_class=args.func_class)
+                       func_class=args.func_class, exclude=args.exclude)
 
     quiet = args.quiet and args.by_category
     if args.quiet and not args.by_category:
@@ -998,11 +1029,12 @@ def main():
 
     if args.latex:
         print()
-        algorithms = discover_algorithms(args.base_dir, args.maxevals)
+        algorithms = discover_algorithms(
+            args.base_dir, args.maxevals, exclude=args.exclude)
         print_latex_errstats(args.base_dir, alg_names, algorithms,
                              maxevals=args.maxevals,
                              caption=args.caption,
-                             label=args.label)
+                             label=args.label, func_class=args.func_class)
 
 
 if __name__ == '__main__':
